@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f6f6f6;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        .header {
+            background-color: #f59e0b; /* Amber-500 for reminders */
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px;
+            color: #333333;
+            line-height: 1.6;
+        }
+        .details-box {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin: 20px 0;
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 10px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+            margin-bottom: 0;
+        }
+        .label {
+            font-weight: bold;
+            color: #6b7280;
+        }
+        .value {
+            font-weight: 500;
+            color: #111827;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #9ca3af;
+            background-color: #f9fafb;
+        }
+        .button {
+            display: inline-block;
+            background-color: #f59e0b;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Recordatorio de Cita</h1>
+        </div>
+        <div class="content">
+            <p>Hola <strong>{{customerName}}</strong>,</p>
+            <p>Te recordamos que tienes una cita próxima en <strong>{{tenantName}}</strong>.</p>
+            
+            <div class="details-box">
+                <div class="detail-row">
+                    <span class="label">Servicio:</span>
+                    <span class="value">{{serviceName}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Fecha:</span>
+                    <span class="value">{{date}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Hora:</span>
+                    <span class="value">{{time}}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="label">Especialista:</span>
+                    <span class="value">{{doctorName}}</span>
+                </div>
+            </div>
+
+            <p>¡Te esperamos! Si no puedes asistir, por favor avísanos para reagendar.</p>
+
+            <center>
+                <a href="{{url}}" class="button">Ver Detalles</a>
+            </center>
+        </div>
+        <div class="footer">
+            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+            <p>&copy; {{year}} {{tenantName}}. Todos los derechos reservados.</p>
+        </div>
+    </div>
+</body>
+</html>

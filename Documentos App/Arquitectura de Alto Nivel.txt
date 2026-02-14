@@ -1,0 +1,13 @@
+[ Web / PWA / Mobile ]
+          |
+       API Gateway
+          |
+ ┌────────┴─────────┐
+ |                  |
+Core Backend     IA Service
+(NestJS)         (AI Gateway)
+ |                  |
+Postgres       Proveedores IA
+Redis          (OpenAI, etc.)
+ |
+Object Storage
