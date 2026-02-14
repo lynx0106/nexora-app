@@ -1,0 +1,40 @@
+name: Run Supabase migrations
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  apply-migrations:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Run SQL migrations against Supabase
+        run: |
+          if [ -z "${DATABASE_URL}" ]; then
+            echo "ERROR: SUPABASE_DATABASE_URL secret not set.";
+            exit 1;
+          fi
+          MIG_DIRS=("supabase/migrations" "backend/migrations" "database/migrations")
+          FOUND=0
+          for d in "${MIG_DIRS[@]}"; do
+            if [ -d "$d" ]; then
+              FOUND=1
+              echo "Applying migrations from $d"
+              for f in $(find "$d" -type f -name "*.sql" | sort); do
+                echo "-- applying $f"
+                psql "$DATABASE_URL" -f "$f"
+              done
+            fi
+          done
+          if [ "$FOUND" -eq 0 ]; then
+            echo "No migration directories found; skipping.";
+          fi
