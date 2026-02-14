@@ -1,0 +1,9 @@
+backend/**
+docs/**
+Documentos App/**
+uploads/**
+*.backup
+*.bak
+*.zip
+*.tar.gz
+.git.backup/**
