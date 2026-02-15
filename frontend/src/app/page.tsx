@@ -208,11 +208,11 @@ function HomeContent() {
   const currentConfig = profileConfig[activeProfile];
 
   return (
-    <div className="flex min-h-screen w-full flex-col items-center justify-center bg-zinc-50 px-4 py-12 transition-colors dark:bg-zinc-900 sm:px-6 lg:px-8">
+    <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
       {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute right-4 top-4 rounded-full bg-zinc-200 p-2 text-zinc-600 transition-colors hover:bg-zinc-300 dark:bg-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-700"
+        className="absolute right-4 top-4 rounded-full border border-slate-200 bg-white/80 p-2 text-slate-600 shadow-sm backdrop-blur transition hover:bg-white"
         title="Cambiar tema"
       >
         {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
@@ -227,16 +227,16 @@ function HomeContent() {
              alt="Logo Agencia" 
              className="mb-2 h-24 w-auto object-contain"
            />
-           <h2 className="text-center text-3xl font-bold tracking-tight text-zinc-900 dark:text-white">
+           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
             {t('auth.access_system')}
           </h2>
-          <p className="mt-2 text-center text-sm text-zinc-600 dark:text-zinc-400">
+          <p className="mt-2 text-center text-sm text-slate-500">
             {t('auth.select_account_type')}
           </p>
         </div>
 
         {/* Profile Selector */}
-        <div className="grid grid-cols-4 gap-2 p-1 bg-white rounded-xl shadow-sm border border-zinc-200 dark:bg-zinc-800 dark:border-zinc-700">
+        <div className="grid grid-cols-4 gap-2 p-1 ds-card">
           {(Object.keys(profileConfig) as ProfileType[]).map((profile) => (
             <button
               key={profile}
@@ -255,10 +255,10 @@ function HomeContent() {
               disabled={!!inviteRole && inviteRole !== profile}
               className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-medium transition-all ${
                 activeProfile === profile
-                  ? "bg-white dark:bg-zinc-700 shadow-sm text-zinc-900 dark:text-white ring-1 ring-zinc-200 dark:ring-zinc-600"
+                  ? "bg-white shadow-sm text-slate-900 ring-1 ring-slate-200"
                   : !!inviteRole && inviteRole !== profile 
-                    ? "opacity-50 cursor-not-allowed text-zinc-400" 
-                    : "text-zinc-500 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 hover:text-zinc-700 dark:hover:text-zinc-300"
+                    ? "opacity-50 cursor-not-allowed text-slate-400" 
+                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
               }`}
             >
               <div className={`mb-1 p-1.5 rounded-full ${activeProfile === profile ? profileConfig[profile].lightColor : "bg-transparent"}`}>
@@ -279,17 +279,17 @@ function HomeContent() {
            <h3 className={`text-lg font-semibold ${
              activeProfile === 'client' ? 'text-emerald-600' :
              activeProfile === 'employee' ? 'text-blue-600' :
-             activeProfile === 'admin' ? 'text-indigo-600' : 'text-zinc-700 dark:text-zinc-300'
+             activeProfile === 'admin' ? 'text-indigo-600' : 'text-slate-700'
            }`}>
              {currentConfig.title}
            </h3>
-           <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+           <p className="text-sm text-slate-500 mt-1">
              {currentConfig.desc}
            </p>
         </div>
 
         {/* Form */}
-        <div className="bg-white px-6 py-8 shadow sm:rounded-lg dark:bg-zinc-800">
+        <div className="ds-panel px-6 py-8">
           <form className="space-y-6" onSubmit={handleSubmit}>
             
             {/* Login Fields */}
@@ -298,7 +298,7 @@ function HomeContent() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                    className="block text-sm font-medium text-slate-600"
                   >
                     {t('auth.email_label')}
                   </label>
@@ -311,7 +311,7 @@ function HomeContent() {
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                      className="ds-input w-full text-sm"
                       placeholder="nombre@ejemplo.com"
                     />
                   </div>
@@ -320,7 +320,7 @@ function HomeContent() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-zinc-700 dark:text-zinc-300"
+                    className="block text-sm font-medium text-slate-600"
                   >
                     {t('auth.password_label')}
                   </label>
@@ -333,7 +333,7 @@ function HomeContent() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                      className="ds-input w-full text-sm"
                       placeholder="••••••••"
                     />
                   </div>
@@ -345,11 +345,11 @@ function HomeContent() {
             {!isLogin && (
               <div className="space-y-4">
                  {inviteTenantId ? (
-                    <div className="text-xs text-blue-600 bg-blue-50 p-2 rounded border border-blue-200">
+                    <div className="text-xs text-teal-700 bg-teal-50 p-2 rounded border border-teal-200">
                       {t('auth.registering_in', { tenant: inviteTenantId.replace(/-/g, ' '), role: profileConfig[activeProfile].title })}
                     </div>
                  ) : (
-                    <div className="text-xs text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+                    <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
                       {t('auth.registering_new_business')}
                     </div>
                  )}
@@ -357,7 +357,7 @@ function HomeContent() {
                  {/* Existing register fields logic... */}
                  <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-sm font-medium text-slate-600">
                       {t('auth.first_name')}
                     </label>
                     <input
@@ -365,11 +365,11 @@ function HomeContent() {
                       required
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                      className="ds-input w-full text-sm"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-sm font-medium text-slate-600">
                       {t('auth.last_name')}
                     </label>
                     <input
@@ -377,14 +377,14 @@ function HomeContent() {
                       required
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
-                      className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                      className="ds-input w-full text-sm"
                     />
                   </div>
                 </div>
 
                 {!inviteTenantId && (
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-slate-600">
                     {t('auth.tenant_name')}
                   </label>
                   <input
@@ -392,14 +392,14 @@ function HomeContent() {
                     required
                     value={tenantName}
                     onChange={(e) => setTenantName(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                    className="ds-input w-full text-sm"
                   />
                 </div>
                 )}
 
                  {/* Email & Password for Register */}
                  <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-slate-600">
                     {t('auth.email_label')}
                   </label>
                   <input
@@ -407,11 +407,11 @@ function HomeContent() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                    className="ds-input w-full text-sm"
                   />
                 </div>
                  <div>
-                  <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-sm font-medium text-slate-600">
                     {t('auth.password_label')}
                   </label>
                   <input
@@ -419,20 +419,20 @@ function HomeContent() {
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                    className="ds-input w-full text-sm"
                   />
                 </div>
 
                 {!inviteTenantId && (
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <label className="block text-sm font-medium text-slate-600">
                         {t('auth.sector_label')}
                         </label>
                         <select
                         value={sector}
                         onChange={(e) => setSector(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                        className="ds-input w-full text-sm"
                         >
                         <option value="salud">Salud</option>
                         <option value="legal">Legal</option>
@@ -445,13 +445,13 @@ function HomeContent() {
                         </select>
                     </div>
                      <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+                        <label className="block text-sm font-medium text-slate-600">
                         {t('auth.country_label')}
                         </label>
                         <select
                         value={country}
                         onChange={(e) => handleCountryChange(e.target.value)}
-                        className="mt-1 block w-full rounded-md border-zinc-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm dark:border-zinc-600 dark:bg-zinc-700 dark:text-white px-3 py-2 border"
+                        className="ds-input w-full text-sm"
                         >
                         <option value="Colombia">Colombia</option>
                         <option value="Mexico">México</option>
@@ -466,13 +466,13 @@ function HomeContent() {
 
             {/* Error / Success Messages */}
             {error && (
-              <div className="rounded-md bg-red-50 p-4 dark:bg-red-900/20">
+              <div className="rounded-md bg-red-50 p-4">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800 dark:text-red-200">
+                    <h3 className="text-sm font-medium text-red-800">
                       {t('auth.error_title')}
                     </h3>
-                    <div className="mt-2 text-sm text-red-700 dark:text-red-300">
+                    <div className="mt-2 text-sm text-red-700">
                       <p>{error}</p>
                     </div>
                   </div>
@@ -481,13 +481,13 @@ function HomeContent() {
             )}
 
             {success && (
-              <div className="rounded-md bg-green-50 p-4 dark:bg-green-900/20">
+              <div className="rounded-md bg-emerald-50 p-4">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-green-800 dark:text-green-200">
+                    <h3 className="text-sm font-medium text-emerald-800">
                       {success.includes("Nota") ? t('auth.redirecting') : t('auth.success_title')}
                     </h3>
-                    <div className="mt-2 text-sm text-green-700 dark:text-green-300">
+                    <div className="mt-2 text-sm text-emerald-700">
                       <p>{success}</p>
                     </div>
                   </div>
@@ -500,7 +500,7 @@ function HomeContent() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`flex w-full justify-center rounded-md border border-transparent px-4 py-2 text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${currentConfig.color} focus:ring-indigo-500`}
+                className={`ds-button flex w-full justify-center text-sm font-medium text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${currentConfig.color} focus:ring-teal-500`}
               >
                 {loading ? (
                   <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent"></div>
@@ -518,10 +518,10 @@ function HomeContent() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-zinc-300 dark:border-zinc-600" />
+                <div className="w-full border-t border-slate-200" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400">
+                <span className="bg-white px-2 text-slate-400">
                   O
                 </span>
               </div>
@@ -535,7 +535,7 @@ function HomeContent() {
                         setError(null);
                         setSuccess(null);
                     }}
-                    className="flex w-full justify-center rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 shadow-sm hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:border-zinc-600 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                    className="ds-button ds-button-ghost flex w-full justify-center text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2"
                   >
                     {isLogin ? (inviteTenantId ? t('auth.create_account_invite') : t('auth.create_business_account')) : t('auth.back_to_login')}
                   </button>

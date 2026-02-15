@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Space_Grotesk, Fraunces } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-sans",
   subsets: ["latin"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const fraunces = Fraunces({
+  variable: "--font-display",
   subsets: ["latin"],
 });
 
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "NEXORA – El núcleo inteligente de tu negocio.",
   description: "NEXORA, el núcleo inteligente de tu negocio. Plataforma SaaS para gestión empresarial.",
   icons: {
-    icon: "/icon.png",
+    icon: "/favicon.ico",
   },
 };
 
@@ -28,11 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <ClientProviders>{children}</ClientProviders>
+    <html lang="es">
+      <body className={`${spaceGrotesk.variable} ${fraunces.variable} antialiased`}>
+        <ClientProviders>
+          <div className="ds-page">{children}</div>
+        </ClientProviders>
       </body>
     </html>
   );
