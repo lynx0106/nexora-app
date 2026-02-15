@@ -56,8 +56,8 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 27) ✅ Configurar helmet con CSP.
 
 ## P3 - Mejoras de producto
-28) Flujo unificado de invitaciones con magic links.
-29) Exportar reportes (pedidos, citas, usuarios).
+28) ✅ Flujo unificado de invitaciones con magic links.
+29) ✅ Exportar reportes (pedidos, citas, usuarios).
 30) Agregar RBAC avanzado (permisos granulares).
 
 ## P3 - Infra y ops

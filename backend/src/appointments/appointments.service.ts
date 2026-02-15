@@ -182,6 +182,28 @@ export class AppointmentsService {
     });
   }
 
+  async findForReport(
+    tenantId: string,
+    start: Date,
+    end: Date,
+    userId?: string,
+  ) {
+    const where: any = {
+      tenantId,
+      dateTime: Between(start, end),
+    };
+
+    if (userId) {
+      where.clientId = userId;
+    }
+
+    return this.appointmentsRepository.find({
+      where,
+      relations: ['doctor', 'client', 'service'],
+      order: { dateTime: 'DESC' },
+    });
+  }
+
   async findByDateRange(tenantId: string, startDate: Date, endDate: Date) {
     return this.appointmentsRepository.find({
       where: {

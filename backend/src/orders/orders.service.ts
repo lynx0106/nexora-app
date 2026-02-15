@@ -281,6 +281,26 @@ export class OrdersService {
     });
   }
 
+  async findForReport(
+    tenantId: string,
+    start: Date,
+    end: Date,
+    userId?: string,
+  ) {
+    const query = this.ordersRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.tenant', 'tenant')
+      .where('order.tenantId = :tenantId', { tenantId })
+      .andWhere('order.createdAt BETWEEN :start AND :end', { start, end })
+      .orderBy('order.createdAt', 'DESC');
+
+    if (userId) {
+      query.andWhere('order.userId = :userId', { userId });
+    }
+
+    return query.getMany();
+  }
+
   findAllGlobal() {
     return this.ordersRepository.find({
       relations: ['items', 'items.product', 'tenant'], // Add user relation if needed, but tenant is key for superadmin

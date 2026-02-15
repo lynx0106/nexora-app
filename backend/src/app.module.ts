@@ -20,6 +20,8 @@ import { PaymentsModule } from './payments/payments.module';
 import { AiModule } from './ai/ai.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
+import { ReportsModule } from './reports/reports.module';
+import { InvitationsModule } from './invitations/invitations.module';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -83,6 +85,8 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     AiModule,
     NotificationsModule,
     AuditModule,
+    ReportsModule,
+    InvitationsModule,
   ],
   controllers: [AppController],
   providers: [

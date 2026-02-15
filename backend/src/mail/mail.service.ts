@@ -196,6 +196,35 @@ export class MailService {
     }
   }
 
+  async sendInvitation(data: {
+    email: string;
+    token: string;
+    tenantName: string;
+    role: string;
+    inviterName?: string;
+  }) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://nexora-app.online';
+    const url = `${baseUrl}/auth/invite?token=${data.token}`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: data.email,
+        subject: `Invitacion a ${data.tenantName}`,
+        template: './invitation',
+        context: {
+          tenantName: data.tenantName,
+          role: data.role,
+          inviterName: data.inviterName,
+          url,
+          year: new Date().getFullYear(),
+        },
+      });
+      console.log(`✅ Invitation email sent to ${data.email}`);
+    } catch (error) {
+      console.error('❌ Error sending invitation email:', error);
+    }
+  }
+
   async sendMail(options: any) {
     return this.mailerService.sendMail(options);
   }

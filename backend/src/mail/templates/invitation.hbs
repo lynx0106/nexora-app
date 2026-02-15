@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Invitacion</title>
+  </head>
+  <body style="font-family: Arial, sans-serif; background-color: #0f172a; color: #e2e8f0; padding: 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 520px; margin: 0 auto; background: #111827; border-radius: 12px; padding: 24px;">
+      <tr>
+        <td style="font-size: 20px; font-weight: bold; padding-bottom: 12px;">
+          Invitacion a {{tenantName}}
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 14px; line-height: 1.6; padding-bottom: 16px;">
+          {{#if inviterName}}
+            {{inviterName}} te invito a unirte como {{role}}.
+          {{else}}
+            Has sido invitado a unirte como {{role}}.
+          {{/if}}
+        </td>
+      </tr>
+      <tr>
+        <td style="padding-bottom: 20px;">
+          <a href="{{url}}" style="background: #38bdf8; color: #0f172a; padding: 12px 18px; border-radius: 8px; text-decoration: none; font-weight: bold;">
+            Aceptar invitacion
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; opacity: 0.7;">
+          Este enlace expira pronto por seguridad.
+        </td>
+      </tr>
+      <tr>
+        <td style="font-size: 12px; opacity: 0.7; padding-top: 16px;">
+          © {{year}} Nexora
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import * as bcrypt from 'bcrypt';
@@ -38,6 +38,16 @@ export class UsersService {
     return this.usersRepository.find({
       where: { tenantId },
       order: { createdAt: 'ASC' },
+    });
+  }
+
+  findForReport(tenantId: string, start: Date, end: Date) {
+    return this.usersRepository.find({
+      where: {
+        tenantId,
+        createdAt: Between(start, end),
+      },
+      order: { createdAt: 'DESC' },
     });
   }
 
