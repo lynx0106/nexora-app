@@ -10,7 +10,7 @@ export class AuditLog {
   @Column()
   tenantId: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   userId: string;
 
   @Column({ nullable: true })

@@ -41,6 +41,23 @@ export class UsersService {
     });
   }
 
+  findByPasswordResetTokenHash(tokenHash: string) {
+    return this.usersRepository.findOne({
+      where: { passwordResetTokenHash: tokenHash },
+    });
+  }
+
+  async setPasswordResetToken(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ) {
+    await this.usersRepository.update(userId, {
+      passwordResetTokenHash: tokenHash,
+      passwordResetTokenExpiresAt: expiresAt,
+    });
+  }
+
   findAllGlobal() {
     return this.usersRepository.find({
       order: { tenantId: 'ASC', firstName: 'ASC' },

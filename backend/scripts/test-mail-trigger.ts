@@ -50,7 +50,7 @@ async function bootstrap() {
   try {
     console.log('Sending Test Order...');
     const result = await publicService.createOrder(tenant.id, {
-        items: [{ productId: productToUse.id, quantity: 1, price: Number(productToUse.price) }],
+      items: [{ productId: productToUse.id, quantity: 1 }],
         client: {
             firstName: 'Lynxia',
             lastName: 'Test',

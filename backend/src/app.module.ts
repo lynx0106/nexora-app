@@ -30,8 +30,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     ConfigModule.forRoot({ isGlobal: true }),
     ScheduleModule.forRoot(),
     ThrottlerModule.forRoot({
-      ttl: Number(process.env.RATE_LIMIT_TTL || 60),
-      limit: Number(process.env.RATE_LIMIT_LIMIT || 120),
+      throttlers: [
+        {
+          ttl: Number(process.env.RATE_LIMIT_TTL || 60),
+          limit: Number(process.env.RATE_LIMIT_LIMIT || 120),
+        },
+      ],
     }),
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),

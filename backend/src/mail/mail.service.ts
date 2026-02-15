@@ -16,7 +16,8 @@ export class MailService {
     }
 
     const baseUrl = process.env.FRONTEND_URL || 'https://nexora-app.online';
-    const url = `${baseUrl}/orders/status/${order.id}`;
+    const tokenQuery = order.publicToken ? `?token=${order.publicToken}` : '';
+    const url = `${baseUrl}/orders/status/${order.id}${tokenQuery}`;
 
     // Format currency
     const formatter = new Intl.NumberFormat('es-CO', {
@@ -171,6 +172,27 @@ export class MailService {
       console.log(`✅ Appointment reminder (${type}) sent to ${email}`);
     } catch (error) {
       console.error(`❌ Error sending appointment reminder (${type}):`, error);
+    }
+  }
+
+  async sendPasswordReset(data: { email: string; firstName?: string; token: string }) {
+    const baseUrl = process.env.FRONTEND_URL || 'https://nexora-app.online';
+    const url = `${baseUrl}/auth/reset-password?token=${data.token}`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: data.email,
+        subject: 'Restablecer tu contrasena',
+        template: './password-reset',
+        context: {
+          customerName: data.firstName || 'Cliente',
+          url,
+          year: new Date().getFullYear(),
+        },
+      });
+      console.log(`✅ Password reset email sent to ${data.email}`);
+    } catch (error) {
+      console.error('❌ Error sending password reset email:', error);
     }
   }
 

@@ -48,21 +48,21 @@ export class Appointment {
   @JoinColumn({ name: 'doctorId' })
   doctor: User;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   doctorId: string;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'clientId' })
   client: User;
 
-  @Column()
+  @Column({ type: 'uuid' })
   clientId: string;
 
   @ManyToOne(() => Product)
   @JoinColumn({ name: 'serviceId' })
   service: Product;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   serviceId: string;
 
   @Column({ default: false })

@@ -49,6 +49,12 @@ export class User {
   @Column({ default: true })
   isAiChatActive: boolean; // Controls if AI responds to this user
 
+  @Column({ type: 'text', nullable: true })
+  passwordResetTokenHash: string | null;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  passwordResetTokenExpiresAt: Date | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

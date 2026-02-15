@@ -41,7 +41,7 @@ export class Notification {
   tenant: Tenant;
 
   // Optional: Targeted user (if null, maybe broadcast to all admins of tenant)
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   userId: string;
 
   @ManyToOne(() => User, { nullable: true })

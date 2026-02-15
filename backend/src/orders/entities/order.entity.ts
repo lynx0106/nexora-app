@@ -18,6 +18,7 @@ import { Tenant } from '../../tenants/entities/tenant.entity';
 @Index(['tenantId', 'status'])
 @Index(['tenantId', 'paymentStatus'])
 @Index(['tenantId', 'userId'])
+@Index(['publicTokenHash'])
 export class Order {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -33,7 +34,7 @@ export class Order {
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   userId: string;
 
   @Column({ type: 'jsonb', nullable: true })
@@ -62,6 +63,12 @@ export class Order {
 
   @Column({ nullable: true })
   preferenceId: string; // MercadoPago Preference ID
+
+  @Column({ type: 'text', nullable: true })
+  publicTokenHash: string;
+
+  @Column({ type: 'timestamptz', nullable: true })
+  publicTokenExpiresAt: Date;
 
   @OneToMany(() => OrderItem, (item) => item.order, { cascade: true })
   items: OrderItem[];

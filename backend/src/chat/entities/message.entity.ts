@@ -24,7 +24,7 @@ export class Message {
   @JoinColumn({ name: 'senderId' })
   sender: User;
 
-  @Column({ nullable: true })
+  @Column({ type: 'uuid', nullable: true })
   senderId: string;
 
   @ManyToOne(() => Tenant)

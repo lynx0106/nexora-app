@@ -30,9 +30,9 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 13) ✅ Endpoint de health check.
 
 ## P2 - Endpoints publicos
-14) Agregar verificacion de email o reset de password para usuarios publicos.
-15) Agregar token de verificacion para estado de pedidos publicos.
-16) Agregar captcha o anti-bot para reservas y pedidos publicos.
+14) ✅ Agregar verificacion de email o reset de password para usuarios publicos.
+15) ✅ Agregar token de verificacion para estado de pedidos publicos.
+16) ✅ Agregar captcha o anti-bot para reservas y pedidos publicos.
 
 ## P2 - Pagos
 17) Guardar metadata de MercadoPago de forma segura (sin logs de secretos).
@@ -43,7 +43,8 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 20) ✅ Agregar migraciones y tracking de historial.
    - Scripts y DataSource para CLI de migraciones.
 21) ✅ Agregar indices en consultas frecuentes (tenantId, createdAt, status).
-22) ⏳ Agregar constraints para FK tenantId y valores de roles.
+22) ✅ Agregar constraints para FK tenantId y valores de roles.
+   - Se agregaron como NOT VALID para no romper datos existentes; validar en staging/produccion.
 
 ## P2 - UX Frontend
 23) ✅ Agregar error boundary y manejo central de toasts.
@@ -60,9 +61,10 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 30) Agregar RBAC avanzado (permisos granulares).
 
 ## P3 - Infra y ops
-31) Agregar politica de backups y pruebas de restauracion.
-32) Agregar entorno staging y checks de despliegue.
-33) Agregar tests automatizados para flujos criticos.
+31) ✅ Agregar politica de backups y pruebas de restauracion.
+32) ✅ Agregar entorno staging y checks de despliegue.
+33) ✅ Agregar tests automatizados para flujos criticos.
+34) Pendiente: actualizar @nestjs-modules/mailer (rompe compatibilidad) y validar envio de emails en staging.
 
 ## Alcance de redisenio UI
 - Actualizar tokens de diseno (colores, tipografia, spacing).

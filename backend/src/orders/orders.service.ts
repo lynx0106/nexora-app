@@ -10,6 +10,7 @@ import { PaymentsService } from '../payments/payments.service';
 import { ChatGateway } from '../chat/chat.gateway';
 import { ChatService } from '../chat/chat.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class OrdersService {
@@ -29,7 +30,7 @@ export class OrdersService {
   async create(data: {
     tenantId: string;
     userId?: string;
-    items: { productId: string; quantity: number; price: number }[];
+    items: { productId: string; quantity: number; price?: number }[];
     shippingAddress?: {
       street?: string;
       city?: string;
@@ -42,6 +43,7 @@ export class OrdersService {
     customerName?: string;
     paymentMethod?: string;
     paymentStatus?: string;
+    publicAccess?: boolean;
   }) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
@@ -88,6 +90,8 @@ export class OrdersService {
         await queryRunner.manager.save(product);
       }
 
+      const { token, tokenHash, expiresAt } = this.generatePublicToken();
+
       const order = this.ordersRepository.create({
         tenantId: data.tenantId,
         userId: data.userId,
@@ -99,6 +103,8 @@ export class OrdersService {
         paymentMethod: data.paymentMethod || 'cash',
         items: orderItems,
         shippingAddress: data.shippingAddress,
+        publicTokenHash: tokenHash,
+        publicTokenExpiresAt: expiresAt,
       });
 
       const savedOrder = await queryRunner.manager.save(Order, order);
@@ -197,6 +203,7 @@ export class OrdersService {
                       ...fullOrder,
                       customerName,
                       customerEmail: data.customerEmail,
+                      publicToken: token,
                     } as any,
                     tenant,
                   )
@@ -217,6 +224,13 @@ export class OrdersService {
         // Do not throw, return the order anyway
       }
 
+      if (data.publicAccess) {
+        return {
+          ...finalOrder,
+          publicToken: token,
+        } as Order & { publicToken: string };
+      }
+
       return finalOrder;
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -224,6 +238,19 @@ export class OrdersService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  private generatePublicToken() {
+    const token = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(token);
+    const ttlDays = Number(process.env.ORDER_PUBLIC_TOKEN_TTL_DAYS || 30);
+    const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000);
+
+    return { token, tokenHash, expiresAt };
+  }
+
+  private hashToken(token: string) {
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   findAllByTenant(tenantId: string) {

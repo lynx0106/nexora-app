@@ -2,12 +2,16 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { TenantsService } from '../tenants/tenants.service';
 import { ProductsService } from '../products/products.service';
 import { AppointmentsService } from '../appointments/appointments.service';
 import { UsersService } from '../users/users.service';
 import { OrdersService } from '../orders/orders.service';
+import { CreatePublicAppointmentDto } from './dto/create-public-appointment.dto';
+import { CreatePublicOrderDto } from './dto/create-public-order.dto';
 
 @Injectable()
 export class PublicService {
@@ -113,18 +117,11 @@ export class PublicService {
 
   async createAppointment(
     tenantId: string,
-    data: {
-      serviceId: string;
-      dateTime: string;
-      client: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone?: string;
-        notes?: string;
-      };
-    },
+    data: CreatePublicAppointmentDto,
+    ip?: string,
   ) {
+    await this.ensureNotBot(data.website, data.captchaToken, ip);
+
     // 1. Find or create client
     let user = await this.usersService.findByEmail(data.client.email);
 
@@ -153,18 +150,11 @@ export class PublicService {
 
   async createOrder(
     tenantId: string,
-    data: {
-      items: { productId: string; quantity: number; price: number }[];
-      client: {
-        firstName: string;
-        lastName: string;
-        email: string;
-        address?: string;
-        city?: string;
-        phone?: string;
-      };
-    },
+    data: CreatePublicOrderDto,
+    ip?: string,
   ) {
+    await this.ensureNotBot(data.website, data.captchaToken, ip);
+
     // 1. Find or create client
     let user = await this.usersService.findByEmail(data.client.email);
 
@@ -185,19 +175,39 @@ export class PublicService {
     return this.ordersService.create({
       tenantId,
       userId: user.id,
-      items: data.items,
+      items: data.items.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
       shippingAddress: {
         street: data.client.address,
         city: data.client.city,
       },
       customerEmail: data.client.email,
       paymentMethod: 'card', // Default to card for online orders to trigger Payment Link generation
+      publicAccess: true,
     });
   }
 
-  async getOrderStatus(orderId: string) {
+  async getOrderStatus(orderId: string, token: string) {
+    if (!token) {
+      throw new BadRequestException('Token de verificacion requerido');
+    }
+
     const order = await this.ordersService.findOne(orderId);
     if (!order) throw new NotFoundException('Pedido no encontrado');
+
+    if (!order.publicTokenHash) {
+      throw new ForbiddenException('Pedido no disponible para consulta publica');
+    }
+
+    if (order.publicTokenExpiresAt && order.publicTokenExpiresAt.getTime() < Date.now()) {
+      throw new ForbiddenException('Token expirado');
+    }
+
+    if (!this.isTokenValid(token, order.publicTokenHash)) {
+      throw new ForbiddenException('Token invalido');
+    }
 
     // Return only safe info for public view
     return {
@@ -223,5 +233,65 @@ export class PublicService {
         phone: order.tenant.phone,
       },
     };
+  }
+
+  private async ensureNotBot(
+    honeypot?: string,
+    captchaToken?: string,
+    ip?: string,
+  ) {
+    if (honeypot && honeypot.trim().length > 0) {
+      throw new BadRequestException('Solicitud no valida');
+    }
+
+    await this.verifyCaptcha(captchaToken, ip);
+  }
+
+  private async verifyCaptcha(token?: string, ip?: string) {
+    const secret = process.env.CAPTCHA_SECRET;
+    if (!secret) {
+      return;
+    }
+
+    if (!token) {
+      throw new BadRequestException('Captcha requerido');
+    }
+
+    const verifyUrl =
+      process.env.CAPTCHA_VERIFY_URL ||
+      'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+
+    const body = new URLSearchParams({
+      secret,
+      response: token,
+    });
+
+    if (ip) {
+      body.append('remoteip', ip);
+    }
+
+    const response = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+    });
+
+    const result = await response.json();
+    if (!result?.success) {
+      throw new BadRequestException('Captcha invalido');
+    }
+  }
+
+  private isTokenValid(token: string, tokenHash: string) {
+    const candidateHash = crypto.createHash('sha256').update(token).digest('hex');
+
+    if (candidateHash.length !== tokenHash.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(
+      Buffer.from(candidateHash, 'utf8'),
+      Buffer.from(tokenHash, 'utf8'),
+    );
   }
 }

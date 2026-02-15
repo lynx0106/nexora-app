@@ -214,7 +214,7 @@ async function bootstrap() {
     const tenantId = 'tenant_123';
     
     // This returns void, but updates the order in DB
-    await paymentsService.processPaymentNotification(paymentId, tenantId);
+    await paymentsService.processPaymentNotificationWithRetry(paymentId, tenantId);
     
     // Fetch order again to check status
     const updatedOrder = ordersDb.get(createdOrder.id);
