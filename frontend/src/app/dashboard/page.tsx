@@ -316,11 +316,11 @@ export default function DashboardPage() {
       <div className="flex min-h-screen">
         <aside className="hidden w-64 flex-col border-r border-slate-800 bg-slate-950/70 px-4 py-6 md:flex">
           <div className="mb-8 flex flex-col items-center">
-             <img 
-               src="/logo.png" 
-               alt="Logo Agencia" 
-               className="mb-3 h-20 w-auto object-contain"
-             />
+              <img 
+                src="/logo-fondo.png" 
+                alt="Logo Agencia" 
+                className="mb-3 h-20 w-auto object-contain"
+              />
             <div className="text-center text-sm font-semibold text-slate-100">
               NEXORA – El núcleo inteligente de tu negocio.
             </div>

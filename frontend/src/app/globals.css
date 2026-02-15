@@ -222,30 +222,68 @@ a {
 html.dark .bg-white,
 html.dark .bg-gray-50,
 html.dark .bg-zinc-50,
-html.dark .bg-slate-50 {
-  background-color: var(--color-surface) !important;
+html.dark .bg-slate-50,
+html.dark .bg-gray-100,
+html.dark .bg-zinc-100,
+html.dark .bg-slate-100,
+html.dark .bg-emerald-50,
+html.dark .bg-green-50,
+html.dark .bg-blue-50,
+html.dark .bg-indigo-50,
+html.dark .bg-purple-50,
+html.dark .bg-amber-50,
+html.dark .bg-red-50 {
+  background-color: var(--color-surface-2) !important;
 }
 
 html.dark .text-gray-900,
 html.dark .text-zinc-900,
-html.dark .text-slate-900 {
+html.dark .text-slate-900,
+html.dark .text-emerald-900,
+html.dark .text-green-900,
+html.dark .text-blue-900,
+html.dark .text-indigo-900,
+html.dark .text-purple-900,
+html.dark .text-amber-900,
+html.dark .text-red-900 {
   color: var(--color-ink) !important;
 }
 
 html.dark .text-gray-700,
 html.dark .text-zinc-700,
-html.dark .text-slate-700 {
+html.dark .text-slate-700,
+html.dark .text-emerald-700,
+html.dark .text-green-700,
+html.dark .text-blue-700,
+html.dark .text-indigo-700,
+html.dark .text-purple-700,
+html.dark .text-amber-700,
+html.dark .text-red-700 {
   color: var(--color-ink-soft) !important;
 }
 
 html.dark .text-gray-500,
 html.dark .text-zinc-500,
-html.dark .text-slate-500 {
+html.dark .text-slate-500,
+html.dark .text-emerald-600,
+html.dark .text-green-600,
+html.dark .text-blue-600,
+html.dark .text-indigo-600,
+html.dark .text-purple-600,
+html.dark .text-amber-600,
+html.dark .text-red-600 {
   color: var(--color-muted) !important;
 }
 
 html.dark .border-gray-200,
 html.dark .border-zinc-200,
-html.dark .border-slate-200 {
+html.dark .border-slate-200,
+html.dark .border-emerald-100,
+html.dark .border-green-100,
+html.dark .border-blue-100,
+html.dark .border-indigo-100,
+html.dark .border-purple-100,
+html.dark .border-amber-100,
+html.dark .border-red-100 {
   border-color: var(--color-border) !important;
 }

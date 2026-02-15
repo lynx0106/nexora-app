@@ -28,7 +28,12 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="dark"
+        enableSystem={false}
+        storageKey="nexora-theme"
+      >
         {children}
       </ThemeProvider>
     </QueryClientProvider>

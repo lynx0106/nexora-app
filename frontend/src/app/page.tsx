@@ -221,7 +221,7 @@ function HomeContent() {
         {/* Header Logo */}
         <div className="flex flex-col items-center">
            <img 
-             src="/logo.png" 
+             src="/logo-fondo.png" 
              alt="Logo Agencia" 
              className="mb-2 h-24 w-auto object-contain"
            />
