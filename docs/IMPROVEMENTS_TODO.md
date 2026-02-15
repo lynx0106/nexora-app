@@ -1,6 +1,6 @@
-# Improvements and hardening checklist
+# Checklist de mejoras y hardening
 
-This list is prioritized for long term stability, security, and maintainability.
+Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo plazo.
 
 ## P0 - Seguridad e integridad de datos
 1) ✅ Desactivar TypeORM auto-sync en produccion.
@@ -17,55 +17,55 @@ This list is prioritized for long term stability, security, and maintainability.
 5) ✅ Restringir CORS en WebSocket.
    - CORS_ORIGINS o FRONTEND_URL.
 
-## P1 - Stability and data quality
-6) Add input validation in controllers (DTO + class-validator).
-7) Add explicit role enums and consistent role checks.
-8) Remove auto tenant creation in getOrCreateTenant or restrict it.
-9) Add rate limiting for auth and public endpoints.
-10) Add transactional safety for stock updates and refunds.
+## P1 - Estabilidad y calidad de datos
+6) Agregar validacion de entrada en controllers (DTO + class-validator).
+7) Definir enums de rol y checks consistentes.
+8) Eliminar o restringir creacion automatica de tenant en getOrCreateTenant.
+9) Agregar rate limiting para auth y endpoints publicos.
+10) Mejorar seguridad transaccional en stock y reembolsos.
 
-## P1 - Observability
-11) Add structured logging (request id, tenant id).
-12) Add error tracking (Sentry or similar).
-13) Expose health check endpoint.
+## P1 - Observabilidad
+11) ✅ Logging estructurado (request id, tenant id).
+12) ✅ Tracking de errores (webhook opcional).
+13) ✅ Endpoint de health check.
 
-## P2 - Public flow hardening
-14) Add email verification or password reset for public users.
-15) Add order verification token for public order status.
-16) Add captcha or anti-bot for public booking and orders.
+## P2 - Endpoints publicos
+14) Agregar verificacion de email o reset de password para usuarios publicos.
+15) Agregar token de verificacion para estado de pedidos publicos.
+16) Agregar captcha o anti-bot para reservas y pedidos publicos.
 
-## P2 - Payments
-17) Store MercadoPago metadata safely (no logging of secrets).
-18) Add webhook signature verification.
-19) Add retry queue for webhook processing failures.
+## P2 - Pagos
+17) Guardar metadata de MercadoPago de forma segura (sin logs de secretos).
+18) Verificar firma de webhooks.
+19) Agregar cola de reintentos para fallos en webhooks.
 
-## P2 - Data and schema
-20) Add migrations and migration history tracking.
-21) Add indexes on frequent queries (tenantId, createdAt, status).
-22) Add constraints for tenantId FK and role values.
+## P2 - Datos y esquema
+20) Agregar migraciones y tracking de historial.
+21) Agregar indices en consultas frecuentes (tenantId, createdAt, status).
+22) Agregar constraints para FK tenantId y valores de roles.
 
-## P2 - Frontend UX
-23) Add central API error boundary and toast handling.
-24) Improve empty states for chat, orders, agenda.
-25) Add better loading states and skeletons.
+## P2 - UX Frontend
+23) Agregar error boundary y manejo central de toasts.
+24) Mejorar estados vacios para chat, pedidos y agenda.
+25) Agregar loaders y skeletons.
 
-## P2 - Security headers
-26) Add strict CORS and security headers in backend.
-27) Configure helmet with CSP.
+## P2 - Headers de seguridad
+26) Agregar CORS estricto y headers de seguridad en backend.
+27) Configurar helmet con CSP.
 
-## P3 - Product improvements
-28) Unified admin invitation flow with magic link tokens.
-29) Export reports (orders, appointments, users).
-30) Add advanced RBAC (fine-grained permissions).
+## P3 - Mejoras de producto
+28) Flujo unificado de invitaciones con magic links.
+29) Exportar reportes (pedidos, citas, usuarios).
+30) Agregar RBAC avanzado (permisos granulares).
 
-## P3 - Infra and ops
-31) Add backup policy and restore drills.
-32) Add staging environment and deployment checks.
-33) Add automated tests for critical flows.
+## P3 - Infra y ops
+31) Agregar politica de backups y pruebas de restauracion.
+32) Agregar entorno staging y checks de despliegue.
+33) Agregar tests automatizados para flujos criticos.
 
-## Theme and UI redesign scope
-- Update design tokens (colors, typography, spacing).
-- Create a unified component system (buttons, cards, forms).
-- Redesign dashboard and public booking flow.
-- Add consistent iconography and data visualization styles.
+## Alcance de redisenio UI
+- Actualizar tokens de diseno (colores, tipografia, spacing).
+- Crear sistema de componentes unificado (botones, tarjetas, formularios).
+- Redisenar dashboard y flujo publico de reservas.
+- Agregar iconografia consistente y estilos de data viz.
 
