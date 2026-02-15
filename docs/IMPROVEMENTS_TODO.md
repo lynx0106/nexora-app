@@ -51,8 +51,8 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 25) ✅ Agregar loaders y skeletons.
 
 ## P2 - Headers de seguridad
-26) Agregar CORS estricto y headers de seguridad en backend.
-27) Configurar helmet con CSP.
+26) ✅ Agregar CORS estricto y headers de seguridad en backend.
+27) ✅ Configurar helmet con CSP.
 
 ## P3 - Mejoras de producto
 28) Flujo unificado de invitaciones con magic links.
