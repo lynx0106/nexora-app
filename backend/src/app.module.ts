@@ -56,7 +56,8 @@ import { ScheduleModule } from '@nestjs/schedule';
           }
         : false,
       autoLoadEntities: true,
-      synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' || true, // Default to true for dev if not set, set to false in PROD
+      // En produccion debe estar en false y usarse migraciones.
+      synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
     }),
     UsersModule,
     AuthModule,

@@ -6,10 +6,12 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
+import { getCorsOrigins, getJwtSecret } from '../config/runtime.config';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: getCorsOrigins(),
+    credentials: true,
   },
   namespace: '/notifications', // Separate namespace to avoid conflict/noise with chat
 })
@@ -32,7 +34,7 @@ export class NotificationsGateway
 
       const cleanToken = token.replace('Bearer ', '');
       const payload = this.jwtService.verify(cleanToken, {
-        secret: process.env.JWT_SECRET || 'change-me',
+        secret: getJwtSecret(),
       });
 
       client.data.user = payload;

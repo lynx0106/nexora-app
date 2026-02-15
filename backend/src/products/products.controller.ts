@@ -49,7 +49,18 @@ export class ProductsController {
   }
 
   @Post('seed/:tenantId')
-  seed(@Param('tenantId') tenantId: string) {
+  @UseGuards(AuthGuard('jwt'))
+  seed(@Param('tenantId') tenantId: string, @Req() req: Request) {
+    const user = (req as any).user;
+
+    if (!user || user.role !== 'superadmin') {
+      throw new ForbiddenException('Solo superadmin puede ejecutar seeds');
+    }
+
+    if (process.env.ALLOW_PRODUCT_SEED !== 'true') {
+      throw new ForbiddenException('Seed deshabilitado en este entorno');
+    }
+
     return this.productsService.seedProducts(tenantId);
   }
 

@@ -5,12 +5,13 @@ import { NotificationsController } from './notifications.controller';
 import { NotificationsGateway } from './notifications.gateway';
 import { Notification } from './entities/notification.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { getJwtSecret } from '../config/runtime.config';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Notification]),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'change-me',
+      secret: getJwtSecret(),
       signOptions: { expiresIn: '1d' },
     }),
   ],

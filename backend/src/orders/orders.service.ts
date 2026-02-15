@@ -48,30 +48,19 @@ export class OrdersService {
     await queryRunner.startTransaction();
 
     try {
-      const total = data.items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0,
-      );
+      if (!data.items || data.items.length === 0) {
+        throw new BadRequestException('El pedido debe incluir al menos un item');
+      }
 
-      const order = this.ordersRepository.create({
-        tenantId: data.tenantId,
-        userId: data.userId,
-        customerName: data.customerName,
-        customerEmail: data.customerEmail,
-        total,
-        status: 'pending', // Default to pending
-        paymentStatus: data.paymentStatus || 'pending',
-        paymentMethod: data.paymentMethod || 'cash',
-        items: data.items.map((item) => ({
-          productId: item.productId,
-          quantity: item.quantity,
-          price: item.price,
-        })),
-        shippingAddress: data.shippingAddress,
-      });
+      let total = 0;
+      const orderItems: { productId: string; quantity: number; price: number }[] = [];
 
       // Decrease stock
       for (const item of data.items) {
+        if (item.quantity <= 0) {
+          throw new BadRequestException('La cantidad debe ser mayor a cero');
+        }
+
         const product = await queryRunner.manager.findOne(Product, {
           where: { id: item.productId },
           lock: { mode: 'pessimistic_write' }, // Lock row to prevent race conditions
@@ -87,9 +76,30 @@ export class OrdersService {
           );
         }
 
+        const unitPrice = Number(product.price || 0);
+        orderItems.push({
+          productId: item.productId,
+          quantity: item.quantity,
+          price: unitPrice,
+        });
+        total += unitPrice * item.quantity;
+
         product.stock -= item.quantity;
         await queryRunner.manager.save(product);
       }
+
+      const order = this.ordersRepository.create({
+        tenantId: data.tenantId,
+        userId: data.userId,
+        customerName: data.customerName,
+        customerEmail: data.customerEmail,
+        total,
+        status: 'pending', // Default to pending
+        paymentStatus: data.paymentStatus || 'pending',
+        paymentMethod: data.paymentMethod || 'cash',
+        items: orderItems,
+        shippingAddress: data.shippingAddress,
+      });
 
       const savedOrder = await queryRunner.manager.save(Order, order);
       await queryRunner.commitTransaction();

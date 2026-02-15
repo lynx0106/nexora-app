@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-jwt';
 import type { Request } from 'express';
+import { getJwtSecret } from '../config/runtime.config';
 
 interface JwtPayload {
   sub: string;
@@ -28,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         return token;
       },
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'change-me',
+      secretOrKey: getJwtSecret(),
     });
   }
 

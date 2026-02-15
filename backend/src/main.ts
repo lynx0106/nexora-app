@@ -1,14 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const frontendUrl = process.env.FRONTEND_URL;
-  const corsOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
-    : frontendUrl
-      ? [frontendUrl]
-      : ['http://localhost:3002'];
+  // Valida configuracion critica al inicio.
+  getJwtSecret();
+
+  const corsOrigins = getCorsOrigins();
 
   app.enableCors({
     origin: corsOrigins,

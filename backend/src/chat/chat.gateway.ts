@@ -11,12 +11,14 @@ import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ChatService } from './chat.service';
 import { AiService } from '../ai/ai.service';
+import { getCorsOrigins, getJwtSecret } from '../config/runtime.config';
 
 import { UsersService } from '../users/users.service';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // Allow all origins for now
+    origin: getCorsOrigins(),
+    credentials: true,
   },
 })
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -42,7 +44,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Remove "Bearer " if present
       const cleanToken = token.replace('Bearer ', '');
       const payload = this.jwtService.verify(cleanToken, {
-        secret: process.env.JWT_SECRET || 'change-me',
+        secret: getJwtSecret(),
       });
 
       // Store user info in socket

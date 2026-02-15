@@ -2,20 +2,20 @@
 
 This list is prioritized for long term stability, security, and maintainability.
 
-## P0 - Security and data integrity
-1) Disable TypeORM auto-sync in production.
-   - Use TYPEORM_SYNCHRONIZE=false in prod.
-   - Add migrations workflow.
-2) Protect seed endpoints.
-   - Require AuthGuard + superadmin role.
-   - Or remove in production build.
-3) Validate order pricing on server.
-   - Recalculate price from Product table.
-   - Ignore client-provided price and total.
-4) Enforce JWT secret in prod.
-   - Fail fast if JWT_SECRET missing.
-5) Lock down WebSocket CORS.
-   - Allow only known frontend origins.
+## P0 - Seguridad e integridad de datos
+1) ✅ Desactivar TypeORM auto-sync en produccion.
+   - Usar TYPEORM_SYNCHRONIZE=false en prod.
+   - Agregar flujo de migraciones.
+2) ✅ Proteger endpoints de seed.
+   - Requiere AuthGuard + rol superadmin.
+   - Controlado con ALLOW_PRODUCT_SEED=true.
+3) ✅ Validar precios de pedidos en servidor.
+   - Recalcular precio desde Product.
+   - Ignorar precio y total enviados por cliente.
+4) ✅ Enforzar JWT_SECRET en prod.
+   - Falla rapido si JWT_SECRET no esta configurado.
+5) ✅ Restringir CORS en WebSocket.
+   - CORS_ORIGINS o FRONTEND_URL.
 
 ## P1 - Stability and data quality
 6) Add input validation in controllers (DTO + class-validator).
