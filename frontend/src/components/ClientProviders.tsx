@@ -4,6 +4,8 @@ import "../i18n/config";
 import { ReactNode, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import ErrorBoundary from "./ErrorBoundary";
+import ToastProvider from "./ToastProvider";
 
 export default function ClientProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
@@ -15,7 +17,10 @@ export default function ClientProviders({ children }: { children: ReactNode }) {
         forcedTheme="dark"
         enableSystem={false}
       >
-        {children}
+        <ErrorBoundary>
+          {children}
+          <ToastProvider />
+        </ErrorBoundary>
       </ThemeProvider>
     </QueryClientProvider>
   );

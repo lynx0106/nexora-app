@@ -46,7 +46,7 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 22) ⏳ Agregar constraints para FK tenantId y valores de roles.
 
 ## P2 - UX Frontend
-23) Agregar error boundary y manejo central de toasts.
+23) ✅ Agregar error boundary y manejo central de toasts.
 24) Mejorar estados vacios para chat, pedidos y agenda.
 25) Agregar loaders y skeletons.
 

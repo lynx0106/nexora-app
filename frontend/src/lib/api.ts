@@ -1,3 +1,5 @@
+import { showToast } from './toast';
+
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
@@ -12,9 +14,13 @@ export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   if (!res.ok) {
     try {
       const error = await res.json();
-      throw new Error(error.message || 'Error en la petición');
+      const message = error.message || 'Error en la petición';
+      showToast(message, 'error');
+      throw new Error(message);
     } catch {
-      throw new Error(`Error HTTP: ${res.status}`);
+      const message = `Error HTTP: ${res.status}`;
+      showToast(message, 'error');
+      throw new Error(message);
     }
   }
 
@@ -62,12 +68,16 @@ export async function fetchAPIWithAuth(endpoint: string, options: RequestInit = 
     }
 
     if (res.status === 401) {
-      throw new Error('Tu sesión ha expirado o no tienes permisos. Vuelve a iniciar sesión.');
+      const authMessage = 'Tu sesión ha expirado o no tienes permisos. Vuelve a iniciar sesión.';
+      showToast(authMessage, 'error');
+      throw new Error(authMessage);
     }
 
     if (message === 'Error en la petición') {
       message = `Error HTTP: ${res.status}`;
     }
+
+    showToast(message, 'error');
 
     throw new Error(message);
   }
