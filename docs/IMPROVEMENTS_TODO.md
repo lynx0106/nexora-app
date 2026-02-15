@@ -36,8 +36,8 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 
 ## P2 - Pagos
 17) Guardar metadata de MercadoPago de forma segura (sin logs de secretos).
-18) Verificar firma de webhooks.
-19) Agregar cola de reintentos para fallos en webhooks.
+18) ✅ Verificar firma de webhooks.
+19) ✅ Agregar cola de reintentos para fallos en webhooks.
 
 ## P2 - Datos y esquema
 20) ✅ Agregar migraciones y tracking de historial.

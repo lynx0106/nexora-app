@@ -13,6 +13,10 @@ import { MailService } from '../mail/mail.service';
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
+  private readonly maxWebhookRetries = Number(process.env.MP_WEBHOOK_RETRY_MAX || 3);
+  private readonly baseRetryDelayMs = Number(
+    process.env.MP_WEBHOOK_RETRY_DELAY_MS || 2000,
+  );
 
   private getFrontendUrl() {
     return (process.env.FRONTEND_URL || 'http://localhost:3002').replace(/\/$/, '');
@@ -89,7 +93,15 @@ export class PaymentsService {
     }
   }
 
-  async processPaymentNotification(paymentId: string, tenantId?: string) {
+  async processPaymentNotificationWithRetry(paymentId: string, tenantId?: string) {
+    await this.processPaymentNotificationOnce(paymentId, tenantId, 1);
+  }
+
+  private async processPaymentNotificationOnce(
+    paymentId: string,
+    tenantId: string | undefined,
+    attempt: number,
+  ) {
     try {
       let tenant: Tenant | null = null;
       if (tenantId) {
@@ -123,8 +135,7 @@ export class PaymentsService {
       }
 
       if (!paymentData) {
-        this.logger.error(`Payment ${paymentId} not found in MercadoPago`);
-        return;
+        throw new Error(`Pago ${paymentId} no encontrado en MercadoPago`);
       }
 
       const { status, external_reference } = paymentData;
@@ -142,10 +153,7 @@ export class PaymentsService {
         relations: ['tenant', 'items', 'items.product'],
       });
       if (!order) {
-        this.logger.error(
-          `Order ${orderId} not found for Payment ${paymentId}`,
-        );
-        return;
+        throw new Error(`Pedido ${orderId} no encontrado para pago ${paymentId}`);
       }
 
       // Validate status
@@ -216,8 +224,19 @@ export class PaymentsService {
         }
       }
     } catch (error) {
+      if (attempt < this.maxWebhookRetries) {
+        const delay = this.baseRetryDelayMs * Math.pow(2, attempt - 1);
+        this.logger.warn(
+          `Error procesando webhook ${paymentId}. Reintento ${attempt + 1} en ${delay}ms`,
+        );
+        setTimeout(() => {
+          void this.processPaymentNotificationOnce(paymentId, tenantId, attempt + 1);
+        }, delay);
+        return;
+      }
+
       this.logger.error(
-        `Error processing payment notification ${paymentId}`,
+        `Error procesando webhook ${paymentId} despues de reintentos`,
         error,
       );
     }
