@@ -402,7 +402,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
     <div className="fixed bottom-4 right-4 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="bg-white border border-gray-200 shadow-xl rounded-lg w-80 sm:w-96 h-[500px] mb-4 flex flex-col overflow-hidden">
+        <div className="bg-slate-900 border border-slate-800 shadow-xl rounded-lg w-80 sm:w-96 h-[500px] mb-4 flex flex-col overflow-hidden">
           {/* Header */}
           <div className="bg-indigo-600 p-3 flex flex-col text-white">
             <div className="flex justify-between items-center mb-2">
@@ -445,7 +445,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
           </div>
 
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-50 space-y-3 relative">
+          <div className="flex-1 overflow-y-auto p-4 bg-slate-950 space-y-3 relative">
             {/* AI Status Banner for Admin */}
             {role !== 'user' && activeChatUserId && activeTab === 'CUSTOMER' && (
                 <div className="sticky top-0 z-10 flex justify-center mb-2">
@@ -453,8 +453,8 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                         onClick={toggleAi}
                         className={`text-[10px] px-2 py-1 rounded-full shadow border flex items-center gap-1 ${
                             activeCustomerAi 
-                            ? 'bg-purple-100 text-purple-700 border-purple-200 hover:bg-purple-200' 
-                            : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200'
+                            ? 'bg-purple-900/40 text-purple-200 border-purple-700 hover:bg-purple-900/60' 
+                            : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
                         }`}
                     >
                         {activeCustomerAi ? t('chat.widget.ai_active') : t('chat.widget.ai_paused')}
@@ -463,7 +463,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
             )}
 
             {displayedMessages.length === 0 && (
-                <p className="text-center text-gray-400 text-xs mt-4">{t('chat.widget.no_messages')}</p>
+                <p className="text-center text-slate-500 text-xs mt-4">{t('chat.widget.no_messages')}</p>
             )}
             {displayedMessages.map((msg) => {
               const isMe = msg.senderId === currentUserId;
@@ -474,11 +474,11 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                     isMe 
                       ? 'bg-indigo-600 text-white rounded-br-none' 
                       : isAi
-                        ? 'bg-purple-100 border border-purple-200 text-purple-900 rounded-bl-none'
-                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                        ? 'bg-purple-900/40 border border-purple-700 text-purple-100 rounded-bl-none'
+                        : 'bg-slate-900 border border-slate-700 text-slate-100 rounded-bl-none'
                   }`}>
                     {!isMe && (
-                      <div className={`text-xs mb-1 font-bold flex justify-between gap-2 ${isAi ? 'text-purple-700' : 'text-gray-500'}`}>
+                      <div className={`text-xs mb-1 font-bold flex justify-between gap-2 ${isAi ? 'text-purple-200' : 'text-slate-400'}`}>
                         <span>{isAi ? '🤖 Asistente Virtual' : (msg.sender?.firstName || 'Usuario')}</span>
                         {/* Show Role if needed, or context */}
                       </div>
@@ -495,7 +495,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                             {t('chat.widget.download_file')}
                         </a>
                     )}
-                    <div className={`text-[10px] mt-1 ${isMe ? 'text-indigo-200' : 'text-gray-400'} text-right`}>
+                    <div className={`text-[10px] mt-1 ${isMe ? 'text-indigo-200' : 'text-slate-400'} text-right`}>
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -506,7 +506,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
           </div>
 
           {/* Input Area */}
-          <form onSubmit={handleSendMessage} className="p-3 bg-white border-t border-gray-200 flex gap-2 items-center">
+          <form onSubmit={handleSendMessage} className="p-3 bg-slate-950 border-t border-slate-800 flex gap-2 items-center">
             <input 
                 type="file" 
                 ref={fileInputRef} 
@@ -518,11 +518,11 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="text-gray-500 hover:text-indigo-600 focus:outline-none disabled:opacity-50"
+                className="text-slate-400 hover:text-emerald-300 focus:outline-none disabled:opacity-50"
                 title={t('chat.widget.attach_file')}
             >
                 {isUploading ? (
-                     <svg className="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                     <svg className="animate-spin h-5 w-5 text-emerald-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                      </svg>
@@ -540,7 +540,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                 onTouchStart={startRecording}
                 onTouchEnd={stopRecording}
                 disabled={isUploading}
-                className={`text-gray-500 hover:text-indigo-600 focus:outline-none transition-colors ${isRecording ? 'text-red-600 animate-pulse' : ''}`}
+                className={`text-slate-400 hover:text-emerald-300 focus:outline-none transition-colors ${isRecording ? 'text-red-400 animate-pulse' : ''}`}
                 title="Hold to record"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" fill={isRecording ? "currentColor" : "none"} viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
@@ -549,7 +549,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
             </button>
 
             {isRecording ? (
-                 <div className="flex-1 border border-red-300 rounded-md px-3 py-2 text-sm bg-red-50 text-red-600 flex items-center justify-between animate-pulse">
+                 <div className="flex-1 border border-red-700 rounded-md px-3 py-2 text-sm bg-red-950/40 text-red-200 flex items-center justify-between animate-pulse">
                     <span>Recording...</span>
                  </div>
             ) : (
@@ -558,13 +558,13 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder={t('chat.widget.input_placeholder')}
-                  className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="flex-1 border border-slate-700 rounded-md px-3 py-2 text-sm bg-slate-900 text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-400"
                 />
             )}
             <button
               type="submit"
               disabled={!newMessage.trim()}
-              className="bg-indigo-600 text-white p-2 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-emerald-400 text-slate-900 p-2 rounded-md hover:bg-emerald-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
@@ -577,10 +577,10 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
       {/* Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-3 shadow-lg transition-transform hover:scale-105 focus:outline-none relative"
+        className="bg-emerald-400 hover:bg-emerald-300 text-slate-900 rounded-full p-3 shadow-lg transition-transform hover:scale-105 focus:outline-none relative"
       >
         {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full border-2 border-white">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full border-2 border-slate-950">
                 {unreadCount > 9 ? '9+' : unreadCount}
             </span>
         )}

@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es" className="dark">
       <body className={`${spaceGrotesk.variable} ${fraunces.variable} antialiased`}>
         <ClientProviders>
           <div className="ds-page">{children}</div>

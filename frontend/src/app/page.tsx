@@ -49,7 +49,7 @@ function HomeContent() {
   if (!mounted) return null;
 
   const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
+    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleCountryChange = (val: string) => {
@@ -180,28 +180,28 @@ function HomeContent() {
       desc: t('auth.role_descs.client'),
       icon: <User className="w-5 h-5" />,
       color: "bg-emerald-600 hover:bg-emerald-700",
-      lightColor: "bg-emerald-50 text-emerald-700 border-emerald-200"
+      lightColor: "bg-emerald-900/40 text-emerald-200 border-emerald-700"
     },
     employee: {
       title: t('auth.roles.employee'),
       desc: t('auth.role_descs.employee'),
       icon: <Briefcase className="w-5 h-5" />,
       color: "bg-blue-600 hover:bg-blue-700",
-      lightColor: "bg-blue-50 text-blue-700 border-blue-200"
+      lightColor: "bg-blue-900/40 text-blue-200 border-blue-700"
     },
     admin: {
       title: t('auth.roles.admin'),
       desc: t('auth.role_descs.admin'),
       icon: <Store className="w-5 h-5" />,
       color: "bg-indigo-600 hover:bg-indigo-700",
-      lightColor: "bg-indigo-50 text-indigo-700 border-indigo-200"
+      lightColor: "bg-indigo-900/40 text-indigo-200 border-indigo-700"
     },
     superadmin: {
       title: t('auth.roles.superadmin'),
       desc: t('auth.role_descs.superadmin'),
       icon: <Lock className="w-5 h-5" />,
-      color: "bg-zinc-800 hover:bg-zinc-900",
-      lightColor: "bg-zinc-100 text-zinc-800 border-zinc-200"
+      color: "bg-slate-800 hover:bg-slate-700",
+      lightColor: "bg-slate-900 text-slate-100 border-slate-700"
     }
   };
 
@@ -209,15 +209,13 @@ function HomeContent() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      {/* Theme Toggle */}
       <button
         onClick={toggleTheme}
-        className="absolute right-4 top-4 rounded-full border border-slate-200 bg-white/80 p-2 text-slate-600 shadow-sm backdrop-blur transition hover:bg-white"
+        className="absolute right-4 top-4 rounded-full p-2 shadow-sm backdrop-blur transition hover:scale-[1.02] ds-toggle"
         title="Cambiar tema"
       >
-        {theme === "light" ? <Moon size={20} /> : <Sun size={20} />}
+        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
       </button>
-
       <div className="w-full max-w-md space-y-8">
         
         {/* Header Logo */}
@@ -227,10 +225,10 @@ function HomeContent() {
              alt="Logo Agencia" 
              className="mb-2 h-24 w-auto object-contain"
            />
-           <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">
+           <h2 className="text-center text-3xl font-semibold tracking-tight ds-text">
             {t('auth.access_system')}
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-500">
+          <p className="mt-2 text-center text-sm ds-muted">
             {t('auth.select_account_type')}
           </p>
         </div>
@@ -255,10 +253,10 @@ function HomeContent() {
               disabled={!!inviteRole && inviteRole !== profile}
               className={`flex flex-col items-center justify-center py-2 px-1 rounded-lg text-xs font-medium transition-all ${
                 activeProfile === profile
-                  ? "bg-white shadow-sm text-slate-900 ring-1 ring-slate-200"
+                  ? "ds-choice-active"
                   : !!inviteRole && inviteRole !== profile 
-                    ? "opacity-50 cursor-not-allowed text-slate-400" 
-                    : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+                    ? "opacity-50 cursor-not-allowed ds-muted" 
+                    : "ds-choice"
               }`}
             >
               <div className={`mb-1 p-1.5 rounded-full ${activeProfile === profile ? profileConfig[profile].lightColor : "bg-transparent"}`}>
@@ -279,11 +277,11 @@ function HomeContent() {
            <h3 className={`text-lg font-semibold ${
              activeProfile === 'client' ? 'text-emerald-600' :
              activeProfile === 'employee' ? 'text-blue-600' :
-             activeProfile === 'admin' ? 'text-indigo-600' : 'text-slate-700'
+             activeProfile === 'admin' ? 'text-indigo-300' : 'ds-soft'
            }`}>
              {currentConfig.title}
            </h3>
-           <p className="text-sm text-slate-500 mt-1">
+           <p className="text-sm ds-muted mt-1">
              {currentConfig.desc}
            </p>
         </div>
@@ -298,7 +296,7 @@ function HomeContent() {
                 <div>
                   <label
                     htmlFor="email"
-                    className="block text-sm font-medium text-slate-600"
+                    className="block text-sm font-medium ds-muted"
                   >
                     {t('auth.email_label')}
                   </label>
@@ -320,7 +318,7 @@ function HomeContent() {
                 <div>
                   <label
                     htmlFor="password"
-                    className="block text-sm font-medium text-slate-600"
+                    className="block text-sm font-medium ds-muted"
                   >
                     {t('auth.password_label')}
                   </label>
@@ -345,11 +343,11 @@ function HomeContent() {
             {!isLogin && (
               <div className="space-y-4">
                  {inviteTenantId ? (
-                    <div className="text-xs text-teal-700 bg-teal-50 p-2 rounded border border-teal-200">
+                    <div className="text-xs text-teal-200 bg-teal-900/30 p-2 rounded border border-teal-700">
                       {t('auth.registering_in', { tenant: inviteTenantId.replace(/-/g, ' '), role: profileConfig[activeProfile].title })}
                     </div>
                  ) : (
-                    <div className="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200">
+                    <div className="text-xs text-amber-200 bg-amber-900/30 p-2 rounded border border-amber-700">
                       {t('auth.registering_new_business')}
                     </div>
                  )}
@@ -357,7 +355,7 @@ function HomeContent() {
                  {/* Existing register fields logic... */}
                  <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-600">
+                    <label className="block text-sm font-medium ds-muted">
                       {t('auth.first_name')}
                     </label>
                     <input
@@ -369,7 +367,7 @@ function HomeContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-slate-600">
+                    <label className="block text-sm font-medium ds-muted">
                       {t('auth.last_name')}
                     </label>
                     <input
@@ -384,7 +382,7 @@ function HomeContent() {
 
                 {!inviteTenantId && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-600">
+                  <label className="block text-sm font-medium ds-muted">
                     {t('auth.tenant_name')}
                   </label>
                   <input
@@ -399,7 +397,7 @@ function HomeContent() {
 
                  {/* Email & Password for Register */}
                  <div>
-                  <label className="block text-sm font-medium text-slate-600">
+                  <label className="block text-sm font-medium ds-muted">
                     {t('auth.email_label')}
                   </label>
                   <input
@@ -411,7 +409,7 @@ function HomeContent() {
                   />
                 </div>
                  <div>
-                  <label className="block text-sm font-medium text-slate-600">
+                  <label className="block text-sm font-medium ds-muted">
                     {t('auth.password_label')}
                   </label>
                   <input
@@ -426,7 +424,7 @@ function HomeContent() {
                 {!inviteTenantId && (
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-slate-600">
+                        <label className="block text-sm font-medium ds-muted">
                         {t('auth.sector_label')}
                         </label>
                         <select
@@ -445,7 +443,7 @@ function HomeContent() {
                         </select>
                     </div>
                      <div>
-                        <label className="block text-sm font-medium text-slate-600">
+                        <label className="block text-sm font-medium ds-muted">
                         {t('auth.country_label')}
                         </label>
                         <select
@@ -466,13 +464,13 @@ function HomeContent() {
 
             {/* Error / Success Messages */}
             {error && (
-              <div className="rounded-md bg-red-50 p-4">
+              <div className="ds-alert ds-alert-error">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
+                    <h3 className="text-sm font-medium">
                       {t('auth.error_title')}
                     </h3>
-                    <div className="mt-2 text-sm text-red-700">
+                    <div className="mt-2 text-sm">
                       <p>{error}</p>
                     </div>
                   </div>
@@ -481,13 +479,13 @@ function HomeContent() {
             )}
 
             {success && (
-              <div className="rounded-md bg-emerald-50 p-4">
+              <div className="ds-alert ds-alert-success">
                 <div className="flex">
                   <div className="ml-3">
-                    <h3 className="text-sm font-medium text-emerald-800">
+                    <h3 className="text-sm font-medium">
                       {success.includes("Nota") ? t('auth.redirecting') : t('auth.success_title')}
                     </h3>
-                    <div className="mt-2 text-sm text-emerald-700">
+                    <div className="mt-2 text-sm">
                       <p>{success}</p>
                     </div>
                   </div>
@@ -518,10 +516,10 @@ function HomeContent() {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-slate-200" />
+                <div className="w-full border-t ds-divider" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="bg-white px-2 text-slate-400">
+                <span className="ds-divider-label px-2">
                   O
                 </span>
               </div>

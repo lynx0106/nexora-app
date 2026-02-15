@@ -1,6 +1,36 @@
 @import "tailwindcss";
 
 :root {
+  --color-ink: #f8fafc;
+  --color-ink-soft: #cbd5f5;
+  --color-muted: #94a3b8;
+  --color-border: #1f2937;
+  --color-surface: #0b111c;
+  --color-surface-2: #0f172a;
+  --color-surface-3: #111827;
+  --color-bg: #0a0f1c;
+  --color-glow-1: rgba(20, 184, 166, 0.2);
+  --color-glow-2: rgba(37, 99, 235, 0.18);
+  --color-accent: #2dd4bf;
+  --color-accent-2: #14b8a6;
+  --color-accent-soft: rgba(20, 184, 166, 0.12);
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-danger-soft: rgba(248, 113, 113, 0.12);
+  --color-danger-border: rgba(248, 113, 113, 0.35);
+  --color-success: #34d399;
+  --color-success-soft: rgba(52, 211, 153, 0.12);
+  --color-success-border: rgba(52, 211, 153, 0.35);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-sm: 0 6px 16px rgba(2, 6, 23, 0.45);
+  --shadow-md: 0 16px 36px rgba(2, 6, 23, 0.5);
+  --shadow-lg: 0 24px 48px rgba(2, 6, 23, 0.55);
+  color-scheme: dark;
+}
+
+:root.light {
   --color-ink: #0f172a;
   --color-ink-soft: #334155;
   --color-muted: #64748b;
@@ -8,24 +38,30 @@
   --color-surface: #ffffff;
   --color-surface-2: #f8fafc;
   --color-surface-3: #eef2f6;
+  --color-bg: #f7f8fb;
+  --color-glow-1: rgba(15, 118, 110, 0.12);
+  --color-glow-2: rgba(99, 102, 241, 0.1);
   --color-accent: #0f766e;
   --color-accent-2: #0d9488;
   --color-accent-soft: #ecfdfb;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fecaca;
+  --color-success: #10b981;
+  --color-success-soft: #ecfdf5;
+  --color-success-border: #a7f3d0;
   --shadow-sm: 0 6px 16px rgba(15, 23, 42, 0.06);
   --shadow-md: 0 16px 36px rgba(15, 23, 42, 0.12);
   --shadow-lg: 0 24px 48px rgba(15, 23, 42, 0.16);
+  color-scheme: light;
 }
 
 body {
   background:
-    radial-gradient(1200px 600px at 10% -10%, #e6f7f4 0%, transparent 55%),
-    radial-gradient(1000px 480px at 90% 0%, #f3f7ff 0%, transparent 60%),
-    #f7f8fb;
+    radial-gradient(1200px 600px at 10% -10%, var(--color-glow-1) 0%, transparent 55%),
+    radial-gradient(1000px 480px at 90% 0%, var(--color-glow-2) 0%, transparent 60%),
+    var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
   min-height: 100vh;
@@ -52,8 +88,8 @@ a {
 }
 
 ::selection {
-  background: #ccfbf1;
-  color: #0f172a;
+  background: rgba(20, 184, 166, 0.35);
+  color: #f8fafc;
 }
 
 .ds-page {
@@ -95,28 +131,121 @@ a {
 .ds-button-primary {
   background: linear-gradient(135deg, var(--color-accent), var(--color-accent-2));
   color: #ffffff;
-  box-shadow: 0 10px 22px rgba(15, 118, 110, 0.25);
+  box-shadow: 0 10px 22px rgba(20, 184, 166, 0.25);
 }
 
 .ds-button-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(15, 118, 110, 0.3);
+  box-shadow: 0 16px 30px rgba(20, 184, 166, 0.35);
 }
 
 .ds-button-ghost {
   background: var(--color-accent-soft);
   color: var(--color-accent);
+  border: 1px solid rgba(20, 184, 166, 0.25);
 }
 
 .ds-input {
   border-radius: 12px;
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--color-surface-3);
   padding: 0.6rem 0.8rem;
   color: var(--color-ink);
 }
 
 .ds-input:focus {
-  outline: 2px solid rgba(13, 148, 136, 0.25);
+  outline: 2px solid rgba(20, 184, 166, 0.35);
   border-color: var(--color-accent-2);
+}
+
+.ds-text {
+  color: var(--color-ink);
+}
+
+.ds-soft {
+  color: var(--color-ink-soft);
+}
+
+.ds-muted {
+  color: var(--color-muted);
+}
+
+.ds-toggle {
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 88%, transparent);
+  color: var(--color-muted);
+  box-shadow: var(--shadow-sm);
+}
+
+.ds-divider {
+  border-color: var(--color-border);
+}
+
+.ds-divider-label {
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+}
+
+.ds-alert {
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.ds-alert-error {
+  background: var(--color-danger-soft);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger);
+}
+
+.ds-alert-success {
+  background: var(--color-success-soft);
+  border: 1px solid var(--color-success-border);
+  color: var(--color-success);
+}
+
+.ds-choice {
+  color: var(--color-muted);
+}
+
+.ds-choice:hover {
+  background: color-mix(in srgb, var(--color-surface-3) 55%, transparent);
+  color: var(--color-ink-soft);
+}
+
+.ds-choice-active {
+  background: color-mix(in srgb, var(--color-surface-3) 70%, transparent);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+}
+
+/* Transitional overrides to darken legacy light utility usage across views. */
+html.dark .bg-white,
+html.dark .bg-gray-50,
+html.dark .bg-zinc-50,
+html.dark .bg-slate-50 {
+  background-color: var(--color-surface) !important;
+}
+
+html.dark .text-gray-900,
+html.dark .text-zinc-900,
+html.dark .text-slate-900 {
+  color: var(--color-ink) !important;
+}
+
+html.dark .text-gray-700,
+html.dark .text-zinc-700,
+html.dark .text-slate-700 {
+  color: var(--color-ink-soft) !important;
+}
+
+html.dark .text-gray-500,
+html.dark .text-zinc-500,
+html.dark .text-slate-500 {
+  color: var(--color-muted) !important;
+}
+
+html.dark .border-gray-200,
+html.dark .border-zinc-200,
+html.dark .border-slate-200 {
+  border-color: var(--color-border) !important;
 }

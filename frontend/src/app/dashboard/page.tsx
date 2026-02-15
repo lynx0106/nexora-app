@@ -198,8 +198,8 @@ export default function DashboardPage() {
       ? "flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm font-medium" 
       : "flex items-center justify-between rounded-md px-3 py-2 text-left text-sm";
     
-    const activeClass = "bg-zinc-900 text-white";
-    const inactiveClass = "text-zinc-700 hover:bg-zinc-100";
+    const activeClass = "bg-slate-800 text-slate-100";
+    const inactiveClass = "text-slate-300 hover:bg-slate-900/60";
 
     const getItemClass = (section: string) => 
       `${baseClass} ${activeSection === section ? activeClass : inactiveClass}`;
@@ -284,7 +284,7 @@ export default function DashboardPage() {
         </button>
 
         {(role === "admin" || role === "superadmin") && (
-             <Link href="/configuracion" onClick={() => mobile && setIsMobileMenuOpen(false)} className={mobile ? baseClass + " text-zinc-700 hover:bg-zinc-100" : "mt-4 inline-flex items-center justify-between rounded-md px-3 py-2 text-left text-zinc-700 hover:bg-zinc-100"}>
+             <Link href="/configuracion" onClick={() => mobile && setIsMobileMenuOpen(false)} className={mobile ? baseClass + " text-slate-300 hover:bg-slate-900/60" : "mt-4 inline-flex items-center justify-between rounded-md px-3 py-2 text-left text-slate-300 hover:bg-slate-900/60"}>
                 <span>{t('sidebar.configuration')}</span>
              </Link>
         )}
@@ -294,10 +294,10 @@ export default function DashboardPage() {
 
   if (isAuthChecking) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+      <div className="flex h-screen w-full items-center justify-center bg-slate-950">
         <div className="flex flex-col items-center gap-4">
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
-          <p className="text-sm text-gray-500">{t('dashboard.verifying')}</p>
+          <p className="text-sm text-slate-400">{t('dashboard.verifying')}</p>
         </div>
       </div>
     );
@@ -306,25 +306,25 @@ export default function DashboardPage() {
   if (!userInfo || !role) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-zinc-700">{t('dashboard.redirecting')}</div>
+        <div className="text-slate-400">{t('dashboard.redirecting')}</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-zinc-50">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
       <div className="flex min-h-screen">
-        <aside className="hidden w-64 flex-col border-r border-zinc-200 bg-white px-4 py-6 md:flex">
+        <aside className="hidden w-64 flex-col border-r border-slate-800 bg-slate-950/70 px-4 py-6 md:flex">
           <div className="mb-8 flex flex-col items-center">
              <img 
                src="/logo.png" 
                alt="Logo Agencia" 
                className="mb-3 h-20 w-auto object-contain"
              />
-            <div className="text-center text-sm font-semibold text-zinc-900">
+            <div className="text-center text-sm font-semibold text-slate-100">
               NEXORA – El núcleo inteligente de tu negocio.
             </div>
-            <div className="mt-2 inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
+            <div className="mt-2 inline-flex rounded-full bg-blue-900/40 px-3 py-1 text-xs font-medium text-blue-200">
               {t('common.role')}: {role?.toUpperCase()}
             </div>
           </div>
@@ -336,31 +336,31 @@ export default function DashboardPage() {
               window.localStorage.removeItem("token");
               router.push("/");
             }}
-            className="mt-6 rounded-md border border-red-200 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-50"
+            className="mt-6 rounded-md border border-red-500/40 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-950/40"
           >
             {t('sidebar.logout')}
           </button>
-          <div className="mt-6 border-t border-zinc-100 pt-4 text-center text-[11px] text-zinc-400">
+          <div className="mt-6 border-t border-slate-800 pt-4 text-center text-[11px] text-slate-500">
             Powered by Lynx IA
           </div>
         </aside>
 
         <div className="flex flex-1 flex-col">
-          <header className="bg-white shadow-sm md:border-b md:shadow-none relative">
+          <header className="bg-slate-950/70 shadow-sm md:border-b md:border-slate-800 md:shadow-none relative backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
               {/* Logo Centered (or Left on Desktop if preferred, but keeping existing style mostly) */}
               <div className="flex flex-1 justify-center md:justify-start items-center gap-3">
                  <button 
-                  className="md:hidden p-2 text-zinc-600 hover:bg-zinc-100 rounded-md"
+                  className="md:hidden rounded-md p-2 text-slate-300 hover:bg-slate-900/60"
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                  >
                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
                  </button>
                 <div className="flex flex-col items-center md:items-start gap-1">
-                  <span className="block text-lg font-semibold text-zinc-900 sm:text-2xl">
+                  <span className="block text-lg font-semibold text-slate-100 sm:text-2xl">
                     NEXORA
                   </span>
-                  <span className="hidden md:block text-xs text-zinc-700">
+                  <span className="hidden md:block text-xs text-slate-400">
                     El núcleo inteligente de tu negocio.
                   </span>
                 </div>
@@ -372,7 +372,7 @@ export default function DashboardPage() {
                 <NotificationsDropdown />
                 
                 <div className="hidden md:flex items-center gap-4">
-                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+                   <span className="rounded-full bg-blue-900/40 px-3 py-1 text-xs font-medium text-blue-200">
                     {t('common.role')}: {role?.toUpperCase()}
                   </span>
                 </div>
@@ -384,7 +384,7 @@ export default function DashboardPage() {
                       window.localStorage.removeItem("token");
                       router.push("/");
                     }}
-                    className="text-xs font-medium text-red-600"
+                    className="text-xs font-medium text-red-300"
                   >
                     {t('sidebar.logout')}
                   </button>
@@ -394,10 +394,10 @@ export default function DashboardPage() {
 
             {/* Mobile Menu Dropdown */}
             {isMobileMenuOpen && (
-              <div className="md:hidden absolute top-full left-0 w-full bg-white border-b border-zinc-200 shadow-lg z-50 px-4 py-4 flex flex-col gap-2">
-                 <div className="mb-4 pb-2 border-b border-zinc-100 flex items-center justify-between">
-                    <span className="text-sm font-semibold text-zinc-900">{t('sidebar.navigation_menu')}</span>
-                    <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-800">
+              <div className="md:hidden absolute top-full left-0 w-full bg-slate-950 border-b border-slate-800 shadow-lg z-50 px-4 py-4 flex flex-col gap-2">
+                 <div className="mb-4 pb-2 border-b border-slate-800 flex items-center justify-between">
+                    <span className="text-sm font-semibold text-slate-100">{t('sidebar.navigation_menu')}</span>
+                    <span className="rounded-full bg-blue-900/40 px-3 py-1 text-xs font-medium text-blue-200">
                       {role?.toUpperCase()}
                     </span>
                  </div>
