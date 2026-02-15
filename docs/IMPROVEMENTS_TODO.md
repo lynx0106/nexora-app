@@ -40,9 +40,10 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 19) Agregar cola de reintentos para fallos en webhooks.
 
 ## P2 - Datos y esquema
-20) Agregar migraciones y tracking de historial.
-21) Agregar indices en consultas frecuentes (tenantId, createdAt, status).
-22) Agregar constraints para FK tenantId y valores de roles.
+20) ✅ Agregar migraciones y tracking de historial.
+   - Scripts y DataSource para CLI de migraciones.
+21) ✅ Agregar indices en consultas frecuentes (tenantId, createdAt, status).
+22) ⏳ Agregar constraints para FK tenantId y valores de roles.
 
 ## P2 - UX Frontend
 23) Agregar error boundary y manejo central de toasts.

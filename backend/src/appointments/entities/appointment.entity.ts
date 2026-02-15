@@ -6,12 +6,18 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Product } from '../../products/entities/product.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 
 @Entity('appointments')
+@Index(['tenantId', 'dateTime'])
+@Index(['status'])
+@Index(['doctorId'])
+@Index(['clientId'])
+@Index(['serviceId'])
 export class Appointment {
   @PrimaryGeneratedColumn('uuid')
   id: string;

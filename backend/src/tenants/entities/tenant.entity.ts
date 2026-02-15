@@ -4,9 +4,11 @@ import {
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('tenants')
+@Index(['createdAt'])
 export class Tenant {
   @PrimaryColumn()
   id: string;

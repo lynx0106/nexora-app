@@ -4,9 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  Index,
 } from 'typeorm';
 
 @Entity('products')
+@Index(['tenantId'])
+@Index(['isActive'])
+@Index(['createdAt'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string;

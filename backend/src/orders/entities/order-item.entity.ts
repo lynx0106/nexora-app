@@ -4,11 +4,14 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Order } from './order.entity';
 import { Product } from '../../products/entities/product.entity';
 
 @Entity('order_items')
+@Index(['orderId'])
+@Index(['productId'])
 export class OrderItem {
   @PrimaryGeneratedColumn('uuid')
   id: string;
