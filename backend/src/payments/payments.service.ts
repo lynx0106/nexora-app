@@ -14,6 +14,14 @@ import { MailService } from '../mail/mail.service';
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
 
+  private getFrontendUrl() {
+    return (process.env.FRONTEND_URL || 'http://localhost:3002').replace(/\/$/, '');
+  }
+
+  private getBackendUrl() {
+    return (process.env.BACKEND_URL || 'http://localhost:4001').replace(/\/$/, '');
+  }
+
   constructor(
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
@@ -58,13 +66,13 @@ export class PaymentsService {
             email: order.customerEmail || 'test_user_123456@testuser.com', // Use a valid email or placeholder
           },
           back_urls: {
-            success: `https://nexora-app.online/orders/thank-you?orderId=${order.id}&status=success`, // Changed to https for validation
-            failure: `https://nexora-app.online/orders/thank-you?orderId=${order.id}&status=failure`,
-            pending: `https://nexora-app.online/orders/thank-you?orderId=${order.id}&status=pending`,
+            success: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=success`,
+            failure: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=failure`,
+            pending: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=pending`,
           },
           auto_return: 'approved',
           external_reference: order.id, // CRITICAL: This links the payment to our Order ID
-          notification_url: `https://nexora-app.online/api/payments/webhook?tenantId=${tenant.id}`, // Must be HTTPS and public
+          notification_url: `${this.getBackendUrl()}/payments/webhook?tenantId=${tenant.id}`,
         },
       });
 
@@ -177,7 +185,7 @@ export class PaymentsService {
               businessName: order.tenant.name,
               tenantName: order.tenant.name,
               customerName: order.customerName || 'Cliente',
-              url: `https://nexora-app.online/orders/status/${order.id}`,
+              url: `${this.getFrontendUrl()}/orders/status/${order.id}`,
               tenantAddress: order.tenant.address || '',
             },
           });
@@ -197,7 +205,7 @@ export class PaymentsService {
               businessName: order.tenant.name,
               tenantName: order.tenant.name,
               customerName: 'Admin', // Addressing the admin
-              url: `https://nexora-app.online/dashboard/orders`,
+              url: `${this.getFrontendUrl()}/dashboard/orders`,
               tenantAddress: order.tenant.address || '',
               isAdminNotification: true,
             },

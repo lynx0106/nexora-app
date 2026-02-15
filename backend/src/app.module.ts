@@ -34,11 +34,27 @@ import { ScheduleModule } from '@nestjs/schedule';
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: process.env.POSTGRES_HOST || 'localhost',
-      port: parseInt(process.env.POSTGRES_PORT || '5432') || 5432,
-      username: process.env.POSTGRES_USER || 'postgres',
-      password: process.env.POSTGRES_PASSWORD || 'adminpassword',
-      database: process.env.POSTGRES_DB || 'postgres', // Default DB for local install usually 'postgres'
+      url: process.env.DATABASE_URL,
+      host: process.env.DATABASE_URL
+        ? undefined
+        : process.env.POSTGRES_HOST || 'localhost',
+      port: process.env.DATABASE_URL
+        ? undefined
+        : parseInt(process.env.POSTGRES_PORT || '5432') || 5432,
+      username: process.env.DATABASE_URL
+        ? undefined
+        : process.env.POSTGRES_USER || 'postgres',
+      password: process.env.DATABASE_URL
+        ? undefined
+        : process.env.POSTGRES_PASSWORD || 'adminpassword',
+      database: process.env.DATABASE_URL
+        ? undefined
+        : process.env.POSTGRES_DB || 'postgres', // Default DB for local install usually 'postgres'
+      ssl: process.env.DATABASE_URL
+        ? {
+            rejectUnauthorized: false,
+          }
+        : false,
       autoLoadEntities: true,
       synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true' || true, // Default to true for dev if not set, set to false in PROD
     }),
