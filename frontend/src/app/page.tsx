@@ -2,8 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Briefcase, Store, Lock, ArrowRight, Sun, Moon } from "lucide-react";
-import { useTheme } from "next-themes";
+import { User, Briefcase, Store, Lock, ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
 
@@ -13,7 +12,6 @@ function HomeContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   // Parse invite params
@@ -48,9 +46,6 @@ function HomeContent() {
 
   if (!mounted) return null;
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
-  };
 
   const handleCountryChange = (val: string) => {
     setCountry(val);
@@ -209,13 +204,6 @@ function HomeContent() {
 
   return (
     <div className="relative flex min-h-screen w-full flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
-      <button
-        onClick={toggleTheme}
-        className="absolute right-4 top-4 rounded-full p-2 shadow-sm backdrop-blur transition hover:scale-[1.02] ds-toggle"
-        title="Cambiar tema"
-      >
-        {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
-      </button>
       <div className="w-full max-w-md space-y-8">
         
         {/* Header Logo */}
