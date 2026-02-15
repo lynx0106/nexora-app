@@ -12,46 +12,11 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
 import { TenantsService } from './tenants.service';
+import { CreateTenantWithAdminDto } from './dto/create-tenant-with-admin.dto';
+import { RegisterTenantDto } from './dto/register-tenant.dto';
+import { UpdateTenantProfileDto } from './dto/update-tenant-profile.dto';
+import { Role, hasRole } from '../common/constants/roles';
 
-class CreateTenantWithAdminDto {
-  tenantId?: string;
-  name: string;
-  sector?: string;
-  country?: string;
-  city?: string;
-  currency?: string;
-  adminFirstName: string;
-  adminLastName: string;
-  adminEmail: string;
-  adminPhone?: string;
-  adminPassword: string;
-}
-
-class UpdateTenantProfileDto {
-  name?: string;
-  sector?: string;
-  country?: string;
-  city?: string;
-  address?: string;
-  phone?: string;
-  email?: string;
-  openingTime?: string;
-  closingTime?: string;
-  appointmentDuration?: number;
-  language?: string;
-  currency?: string;
-  logoUrl?: string;
-  coverUrl?: string;
-  aiPromptCustomer?: string;
-  aiPromptSupport?: string;
-  aiPromptInternal?: string;
-  mercadoPagoPublicKey?: string;
-  mercadoPagoAccessToken?: string;
-  openaiApiKey?: string;
-  aiModel?: string;
-  tablesCount?: number;
-  capacity?: number;
-}
 
 interface AuthRequest extends Request {
   user?: {
@@ -67,7 +32,7 @@ export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @Post('register')
-  async register(@Body() body: any) {
+  async register(@Body() body: RegisterTenantDto) {
     // Generate a unique tenantId from the name
     const tenantId = await this.tenantsService.generateAvailableTenantId(
       body.name,
@@ -93,7 +58,7 @@ export class TenantsController {
     @Body() dto: CreateTenantWithAdminDto,
   ) {
     const role = req.user?.role;
-    if (role !== 'superadmin') {
+    if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException(
         'Solo el superadmin puede crear nuevos tenants',
       );
@@ -124,13 +89,13 @@ export class TenantsController {
       throw new ForbiddenException('Tenant no asignado');
     }
 
-    if (role !== 'admin' && role !== 'superadmin') {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin])) {
       throw new ForbiddenException(
         'No tienes permisos para ver los datos del tenant',
       );
     }
 
-    return this.tenantsService.getOrCreateTenant(tenantId);
+    return this.tenantsService.getTenantOrThrow(tenantId);
   }
 
   @Put('me')
@@ -146,7 +111,7 @@ export class TenantsController {
       throw new ForbiddenException('Tenant no asignado');
     }
 
-    if (role !== 'admin' && role !== 'superadmin') {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin])) {
       throw new ForbiddenException(
         'No tienes permisos para editar los datos del tenant',
       );
@@ -181,7 +146,7 @@ export class TenantsController {
   @UseGuards(AuthGuard('jwt'))
   async cleanupTestTenants(@Req() req: AuthRequest) {
     const role = req.user?.role;
-    if (role !== 'superadmin') {
+    if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException('Solo superadmin puede limpiar tenants');
     }
     return this.tenantsService.cleanupTestTenants();

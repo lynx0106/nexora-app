@@ -16,8 +16,11 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { UsersService } from './users.service';
 import { TenantsService } from '../tenants/tenants.service';
-import { RegisterDto } from '../auth/dto/register.dto';
 import type { Request } from 'express';
+import { Role, hasRole } from '../common/constants/roles';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 interface AuthRequest extends Request {
   user?: {
@@ -63,7 +66,7 @@ export class UsersController {
   async getTenantsSummary(@Req() req: AuthRequest) {
     console.log('GET /users/tenants/summary hit');
     const role = req.user?.role;
-    if (role !== 'superadmin') {
+    if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException(
         'Solo el superadmin puede ver métricas globales de tenants',
       );
@@ -75,7 +78,7 @@ export class UsersController {
 
   @Put('profile')
   @UseGuards(AuthGuard('jwt'))
-  async updateProfile(@Req() req: AuthRequest, @Body() dto: RegisterDto) {
+  async updateProfile(@Req() req: AuthRequest, @Body() dto: UpdateProfileDto) {
     const userId = req.user?.userId;
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
@@ -88,7 +91,7 @@ export class UsersController {
     let allowedUpdates: any = {};
 
     if (role === 'user') {
-      const tenant = await this.tenantsService.getOrCreateTenant(tenantId);
+      const tenant = await this.tenantsService.getTenantOrThrow(tenantId);
       const sector = tenant.sector || 'otros';
 
       // Common allowed fields
@@ -162,7 +165,7 @@ export class UsersController {
     @Req() req: AuthRequest,
   ) {
     const user = req.user;
-    if (user?.role !== 'superadmin' && user?.tenantId !== tenantId) {
+    if (!hasRole(user?.role, [Role.Superadmin]) && user?.tenantId !== tenantId) {
       throw new ForbiddenException(
         'No tienes permiso para ver usuarios de otro tenant',
       );
@@ -179,7 +182,7 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   async findAllGlobal(@Req() req: AuthRequest) {
     const user = req.user;
-    if (user?.role !== 'superadmin') {
+    if (!hasRole(user?.role, [Role.Superadmin])) {
       throw new ForbiddenException('Acceso denegado');
     }
     const users = await this.usersService.findAllGlobal();
@@ -200,7 +203,7 @@ export class UsersController {
     }
 
     // Security check
-    if (requestUser?.role !== 'superadmin') {
+    if (!hasRole(requestUser?.role, [Role.Superadmin])) {
       // If not superadmin, must be same tenant
       if (user.tenantId !== requestUser?.tenantId) {
         throw new ForbiddenException('No tienes permiso para ver este usuario');
@@ -223,14 +226,14 @@ export class UsersController {
     }
 
     // Si es user, permitimos ver solo el STAFF (no otros clientes)
-    if (role !== 'admin' && role !== 'superadmin' && role !== 'user') {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin, Role.User])) {
       throw new ForbiddenException('No tienes permisos para listar usuarios');
     }
 
     const users = await this.usersService.findByTenant(tenantId);
 
     // Filtro de privacidad para usuarios normales
-    if (role === 'user') {
+    if (hasRole(role, [Role.User])) {
       return users
         .filter((u) => u.role !== 'user') // Solo mostrar staff
         .map(({ passwordHash: _, ...safeUser }) => {
@@ -247,17 +250,17 @@ export class UsersController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async create(@Req() req: AuthRequest, @Body() body: any) {
+  async create(@Req() req: AuthRequest, @Body() body: CreateUserDto) {
     const userRole = req.user?.role;
     const userTenantId = req.user?.tenantId;
 
-    if (userRole !== 'admin' && userRole !== 'superadmin') {
+    if (!hasRole(userRole, [Role.Admin, Role.Superadmin])) {
       throw new ForbiddenException('No tienes permisos para crear usuarios');
     }
 
     // Determine target tenant
     let targetTenantId = userTenantId;
-    if (userRole === 'superadmin' && body.tenantId) {
+    if (hasRole(userRole, [Role.Superadmin]) && body.tenantId) {
       targetTenantId = body.tenantId;
     }
 
@@ -288,7 +291,7 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   async findAllForAllTenants(@Req() req: AuthRequest) {
     const role = req.user?.role;
-    if (role !== 'superadmin') {
+    if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException(
         'Solo el superadmin puede listar todos los usuarios',
       );
@@ -308,7 +311,7 @@ export class UsersController {
     @Param('tenantId') tenantId: string,
   ) {
     const role = req.user?.role;
-    if (role !== 'superadmin') {
+    if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException(
         'Solo el superadmin puede listar usuarios por tenant',
       );
@@ -323,13 +326,13 @@ export class UsersController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async createForTenant(@Req() req: AuthRequest, @Body() dto: RegisterDto) {
+  async createForTenant(@Req() req: AuthRequest, @Body() dto: CreateUserDto) {
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
     if (!tenantId) {
       throw new ForbiddenException('Tenant no asignado');
     }
-    if (role !== 'admin' && role !== 'superadmin') {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin])) {
       throw new ForbiddenException('No tienes permisos para crear usuarios');
     }
 
@@ -362,7 +365,7 @@ export class UsersController {
   async updateUser(
     @Req() req: AuthRequest,
     @Param('id') id: string,
-    @Body() dto: RegisterDto,
+    @Body() dto: UpdateUserDto,
   ) {
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
@@ -378,7 +381,7 @@ export class UsersController {
       throw new ForbiddenException('Tenant no asignado');
     }
 
-    const isAdmin = role === 'admin' || role === 'superadmin';
+    const isAdmin = hasRole(role, [Role.Admin, Role.Superadmin]);
     const isSelfUpdate = currentUserId === targetUserId;
 
     if (!isAdmin && !isSelfUpdate) {
@@ -418,7 +421,7 @@ export class UsersController {
     if (!tenantId) {
       throw new ForbiddenException('Tenant no asignado');
     }
-    if (role !== 'admin' && role !== 'superadmin') {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin])) {
       throw new ForbiddenException('No tienes permisos para eliminar usuarios');
     }
 

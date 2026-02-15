@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Role } from '../../common/constants/roles';
 
-export class RegisterDto {
+export class CreateUserDto {
   @IsString()
   firstName: string;
 
@@ -16,6 +16,10 @@ export class RegisterDto {
 
   @IsEmail()
   email: string;
+
+  @IsString()
+  @MinLength(6)
+  password: string;
 
   @IsOptional()
   @IsString()
@@ -29,14 +33,11 @@ export class RegisterDto {
   @IsString()
   avatarUrl?: string;
 
-  @IsString()
-  @MinLength(6)
-  password: string;
-
-  @IsString()
-  tenantId: string;
-
   @IsOptional()
   @IsIn(Object.values(Role))
   role?: string;
+
+  @IsOptional()
+  @IsString()
+  tenantId?: string;
 }

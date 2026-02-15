@@ -1,21 +1,18 @@
-import {
-  IsEmail,
-  IsIn,
-  IsOptional,
-  IsString,
-  MinLength,
-} from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 import { Role } from '../../common/constants/roles';
 
-export class RegisterDto {
+export class UpdateUserDto {
+  @IsOptional()
   @IsString()
-  firstName: string;
+  firstName?: string;
 
+  @IsOptional()
   @IsString()
-  lastName: string;
+  lastName?: string;
 
+  @IsOptional()
   @IsEmail()
-  email: string;
+  email?: string;
 
   @IsOptional()
   @IsString()
@@ -29,12 +26,10 @@ export class RegisterDto {
   @IsString()
   avatarUrl?: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(6)
-  password: string;
-
-  @IsString()
-  tenantId: string;
+  password?: string;
 
   @IsOptional()
   @IsIn(Object.values(Role))

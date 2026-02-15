@@ -16,6 +16,7 @@ import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
+import { Role, hasRole } from '../common/constants/roles';
 
 @Controller('products')
 export class ProductsController {
@@ -37,7 +38,7 @@ export class ProductsController {
     }
 
     let targetTenantId = user.tenantId;
-    if (user.role === 'superadmin' && body.tenantId) {
+    if (hasRole(user.role, [Role.Superadmin]) && body.tenantId) {
       targetTenantId = body.tenantId;
     }
 
@@ -53,7 +54,7 @@ export class ProductsController {
   seed(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = (req as any).user;
 
-    if (!user || user.role !== 'superadmin') {
+    if (!user || !hasRole(user.role, [Role.Superadmin])) {
       throw new ForbiddenException('Solo superadmin puede ejecutar seeds');
     }
 
@@ -70,7 +71,7 @@ export class ProductsController {
     const user = (req as any).user;
 
     let targetTenantId = user.tenantId;
-    if (user.role === 'superadmin' && body.tenantId) {
+    if (hasRole(user.role, [Role.Superadmin]) && body.tenantId) {
       targetTenantId = body.tenantId;
     }
 
@@ -90,7 +91,7 @@ export class ProductsController {
   @UseGuards(AuthGuard('jwt'))
   findAllByTenant(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = (req as any).user;
-    if (user.role !== 'superadmin' && user.tenantId !== tenantId) {
+    if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
       throw new ForbiddenException(
         'No tienes permiso para ver productos de otro tenant',
       );
@@ -105,7 +106,7 @@ export class ProductsController {
     if (!user) {
       throw new ForbiddenException('No tienes permiso para ver productos');
     }
-    if (user.role === 'superadmin') {
+    if (hasRole(user.role, [Role.Superadmin])) {
       return this.productsService.findAll();
     }
     if (!user.tenantId) {
@@ -125,7 +126,7 @@ export class ProductsController {
   @UseGuards(AuthGuard('jwt'))
   update(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
     const user = (req as any).user;
-    if (user.role === 'superadmin') {
+    if (hasRole(user.role, [Role.Superadmin])) {
       return this.productsService.updateAsAdmin(id, body);
     }
     return this.productsService.update(id, user.tenantId, body);
@@ -135,7 +136,7 @@ export class ProductsController {
   @UseGuards(AuthGuard('jwt'))
   remove(@Req() req: Request, @Param('id') id: string) {
     const user = (req as any).user;
-    if (user.role === 'superadmin') {
+    if (hasRole(user.role, [Role.Superadmin])) {
       return this.productsService.removeAsAdmin(id);
     }
     return this.productsService.remove(id, user.tenantId);

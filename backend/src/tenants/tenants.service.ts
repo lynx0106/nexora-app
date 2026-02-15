@@ -165,11 +165,27 @@ export class TenantsService {
     });
 
     if (!tenant) {
+      if (process.env.ALLOW_TENANT_AUTO_CREATE !== 'true') {
+        throw new ForbiddenException('Tenant no existe');
+      }
+
       tenant = this.tenantsRepository.create({
         id: tenantId,
         name: tenantId,
       });
       tenant = await this.tenantsRepository.save(tenant);
+    }
+
+    return tenant;
+  }
+
+  async getTenantOrThrow(tenantId: string) {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
+
+    if (!tenant) {
+      throw new ForbiddenException('Tenant no existe');
     }
 
     return tenant;

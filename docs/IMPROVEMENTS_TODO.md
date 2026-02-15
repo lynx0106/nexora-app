@@ -18,11 +18,11 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
    - CORS_ORIGINS o FRONTEND_URL.
 
 ## P1 - Estabilidad y calidad de datos
-6) Agregar validacion de entrada en controllers (DTO + class-validator).
-7) Definir enums de rol y checks consistentes.
-8) Eliminar o restringir creacion automatica de tenant en getOrCreateTenant.
-9) Agregar rate limiting para auth y endpoints publicos.
-10) Mejorar seguridad transaccional en stock y reembolsos.
+6) ✅ Agregar validacion de entrada en controllers (DTO + class-validator).
+7) ✅ Definir enums de rol y checks consistentes.
+8) ✅ Restringir creacion automatica de tenant en getOrCreateTenant.
+9) ✅ Agregar rate limiting para auth y endpoints publicos.
+10) ✅ Mejorar seguridad transaccional en stock y reembolsos.
 
 ## P1 - Observabilidad
 11) ✅ Logging estructurado (request id, tenant id).
