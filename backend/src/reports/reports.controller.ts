@@ -13,13 +13,17 @@ import type { Request, Response } from 'express';
 import { AuthGuard } from '@nestjs/passport';
 import { ReportsService } from './reports.service';
 import { Role, hasRole } from '../common/constants/roles';
+import { Permission } from '../common/constants/permissions';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 
 @Controller('reports')
-@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'), PermissionsGuard)
 export class ReportsController {
   constructor(private readonly reportsService: ReportsService) {}
 
   @Get('tenant/:tenantId/orders')
+  @RequirePermissions(Permission.ReportExport)
   async exportOrders(
     @Param('tenantId') tenantId: string,
     @Query('from') from: string | undefined,
@@ -50,6 +54,7 @@ export class ReportsController {
   }
 
   @Get('tenant/:tenantId/appointments')
+  @RequirePermissions(Permission.ReportExport)
   async exportAppointments(
     @Param('tenantId') tenantId: string,
     @Query('from') from: string | undefined,
@@ -85,6 +90,7 @@ export class ReportsController {
   }
 
   @Get('tenant/:tenantId/users')
+  @RequirePermissions(Permission.ReportExport)
   async exportUsers(
     @Param('tenantId') tenantId: string,
     @Query('from') from: string | undefined,

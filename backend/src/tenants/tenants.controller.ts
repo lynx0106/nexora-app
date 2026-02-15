@@ -16,6 +16,9 @@ import { CreateTenantWithAdminDto } from './dto/create-tenant-with-admin.dto';
 import { RegisterTenantDto } from './dto/register-tenant.dto';
 import { UpdateTenantProfileDto } from './dto/update-tenant-profile.dto';
 import { Role, hasRole } from '../common/constants/roles';
+import { Permission } from '../common/constants/permissions';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 
 
 interface AuthRequest extends Request {
@@ -52,7 +55,8 @@ export class TenantsController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.TenantManage)
   async createTenantWithAdmin(
     @Req() req: AuthRequest,
     @Body() dto: CreateTenantWithAdminDto,
@@ -80,7 +84,8 @@ export class TenantsController {
   }
 
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.TenantRead)
   async getMyTenant(@Req() req: AuthRequest) {
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
@@ -99,7 +104,8 @@ export class TenantsController {
   }
 
   @Put('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.TenantManage)
   async updateMyTenant(
     @Req() req: AuthRequest,
     @Body() dto: UpdateTenantProfileDto,
@@ -143,7 +149,8 @@ export class TenantsController {
   }
 
   @Delete('cleanup')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.TenantManage)
   async cleanupTestTenants(@Req() req: AuthRequest) {
     const role = req.user?.role;
     if (!hasRole(role, [Role.Superadmin])) {

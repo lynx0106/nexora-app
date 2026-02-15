@@ -13,13 +13,17 @@ import { InvitationsService } from './invitations.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
 import { Role, hasRole } from '../common/constants/roles';
+import { Permission } from '../common/constants/permissions';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 
 @Controller('invites')
 export class InvitationsController {
   constructor(private readonly invitationsService: InvitationsService) {}
 
   @Post('tenant/:tenantId')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.InvitationCreate)
   async createInvitation(
     @Param('tenantId') tenantId: string,
     @Body() dto: CreateInvitationDto,

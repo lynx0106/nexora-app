@@ -17,6 +17,9 @@ import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { Request } from 'express';
 import { Role, hasRole } from '../common/constants/roles';
+import { Permission } from '../common/constants/permissions';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 
 @Controller('products')
 export class ProductsController {
@@ -28,7 +31,8 @@ export class ProductsController {
   }
 
   @Post('upload')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductManage)
   @UseInterceptors(FileInterceptor('file'))
   upload(@UploadedFile() file: any, @Req() req: Request, @Body() body: any) {
     const user = (req as any).user;
@@ -50,7 +54,8 @@ export class ProductsController {
   }
 
   @Post('seed/:tenantId')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductManage)
   seed(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = (req as any).user;
 
@@ -66,7 +71,8 @@ export class ProductsController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductManage)
   create(@Req() req: Request, @Body() body: any) {
     const user = (req as any).user;
 
@@ -88,7 +94,8 @@ export class ProductsController {
   }
 
   @Get('tenant/:tenantId')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductRead)
   findAllByTenant(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = (req as any).user;
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
@@ -100,7 +107,8 @@ export class ProductsController {
   }
 
   @Get()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductRead)
   findAll(@Req() req: Request) {
     const user = (req as any).user;
     if (!user) {
@@ -116,14 +124,16 @@ export class ProductsController {
   }
 
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductRead)
   findOne(@Req() req: Request, @Param('id') id: string) {
     const user = (req as any).user;
     return this.productsService.findOne(id, user.tenantId);
   }
 
   @Put(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductManage)
   update(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
     const user = (req as any).user;
     if (hasRole(user.role, [Role.Superadmin])) {
@@ -133,7 +143,8 @@ export class ProductsController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.ProductManage)
   remove(@Req() req: Request, @Param('id') id: string) {
     const user = (req as any).user;
     if (hasRole(user.role, [Role.Superadmin])) {

@@ -18,6 +18,9 @@ import { UsersService } from './users.service';
 import { TenantsService } from '../tenants/tenants.service';
 import type { Request } from 'express';
 import { Role, hasRole } from '../common/constants/roles';
+import { Permission } from '../common/constants/permissions';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -62,7 +65,8 @@ export class UsersController {
   }
 
   @Get('tenants/summary')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.TenantRead)
   async getTenantsSummary(@Req() req: AuthRequest) {
     console.log('GET /users/tenants/summary hit');
     const role = req.user?.role;
@@ -159,7 +163,8 @@ export class UsersController {
   }
 
   @Get('tenant/:tenantId')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserRead)
   async findByTenantId(
     @Param('tenantId') tenantId: string,
     @Req() req: AuthRequest,
@@ -179,7 +184,8 @@ export class UsersController {
   }
 
   @Get('all')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserRead)
   async findAllGlobal(@Req() req: AuthRequest) {
     const user = req.user;
     if (!hasRole(user?.role, [Role.Superadmin])) {
@@ -249,7 +255,8 @@ export class UsersController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserManage)
   async create(@Req() req: AuthRequest, @Body() body: CreateUserDto) {
     const userRole = req.user?.role;
     const userTenantId = req.user?.tenantId;
@@ -288,7 +295,8 @@ export class UsersController {
   }
 
   @Get('all')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserRead)
   async findAllForAllTenants(@Req() req: AuthRequest) {
     const role = req.user?.role;
     if (!hasRole(role, [Role.Superadmin])) {
@@ -305,7 +313,8 @@ export class UsersController {
   }
 
   @Get('by-tenant/:tenantId')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserRead)
   async findByTenantForSuperadmin(
     @Req() req: AuthRequest,
     @Param('tenantId') tenantId: string,
@@ -325,7 +334,8 @@ export class UsersController {
   }
 
   @Post()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserManage)
   async createForTenant(@Req() req: AuthRequest, @Body() dto: CreateUserDto) {
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
@@ -414,7 +424,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), PermissionsGuard)
+  @RequirePermissions(Permission.UserManage)
   async deleteUser(@Req() req: AuthRequest, @Param('id') id: string) {
     const tenantId = req.user?.tenantId;
     const role = req.user?.role;
