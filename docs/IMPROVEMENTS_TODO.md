@@ -35,7 +35,7 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 16) ✅ Agregar captcha o anti-bot para reservas y pedidos publicos.
 
 ## P2 - Pagos
-17) Guardar metadata de MercadoPago de forma segura (sin logs de secretos).
+17) ✅ Guardar metadata de MercadoPago de forma segura (sin logs de secretos).
 18) ✅ Verificar firma de webhooks.
 19) ✅ Agregar cola de reintentos para fallos en webhooks.
 

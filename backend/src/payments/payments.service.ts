@@ -156,6 +156,12 @@ export class PaymentsService {
         throw new Error(`Pedido ${orderId} no encontrado para pago ${paymentId}`);
       }
 
+      const safeMetadata = this.buildPaymentMetadata(paymentData);
+      order.mpPaymentId = paymentData?.id ? String(paymentData.id) : order.mpPaymentId;
+      order.mpPaymentStatus = status || order.mpPaymentStatus;
+      order.mpMetadata = safeMetadata;
+      await this.ordersRepository.save(order);
+
       // Validate status
       if (status === 'approved' && order.paymentStatus !== 'paid') {
         order.paymentStatus = 'paid';
@@ -240,5 +246,21 @@ export class PaymentsService {
         error,
       );
     }
+  }
+
+  private buildPaymentMetadata(paymentData: any) {
+    return {
+      id: paymentData?.id ?? null,
+      status: paymentData?.status ?? null,
+      statusDetail: paymentData?.status_detail ?? null,
+      paymentMethodId: paymentData?.payment_method_id ?? null,
+      paymentTypeId: paymentData?.payment_type_id ?? null,
+      transactionAmount: paymentData?.transaction_amount ?? null,
+      currencyId: paymentData?.currency_id ?? null,
+      installments: paymentData?.installments ?? null,
+      payerEmail: paymentData?.payer?.email ?? null,
+      createdAt: paymentData?.date_created ?? null,
+      approvedAt: paymentData?.date_approved ?? null,
+    };
   }
 }

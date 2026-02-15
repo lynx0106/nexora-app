@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoreThan, Repository } from 'typeorm';
+import { IsNull, MoreThan, Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { Invitation } from './entities/invitation.entity';
@@ -53,7 +53,7 @@ export class InvitationsService {
       where: {
         tenantId,
         email,
-        acceptedAt: null,
+        acceptedAt: IsNull(),
         expiresAt: MoreThan(now),
       },
     });
@@ -101,7 +101,7 @@ export class InvitationsService {
     const tokenHash = this.hashToken(dto.token);
 
     const invitation = await this.invitationsRepository.findOne({
-      where: { tokenHash, acceptedAt: null },
+      where: { tokenHash, acceptedAt: IsNull() },
     });
 
     if (!invitation) {

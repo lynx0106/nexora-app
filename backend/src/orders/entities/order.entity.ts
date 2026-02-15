@@ -64,6 +64,15 @@ export class Order {
   @Column({ nullable: true })
   preferenceId: string; // MercadoPago Preference ID
 
+  @Column({ nullable: true })
+  mpPaymentId: string;
+
+  @Column({ nullable: true })
+  mpPaymentStatus: string;
+
+  @Column({ type: 'jsonb', nullable: true })
+  mpMetadata: any;
+
   @Column({ type: 'text', nullable: true })
   publicTokenHash: string;
 
