@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { io, Socket } from 'socket.io-client';
 import { fetchAPIWithAuth, API_URL } from '../lib/api';
+import EmptyState from './ui/EmptyState';
+import Skeleton from './ui/Skeleton';
 
 interface Message {
   id: string;
@@ -289,10 +291,21 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
 
             {activeTab === 'CUSTOMER' && (
                 <div className="divide-y divide-gray-100">
-                    {loadingConversations && <p className="p-4 text-xs text-gray-400">{t('chat.loading_conversations')}</p>}
-                    {!loadingConversations && conversations.length === 0 && (
-                        <p className="p-4 text-xs text-gray-400">{t('chat.no_messages')}</p>
-                    )}
+                                        {loadingConversations && (
+                                            <div className="p-4 space-y-3">
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-4 w-2/3" />
+                                                <Skeleton className="h-4 w-4/5" />
+                                            </div>
+                                        )}
+                                        {!loadingConversations && conversations.length === 0 && (
+                                            <div className="p-4">
+                                                <EmptyState
+                                                    titulo={t('chat.no_messages')}
+                                                    descripcion={t('chat.select_chat')}
+                                                />
+                                            </div>
+                                        )}
                     {conversations.map(user => (
                         <div 
                             key={user.id}
@@ -312,7 +325,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       </div>
 
       {/* Main Chat Area */}
-      <div className="w-3/4 flex flex-col bg-white">
+    <div className="w-3/4 flex flex-col bg-white">
         {/* Header */}
         <div className="h-14 border-b border-gray-200 flex items-center justify-between px-6">
             <div>
@@ -344,12 +357,19 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-             {messages.length === 0 && (
-                <div className="flex h-full items-center justify-center text-gray-400 text-sm">
-                    {t('chat.no_messages')}
-                </div>
-             )}
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
+                         {messages.length === 0 && (
+                                <div className="flex h-full items-center justify-center">
+                                    <EmptyState
+                                        titulo={t('chat.no_messages')}
+                                        descripcion={
+                                            activeTab === 'CUSTOMER' && !selectedCustomerId
+                                                ? t('chat.select_chat')
+                                                : t('chat.input_placeholder')
+                                        }
+                                    />
+                                </div>
+                         )}
              
              {messages.map((msg) => {
               const isMe = msg.senderId === currentUserId;

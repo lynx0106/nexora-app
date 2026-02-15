@@ -47,8 +47,8 @@ Esta lista esta priorizada para estabilidad, seguridad y mantenibilidad a largo 
 
 ## P2 - UX Frontend
 23) ✅ Agregar error boundary y manejo central de toasts.
-24) Mejorar estados vacios para chat, pedidos y agenda.
-25) Agregar loaders y skeletons.
+24) ✅ Mejorar estados vacios para chat, pedidos y agenda.
+25) ✅ Agregar loaders y skeletons.
 
 ## P2 - Headers de seguridad
 26) Agregar CORS estricto y headers de seguridad en backend.

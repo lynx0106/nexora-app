@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchAPIWithAuth, API_URL } from '../lib/api';
+import EmptyState from './ui/EmptyState';
+import Skeleton from './ui/Skeleton';
 
 interface Order {
   id: string;
@@ -56,6 +58,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
   const [orders, setOrders] = useState<Order[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingTopProducts, setLoadingTopProducts] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -103,6 +106,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
         return;
     }
     try {
+      setLoadingTopProducts(true);
       // For now, fetching top products generally. 
       // If we had a specific user selected, we would pass userId.
       // But let's show general top products for the tenant as "Bestsellers" 
@@ -114,6 +118,8 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       setTopProducts(data);
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoadingTopProducts(false);
     }
   };
 
@@ -303,7 +309,16 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       <div className="bg-white p-6 rounded-lg shadow">
         <h3 className="text-lg font-medium text-gray-900 mb-4">{t('orders.top_products_title')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
-          {topProducts.map((p) => (
+          {loadingTopProducts && (
+            <>
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+              <Skeleton className="h-28" />
+            </>
+          )}
+          {!loadingTopProducts && topProducts.map((p) => (
             <div key={p.id} className="border rounded-lg p-4 flex flex-col items-center text-center">
               <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center mb-2 overflow-hidden">
                 {p.imageUrl ? (
@@ -317,7 +332,14 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
               <p className="text-xs text-green-600 mt-1">{p.total_quantity} {t('orders.top_products_sold')}</p>
             </div>
           ))}
-          {topProducts.length === 0 && <p className="text-gray-500 text-sm col-span-5">{t('orders.no_data')}</p>}
+          {!loadingTopProducts && topProducts.length === 0 && (
+            <div className="col-span-5">
+              <EmptyState
+                titulo={t('orders.no_data')}
+                descripcion={t('orders.top_products_title')}
+              />
+            </div>
+          )}
         </div>
       </div>
 
@@ -328,9 +350,18 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
         </div>
         <div className="border-t border-gray-200">
             {loading ? (
-                <p className="p-4 text-gray-500">{t('common.loading')}</p>
+                <div className="p-4 space-y-3">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-6 w-5/6" />
+                  <Skeleton className="h-6 w-2/3" />
+                </div>
             ) : orders.length === 0 ? (
-                <p className="p-4 text-gray-500">{t('orders.no_orders')}</p>
+                <div className="p-4">
+                  <EmptyState
+                    titulo={t('orders.no_orders')}
+                    descripcion={t('orders.history_title')}
+                  />
+                </div>
             ) : (
                 <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">

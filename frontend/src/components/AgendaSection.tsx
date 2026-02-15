@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { appointmentsService, Appointment } from "../services/appointments";
 import { fetchAPIWithAuth } from "../lib/api";
+import EmptyState from "./ui/EmptyState";
+import Skeleton from "./ui/Skeleton";
 
 interface AgendaSectionProps {
   tenantId: string;
@@ -281,11 +283,21 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
   }
 
   if (loading && appointments.length === 0) {
-    return <div className="text-zinc-500">{t('common.loading')}</div>;
+    return (
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-1/2" />
+        <Skeleton className="h-12" />
+        <Skeleton className="h-12" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return (
+      <div className="ds-panel p-6">
+        <p className="text-sm text-red-400">{error}</p>
+      </div>
+    );
   }
 
   return (
@@ -491,7 +503,10 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             {appointments.length === 0 ? (
               <tr>
                 <td colSpan={isRestaurant ? 8 : 6} className="px-6 py-8 text-center text-sm text-zinc-500">
-                  No hay {itemLabel.toLowerCase()}s programadas.
+                  <EmptyState
+                    titulo={`No hay ${itemLabel.toLowerCase()}s programadas`}
+                    descripcion={t('agenda.create_first') || t('common.create')}
+                  />
                 </td>
               </tr>
             ) : (
