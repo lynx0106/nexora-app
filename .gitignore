@@ -17,5 +17,11 @@ yarn-error.log*
 dist/
 build/
 coverage/
-/.idea/
-/.cache/
+ /.idea/
+ /.cache/
+
+# Archivos locales innecesarios en raíz
+*.png
+*.bat
+*.vbs
+docker-compose.yml
