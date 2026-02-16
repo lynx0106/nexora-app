@@ -1,32 +1,42 @@
 @import "tailwindcss";
 
 :root {
-  --color-ink: #f8fafc;
-  --color-ink-soft: #cbd5f5;
-  --color-muted: #94a3b8;
-  --color-border: #1f2937;
-  --color-surface: #0b111c;
-  --color-surface-2: #0f172a;
-  --color-surface-3: #111827;
-  --color-bg: #0a0f1c;
-  --color-glow-1: rgba(20, 184, 166, 0.2);
-  --color-glow-2: rgba(37, 99, 235, 0.18);
-  --color-accent: #2dd4bf;
-  --color-accent-2: #14b8a6;
-  --color-accent-soft: rgba(20, 184, 166, 0.12);
+  /* Colores oscuros - manteniendo la oscuridad */
+  --color-ink: #f1f5f9;              /* Texto principal - no muy claro */
+  --color-ink-soft: #94a3b8;          /* Texto secundario */
+  --color-muted: #64748b;             /* Texto muted */
+  --color-border: #334155;           /* Bordes - más visibles */
+  --color-surface: #0f172a;           /* Fondo principal - slate-900 */
+  --color-surface-2: #1e293b;         /* Fondo secundario - slate-800 */
+  --color-surface-3: #334155;        /* Fondo inputs - slate-700 */
+  --color-bg: #0a0f1c;               /* Fondo base - muy oscuro */
+  
+  /* Brillos y gradientes */
+  --color-glow-1: rgba(20, 184, 166, 0.15);  /* Turquesa suave */
+  --color-glow-2: rgba(59, 130, 246, 0.12);  /* Azul suave */
+  
+  /* Colores de acento - mantener turquesa pero más sutil */
+  --color-accent: #14b8a6;           /* Acento principal */
+  --color-accent-2: #0d9488;         /* Acento secundario */
+  --color-accent-soft: rgba(20, 184, 166, 0.1);
+  
+  /* Estados */
   --color-warning: #fbbf24;
   --color-danger: #f87171;
-  --color-danger-soft: rgba(248, 113, 113, 0.12);
-  --color-danger-border: rgba(248, 113, 113, 0.35);
+  --color-danger-soft: rgba(248, 113, 113, 0.1);
+  --color-danger-border: rgba(248, 113, 113, 0.3);
   --color-success: #34d399;
-  --color-success-soft: rgba(52, 211, 153, 0.12);
-  --color-success-border: rgba(52, 211, 153, 0.35);
+  --color-success-soft: rgba(52, 211, 153, 0.1);
+  --color-success-border: rgba(52, 211, 153, 0.3);
+  
+  /* Radios y sombras */
   --radius-sm: 10px;
   --radius-md: 16px;
   --radius-lg: 24px;
-  --shadow-sm: 0 6px 16px rgba(2, 6, 23, 0.45);
-  --shadow-md: 0 16px 36px rgba(2, 6, 23, 0.5);
-  --shadow-lg: 0 24px 48px rgba(2, 6, 23, 0.55);
+  --shadow-sm: 0 6px 16px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 16px 36px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.5);
+  
   color-scheme: dark;
 }
 
@@ -37,13 +47,13 @@
   --color-border: #e2e8f0;
   --color-surface: #ffffff;
   --color-surface-2: #f8fafc;
-  --color-surface-3: #eef2f6;
+  --color-surface-3: #f1f5f9;
   --color-bg: #f7f8fb;
-  --color-glow-1: rgba(15, 118, 110, 0.12);
-  --color-glow-2: rgba(99, 102, 241, 0.1);
+  --color-glow-1: rgba(15, 118, 110, 0.08);
+  --color-glow-2: rgba(99, 102, 241, 0.06);
   --color-accent: #0f766e;
   --color-accent-2: #0d9488;
-  --color-accent-soft: #ecfdfb;
+  --color-accent-soft: #f0fdfa;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
   --color-danger-soft: #fef2f2;
@@ -65,6 +75,28 @@ body {
   color: var(--color-ink);
   font-family: var(--font-sans);
   min-height: 100vh;
+}
+
+/* Transiciones globales */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke, opacity, box-shadow, transform;
+  transition-timing-function: ease-in-out;
+  transition-duration: 150ms;
+}
+
+/* Focus states para accesibilidad */
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 h1,
@@ -112,6 +144,12 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.ds-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 .ds-panel {
@@ -119,13 +157,26 @@ a {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-md);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ds-panel:hover {
+  box-shadow: var(--shadow-lg);
 }
 
 .ds-button {
   border-radius: 999px;
   padding: 0.65rem 1.4rem;
   font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.ds-button:hover {
+  transform: translateY(-2px);
+}
+
+.ds-button:active {
+  transform: translateY(0);
 }
 
 .ds-button-primary {
