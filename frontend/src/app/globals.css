@@ -151,11 +151,75 @@ a {
   background: var(--color-surface-3);
   padding: 0.6rem 0.8rem;
   color: var(--color-ink);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Override browser autofill styles */
+.ds-input:-webkit-autofill,
+.ds-input:-webkit-autofill:hover,
+.ds-input:-webkit-autofill:focus,
+.ds-input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--color-surface-3) inset !important;
+  -webkit-text-fill-color: var(--color-ink) !important;
+  caret-color: var(--color-ink) !important;
+  background-color: var(--color-surface-3) !important;
+  color: var(--color-ink) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Override hover and focus states */
+.ds-input:hover {
+  background: var(--color-surface-2) !important;
+  border-color: var(--color-accent) !important;
 }
 
 .ds-input:focus {
   outline: 2px solid rgba(20, 184, 166, 0.35);
   border-color: var(--color-accent-2);
+  background: var(--color-surface-2) !important;
+}
+
+/* Fix for all input types */
+input.ds-input,
+input[type="text"].ds-input,
+input[type="email"].ds-input,
+input[type="password"].ds-input,
+input[type="number"].ds-input,
+input[type="tel"].ds-input,
+input[type="url"].ds-input,
+textarea.ds-input,
+select.ds-input {
+  background: var(--color-surface-3) !important;
+  color: var(--color-ink) !important;
+}
+
+input.ds-input:hover,
+input[type="text"]:hover,
+input[type="email"]:hover,
+input[type="password"]:hover,
+textarea.ds-input:hover,
+select.ds-input:hover {
+  background: var(--color-surface-2) !important;
+}
+
+input.ds-input:focus,
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+textarea.ds-input:focus,
+select.ds-input:focus {
+  background: var(--color-surface-2) !important;
+}
+
+/* Fix placeholder color */
+.ds-input::placeholder {
+  color: var(--color-muted) !important;
+  opacity: 0.7;
+}
+
+/* Fix for readonly inputs */
+.ds-input:read-only {
+  background: var(--color-surface-2) !important;
 }
 
 .ds-text {

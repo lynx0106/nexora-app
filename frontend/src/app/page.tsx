@@ -299,6 +299,7 @@ function HomeContent() {
                       onChange={(e) => setEmail(e.target.value)}
                       className="ds-input w-full text-sm"
                       placeholder="nombre@ejemplo.com"
+                      style={{ backgroundColor: 'var(--color-surface-3)' }}
                     />
                   </div>
                 </div>
@@ -321,6 +322,7 @@ function HomeContent() {
                       onChange={(e) => setPassword(e.target.value)}
                       className="ds-input w-full text-sm"
                       placeholder="••••••••"
+                      style={{ backgroundColor: 'var(--color-surface-3)' }}
                     />
                   </div>
                 </div>
