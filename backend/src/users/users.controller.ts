@@ -14,6 +14,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { TenantsService } from '../tenants/tenants.service';
 import type { Request } from 'express';
@@ -34,6 +35,7 @@ interface AuthRequest extends Request {
   };
 }
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(
@@ -43,6 +45,10 @@ export class UsersController {
 
   @Get('profile')
   @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized - invalid or missing token' })
   async getProfile(@Req() req: AuthRequest) {
     const userId = req.user?.userId;
     const tenantId = req.user?.tenantId;

@@ -11,6 +11,7 @@ import {
 import { createHmac, timingSafeEqual } from 'crypto';
 import type { Response } from 'express';
 import { PaymentsService } from './payments.service';
+import { WebhookDto } from './dto/webhook.dto';
 
 @Controller('payments')
 export class PaymentsController {
@@ -59,7 +60,7 @@ export class PaymentsController {
 
   @Post('webhook')
   async handleWebhook(
-    @Body() body: any,
+    @Body() body: WebhookDto,
     @Query('topic') topic: string,
     @Query('id') id: string,
     @Query('tenantId') tenantId: string,

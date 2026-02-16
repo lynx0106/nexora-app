@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Order } from '../orders/entities/order.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
+
   constructor(private mailerService: MailerService) {}
 
   async sendOrderConfirmation(order: any, tenant: Tenant) {
     if (!order.customerEmail) {
-      console.warn(
-        `⚠️ Cannot send order confirmation: Missing email for order ${order.id}`,
+      this.logger.warn(
+        `Cannot send order confirmation: Missing email for order ${order.id}`,
       );
       return;
     }
@@ -50,9 +52,9 @@ export class MailService {
           year: new Date().getFullYear(),
         },
       });
-      console.log(`✅ Email sent to ${order.customerEmail}`);
+      this.logger.log(`Email sent to ${order.customerEmail}`);
     } catch (error) {
-      console.error('❌ Error sending email via MailerService:', error);
+      this.logger.error('Error sending email via MailerService:', error);
       // Do not rethrow, just log.
     }
   }
@@ -60,8 +62,8 @@ export class MailService {
   async sendAppointmentConfirmation(appointment: any, tenant: Tenant) {
     const email = appointment.client?.email;
     if (!email) {
-      console.warn(
-        `⚠️ Cannot send appointment confirmation: Missing client email for appointment ${appointment.id}`,
+      this.logger.warn(
+        `Cannot send appointment confirmation: Missing client email for appointment ${appointment.id}`,
       );
       return;
     }
@@ -105,9 +107,9 @@ export class MailService {
           year: new Date().getFullYear(),
         },
       });
-      console.log(`✅ Appointment confirmation email sent to ${email}`);
+      this.logger.log(`Appointment confirmation email sent to ${email}`);
     } catch (error) {
-      console.error('❌ Error sending appointment confirmation email:', error);
+      this.logger.error('Error sending appointment confirmation email:', error);
     }
   }
 
@@ -169,9 +171,9 @@ export class MailService {
           year: new Date().getFullYear(),
         },
       });
-      console.log(`✅ Appointment reminder (${type}) sent to ${email}`);
+      this.logger.log(`Appointment reminder (${type}) sent to ${email}`);
     } catch (error) {
-      console.error(`❌ Error sending appointment reminder (${type}):`, error);
+      this.logger.error(`Error sending appointment reminder (${type}):`, error);
     }
   }
 
@@ -190,9 +192,9 @@ export class MailService {
           year: new Date().getFullYear(),
         },
       });
-      console.log(`✅ Password reset email sent to ${data.email}`);
+      this.logger.log(`Password reset email sent to ${data.email}`);
     } catch (error) {
-      console.error('❌ Error sending password reset email:', error);
+      this.logger.error('Error sending password reset email:', error);
     }
   }
 
@@ -219,9 +221,9 @@ export class MailService {
           year: new Date().getFullYear(),
         },
       });
-      console.log(`✅ Invitation email sent to ${data.email}`);
+      this.logger.log(`Invitation email sent to ${data.email}`);
     } catch (error) {
-      console.error('❌ Error sending invitation email:', error);
+      this.logger.error('Error sending invitation email:', error);
     }
   }
 

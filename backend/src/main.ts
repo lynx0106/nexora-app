@@ -3,6 +3,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -74,6 +75,36 @@ async function bootstrap() {
   );
 
   const port = Number(process.env.PORT) || 4001;
+
+  // Configuracion de Swagger/OpenAPI
+  const config = new DocumentBuilder()
+    .setTitle('Nexora App API')
+    .setDescription('API Documentation for Nexora SaaS Multi-tenant Platform')
+    .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'JWT-auth',
+    )
+    .addTag('Auth')
+    .addTag('Users')
+    .addTag('Tenants')
+    .addTag('Products')
+    .addTag('Orders')
+    .addTag('Appointments')
+    .addTag('Dashboard')
+    .addTag('AI')
+    .addTag('Public')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.listen(port);
 }
 void bootstrap();

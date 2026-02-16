@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('appointments')
@@ -111,7 +112,7 @@ export class AppointmentsController {
   @Patch(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateData: any,
+    @Body() updateData: UpdateAppointmentDto,
     @Req() req: any,
   ) {
     const user = req.user;
@@ -130,9 +131,9 @@ export class AppointmentsController {
       // Users can only update specific fields (e.g. notes, or maybe reschedule?)
       // For now, let's allow them to update, but ensure they can't change the 'status' or 'price' via this endpoint if payload has it.
       // Sanitizing payload:
-      delete updateData.status;
-      delete updateData.price;
-      delete updateData.doctorId; // Cannot change doctor? Maybe allow.
+      delete (updateData as any).status;
+      delete (updateData as any).price;
+      delete (updateData as any).doctorId; // Cannot change doctor? Maybe allow.
     }
 
     return this.appointmentsService.update(id, updateData);

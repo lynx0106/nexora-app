@@ -15,12 +15,17 @@ import {
 import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Role, hasRole } from '../common/constants/roles';
 import { Permission } from '../common/constants/permissions';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { UploadProductDto } from './dto/upload-product.dto';
 
+@ApiTags('Products')
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -34,7 +39,12 @@ export class ProductsController {
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.ProductManage)
   @UseInterceptors(FileInterceptor('file'))
-  upload(@UploadedFile() file: any, @Req() req: Request, @Body() body: any) {
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Upload product image' })
+  @ApiResponse({ status: 201, description: 'Image uploaded successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
+  upload(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() body: UploadProductDto) {
     const user = (req as any).user;
 
     if (!user) {
@@ -73,7 +83,7 @@ export class ProductsController {
   @Post()
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.ProductManage)
-  create(@Req() req: Request, @Body() body: any) {
+  create(@Req() req: Request, @Body() body: CreateProductDto) {
     const user = (req as any).user;
 
     let targetTenantId = user.tenantId;
@@ -134,7 +144,7 @@ export class ProductsController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.ProductManage)
-  update(@Req() req: Request, @Param('id') id: string, @Body() body: any) {
+  update(@Req() req: Request, @Param('id') id: string, @Body() body: UpdateProductDto) {
     const user = (req as any).user;
     if (hasRole(user.role, [Role.Superadmin])) {
       return this.productsService.updateAsAdmin(id, body);

@@ -2,6 +2,7 @@ import { Controller, Get, Post, Req, UseGuards, Query, Body } from '@nestjs/comm
 import { AuthGuard } from '@nestjs/passport';
 import { ChatService } from './chat.service';
 import { UsersService } from '../users/users.service';
+import { SendMessageDto } from './dto/send-message.dto';
 
 @Controller('chat')
 @UseGuards(AuthGuard('jwt'))
@@ -98,7 +99,7 @@ export class ChatController {
   }
 
   @Post('message')
-  async sendMessage(@Req() req, @Body() body: any) {
+  async sendMessage(@Req() req, @Body() body: SendMessageDto) {
     const user = req.user;
     const message = await this.chatService.createMessage(
       body.content,

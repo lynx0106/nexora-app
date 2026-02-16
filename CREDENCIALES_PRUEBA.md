@@ -1,106 +1,151 @@
-# 📋 CREDENCIALES DE PRUEBA - NEXORA APP
+# Credenciales de Prueba - Nexora App
 
-## Usuarios Creador para Pruebas
+## Credenciales Superadmin (Sistema)
 
-### 👑 SUPERADMIN (Plataforma)
-| Campo | Valor |
-|-------|-------|
-| Email | superadmin@saas.com |
-| Password | Super123! |
-| Rol | superadmin |
-| Tenant | system |
+| Email | Password | Rol |
+|-------|----------|-----|
+| superadmin@saas.com | SuperAdmin2024! | superadmin |
 
 ---
 
-### 👨‍💼 ADMINISTRADORES (Por Tenant)
+## Tenants de Demostración
 
-| Tenant | Email | Password | Rol |
-|--------|-------|----------|-----|
-| Restaurante Demo | admin@restaurante-demo.com | Admin123 | admin |
-| Clínica Dental Demo | admin@clinica-demo.com | Admin123 | admin |
-| Tienda Retail Demo | admin@tienda-demo.com | Admin123 | admin |
-| Salón Belleza Demo | admin@belleza-demo.com | Admin123 | admin |
+### 1. Restaurante Demo (restaurante-demo)
 
----
+**Admin del Tenant:**
+- Email: admin@restaurante.com
+- Password: admin123
+- Rol: user
 
-### 👥 USUARIOS DEMO (CREADOS AUTOMÁTICAMENTE)
+**Usuarios de Prueba:**
+| Email | Password | Rol |
+|-------|----------|-----|
+| cliente1@restaurante.com | password123 | client |
+| admin@restaurante.com | admin123 | user |
+| user@restaurante.com | user123 | user |
 
-| Email | Password | Rol | Tenant |
-|-------|----------|-----|--------|
-| carlos.demo@miempresa.com | Demo123! | admin | mi-empresa-saas |
-| luis.demo@miempresa.com | Demo123! | user | mi-empresa-saas |
-| ana.demo@clinica.com | Demo123! | admin | clinica-sonrisas |
-| pedro.demo@clinica.com | Demo123! | user | clinica-sonrisas |
+**Productos:**
+- Hamburguesa Clásica - $15,000
+- Hamburguesa Deluxe - $15,000
 
----
-
-## 🌐 ACCESO A LA APLICACIÓN
-
-| Servicio | URL |
-|----------|-----|
-| **Frontend (Producción)** | https://nexora-app.online |
-| **Backend (API)** | https://nexora-app-production-3199.up.railway.app |
-| **Health Check** | https://nexora-app-production-3199.up.railway.app/health |
+**Pedidos de Prueba:**
+- Pedido #1: Juan Pérez - 2 Hamburguesas Clásicas - $30,000 (pendiente)
+- Pedido #2: Pedro Gómez - 1 Hamburguesa Clásica + 1 Deluxe - $30,000 (pendiente)
 
 ---
 
-## 🧪 CÓMO PROBAR LA APP
+### 2. Clínica Dental Demo (clinica-demo)
 
-### 1. Prueba como ADMINISTRADOR
-1. Ir a https://nexora-app.online
-2. Iniciar sesión con:
-   - Email: `admin@restaurante-demo.com`
-   - Password: `Admin123`
-3. Explorar el panel de administración
-4. Crear productos, ver pedidos, gestionar usuarios
+**Admin del Tenant:**
+- Email: admin@clinica.com
+- Password: admin123
+- Rol: user
 
-### 2. Prueba como USUARIO/CLIENTE
-1. Ir a https://nexora-app.online
-2. Iniciar sesión con:
-   - Email: `luis.demo@miempresa.com`
-   - Password: `Demo123!`
-3. Ver productos, realizar pedidos
+**Usuarios de Prueba:**
+| Email | Password | Rol |
+|-------|----------|-----|
+| cliente1@clinica.com | password123 | client |
+| user@clinica.com | user123 | user |
+| doctor@clinica.com | doctor123 | user |
 
-### 3. Prueba como SUPERADMIN
-1. Ir a https://nexora-app.online
-2. Iniciar sesión con:
-   - Email: `superadmin@saas.com`
-   - Password: `Super123!`
-3. Gestionar todos los tenants, ver métricas globales
+**Servicios:**
+- Limpieza Dental - $80,000
+
+**Citas de Prueba:**
+- Cita #1: Maria Lopez - 20/Feb/2026 10:00 - Limpieza Dental (pendiente)
+- Cita #2: Carlos Martinez - 22/Feb/2026 11:00 - Control dental (pendiente)
+- Cita #3: Laura Sanchez - 23/Feb/2026 15:30 - Blanqueamiento (pendiente)
 
 ---
 
-## 📱 TENANTS CREADOS
+### 3. Tienda de Ropa Demo (tienda-demo)
 
-| ID | Nombre | Sector | Admin |
-|----|--------|--------|-------|
-| restaurante-demo | Restaurante Demo | restaurante | admin@restaurante-demo.com |
-| clinica-demo | Clínica Dental Demo | salud | admin@clinica-demo.com |
-| tienda-demo | Tienda Retail Demo | retail | admin@tienda-demo.com |
-| belleza-demo | Salón Belleza Demo | belleza | admin@belleza-demo.com |
-| mi-empresa-saas | Mi Empresa SaaS | retail | carlos.demo@miempresa.com |
-| clinica-sonrisas | Clínica Sonrisas | salud | ana.demo@clinica.com |
+**Admin del Tenant:**
+- Email: admin@tienda.com
+- Password: admin123
+- Rol: user
 
----
+**Usuarios de Prueba:**
+| Email | Password | Rol |
+|-------|----------|-----|
+| cliente1@tienda.com | password123 | client |
+| user@tienda.com | user123 | user |
+| vendedor@tienda.com | vendedor123 | user |
 
-## ⚠️ NOTAS IMPORTANTES
+**Productos:**
+- Camisa Roja - $45,000
 
-1. **Seed deshabilitado en producción** - Los endpoints de seed están deshabilitados en el entorno de Railway por seguridad
-2. **Productos** - Solo se ha creado 1 producto de prueba (Hamburguesa Deluxe). Los admins pueden crear más desde el panel
-3. **Contraseñas** - Todas las contraseñas de prueba siguen el patrón: `Admin123!` o `Demo123!`
-4. **Dominio** - El dominio nexora-app.online debe estar funcionando para acceder al frontend
-
----
-
-## 🔧 PARA CREAR MÁS DATOS DE PRUEBA
-
-Si necesitas crear más productos, pedidos o citas, puedes:
-
-1. **Iniciar sesión como admin** del tenant correspondiente
-2. **Acceder al panel de administración**
-3. **Crear productos/servicios** desde la sección correspondiente
-4. **Crear pedidos** desde la vista de cliente o el panel
+**Pedidos de Prueba:**
+- Pedido #1: Carlos Rodriguez - 3 Camisas Rojas - $135,000 (pendiente)
+- Pedido #2: Diana Lopez - 2 Camisas Rojas - $90,000 (pendiente)
 
 ---
 
-*Documento generado el 16 de febrero de 2026*
+### 4. Belleza y Cuidado Personal Demo (belleza-demo)
+
+**Admin del Tenant:**
+- Email: admin@belleza.com
+- Password: admin123
+- Rol: user
+
+**Usuarios de Prueba:**
+| Email | Password | Rol |
+|-------|----------|-----|
+| cliente1@belleza.com | password123 | client |
+| user@belleza.com | user123 | user |
+| estilista@belleza.com | estilista123 | user |
+
+**Servicios:**
+- Corte de Cabello - $25,000
+
+**Citas de Prueba:**
+- Cita #1: Ana Garcia - 21/Feb/2026 14:00 - Corte y peinado (pendiente)
+- Cita #2: Sofia Torres - 22/Feb/2026 10:00 - Coloración (pendiente)
+- Cita #3: Miguel Reyes - 24/Feb/2026 16:00 - Corte varonil (pendiente)
+
+---
+
+## URLs de Acceso
+
+### Frontend (Vercel)
+- URL: https://nexora-app.vercel.app
+
+### Backend (Railway)
+- URL: https://nexora-app-production-3199.up.railway.app
+
+### Panel Admin (Por tenant)
+- https://nexora-app.vercel.app/dashboard/{tenantId}
+
+### Reservas/Citas (Público)
+- https://nexora-app.vercel.app/book/{tenantId}
+
+---
+
+## Notas
+
+1. Todos los usuarios tienen `isActive: true`
+2. Los pedidos están en estado `pending` con pago `pending`
+3. Las citas están en estado `pending`
+4. Los enlaces de pago de MercadoPago son de prueba
+5. El token JWT expira en 7 días
+
+## Cómo probar el flujo
+
+### Flujo de Pedidos (Restaurante/Tienda):
+1. Ir a https://nexora-app.vercel.app/book/restaurante-demo
+2. Seleccionar productos
+3. Completar datos del cliente
+4. Verificar que se crea el pedido en estado "pending"
+5. El admin puede ver el pedido en el dashboard
+
+### Flujo de Citas (Clínica/Belleza):
+1. Ir a https://nexora-app.vercel.app/book/clinica-demo
+2. Seleccionar servicio
+3. Elegir fecha y hora
+4. Completar datos del cliente
+5. Verificar que se crea la cita en el dashboard
+
+### Acceso al Dashboard:
+1. Ir a https://nexora-app.vercel.app/auth/login
+2. Ingresar con credenciales de admin
+3. Ver dashboard con métricas del tenant
