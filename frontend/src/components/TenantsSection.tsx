@@ -75,23 +75,23 @@ export function TenantsSection({ tenants, loading, error, onManage, onRefresh }:
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-zinc-900">{t('tenants.title')}</h2>
+        <h2 className="text-xl font-semibold text-slate-200">{t('tenants.title')}</h2>
         <button
           onClick={() => setShowCreateForm(!showCreateForm)}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-600"
         >
           {showCreateForm ? t('tenants.cancel') : t('tenants.new_tenant')}
         </button>
       </div>
 
       {showCreateForm && (
-        <div className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-medium text-zinc-900">{t('tenants.register_title')}</h3>
+        <div className="rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-medium text-slate-200">{t('tenants.register_title')}</h3>
           {createError && (
-            <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{createError}</div>
+            <div className="mb-4 rounded-md bg-red-900/30 p-3 text-sm text-red-400">{createError}</div>
           )}
           {createSuccess && (
-            <div className="mb-4 rounded-md bg-green-50 p-3 text-sm text-green-600">{createSuccess}</div>
+            <div className="mb-4 rounded-md bg-green-900/30 p-3 text-sm text-green-400">{createSuccess}</div>
           )}
           <form onSubmit={handleCreateTenant} className="space-y-4" autoComplete="off">
             {/* Fake inputs to trick browser autofill */}
@@ -187,7 +187,7 @@ export function TenantsSection({ tenants, loading, error, onManage, onRefresh }:
               <button
                 type="submit"
                 disabled={creating}
-                className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                className="rounded-md bg-slate-700 px-4 py-2 text-sm font-medium text-white hover:bg-slate-600 disabled:opacity-50"
               >
                 {creating ? "Creando..." : "Registrar Empresa"}
               </button>
@@ -197,13 +197,13 @@ export function TenantsSection({ tenants, loading, error, onManage, onRefresh }:
       )}
 
       {loading ? (
-        <div className="text-zinc-500">Cargando empresas...</div>
+        <div className="text-slate-500">Cargando empresas...</div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-400">{error}</div>
       ) : (
-        <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
+        <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-sm">
           <table className="w-full text-left text-sm">
-            <thead className="bg-zinc-50 text-zinc-500">
+            <thead className="bg-slate-900 text-slate-400">
               <tr>
                 <th className="px-4 py-3 font-medium">ID Tenant</th>
                 <th className="px-4 py-3 font-medium">Usuarios Totales</th>
@@ -211,16 +211,16 @@ export function TenantsSection({ tenants, loading, error, onManage, onRefresh }:
                 <th className="px-4 py-3 font-medium">Acciones</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100">
+            <tbody className="divide-y divide-slate-700">
               {tenants.map((tenant) => (
-                <tr key={tenant.tenantId} className="hover:bg-zinc-50">
-                  <td className="px-4 py-3 font-medium text-zinc-900">{tenant.tenantId}</td>
-                  <td className="px-4 py-3 text-zinc-600">{tenant.totalUsers}</td>
-                  <td className="px-4 py-3 text-zinc-600">{tenant.activeUsers}</td>
+                <tr key={tenant.tenantId} className="hover:bg-slate-700/50">
+                  <td className="px-4 py-3 font-medium text-slate-200">{tenant.tenantId}</td>
+                  <td className="px-4 py-3 text-slate-400">{tenant.totalUsers}</td>
+                  <td className="px-4 py-3 text-slate-400">{tenant.activeUsers}</td>
                   <td className="px-4 py-3">
                     <button 
                       onClick={() => onManage(tenant.tenantId)}
-                      className="text-zinc-400 hover:text-zinc-600"
+                      className="text-slate-500 hover:text-slate-300"
                     >
                       Gestionar
                     </button>
@@ -229,7 +229,7 @@ export function TenantsSection({ tenants, loading, error, onManage, onRefresh }:
               ))}
               {tenants.length === 0 && (
                 <tr>
-                  <td colSpan={4} className="px-4 py-8 text-center text-zinc-500">
+                  <td colSpan={4} className="px-4 py-8 text-center text-slate-500">
                     No hay empresas registradas.
                   </td>
                 </tr>
