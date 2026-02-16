@@ -68,7 +68,6 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.TenantRead)
   async getTenantsSummary(@Req() req: AuthRequest) {
-    console.log('GET /users/tenants/summary hit');
     const role = req.user?.role;
     if (!hasRole(role, [Role.Superadmin])) {
       throw new ForbiddenException(
@@ -76,7 +75,6 @@ export class UsersController {
       );
     }
     const summary = await this.usersService.getTenantsSummary();
-    console.log('Summary result:', summary);
     return summary;
   }
 

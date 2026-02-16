@@ -26,18 +26,18 @@
 - ✅ URL de producción (temporal): https://frontend-f3l3eshnx-carlos-projects-5a8a20ac.vercel.app
 - ✅ Dominio personalizado: `nexora-app.online` (configurado, en propagación DNS)
 - ✅ Variables de entorno agregadas:
-  - `NEXT_PUBLIC_SUPABASE_URL` = https://cafcekxkqyedvwstugqr.supabase.co
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = [configurada]
+  - `NEXT_PUBLIC_SUPABASE_URL` = [VER SECRETS EN VERCEL]
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` = [VER SECRETS EN VERCEL]
 - ✅ Redeploy ejecutado con las nuevas variables
 
 ### 3. **Supabase (Project: nexora-app)**
 - ✅ Proyecto creado
 - ✅ Base de datos PostgreSQL activa
 - ✅ Credenciales obtenidas:
-  - `SUPABASE_URL` = https://cafcekxkqyedvwstugqr.supabase.co
-  - `SUPABASE_DATABASE_URL` = postgresql://postgres:Oriana2024+*@db.cafcekxkqyedvwstugqr.supabase.co:5432/postgres
-  - `SUPABASE_ANON_KEY` = [guardada en GitHub Secrets]
-  - `SUPABASE_SERVICE_ROLE_KEY` = [guardada en GitHub Secrets]
+  - `SUPABASE_URL` = [VER SECRETS EN GITHUB/RAILWAY]
+  - `SUPABASE_DATABASE_URL` = [VER SECRETS EN GITHUB/RAILWAY]
+  - `SUPABASE_ANON_KEY` = [VER SECRETS EN GITHUB/RAILWAY]
+  - `SUPABASE_SERVICE_ROLE_KEY` = [VER SECRETS EN GITHUB/RAILWAY]
 
 ### 4. **GitHub Actions & Migraciones**
 - ✅ Workflow creado: `.github/workflows/supabase-migrations.yml`
@@ -84,8 +84,8 @@
 
 ### Supabase
 - **Proyecto:** nexora-app
-- **URL API:** https://cafcekxkqyedvwstugqr.supabase.co
-- **Contraseña DB:** Oriana2024+*
+- **URL API:** [VER SECRETS EN GITHUB/RAILWAY]
+- **Contraseña DB:** [VER SECRETS EN GITHUB/RAILWAY] ⚠️ ROTAR INMEDIATAMENTE
 - **Region:** East US (North Virginia)
 - **Tier:** Nano (gratuito)
 
@@ -145,10 +145,10 @@ Esto le dice a Railway/Render cómo ejecutar el backend
 **Tarea 2.3 - Agregar variables de entorno al backend**
 ```
 Variables a configurar en el host del backend:
-- DATABASE_URL = postgresql://postgres:Oriana2024+*@db.cafcekxkqyedvwstugqr.supabase.co:5432/postgres
-- SUPABASE_URL = https://cafcekxkqyedvwstugqr.supabase.co
-- SUPABASE_SERVICE_ROLE_KEY = [valor de GitHub Secrets]
-- JWT_SECRET = [generar valor seguro]
+- DATABASE_URL = [VER SECRETS EN GITHUB/RAILWAY]
+- SUPABASE_URL = [VER SECRETS EN GITHUB/RAILWAY]
+- SUPABASE_SERVICE_ROLE_KEY = [VER SECRETS EN GITHUB/RAILWAY]
+- JWT_SECRET = [VER SECRETS EN GITHUB/RAILWAY]
 - NODE_ENV = production
 - PORT = 3001 (o la que determine Railway/Render)
 ```
@@ -277,7 +277,7 @@ git push origin main
 |----------|-----|---------|
 | GitHub Repo | https://github.com/lynx0106/nexora-app | lynx0106 |
 | Vercel | https://vercel.com/dashboard/carlos-projects-5a8a20ac | lynxia25-hub |
-| Supabase | https://app.supabase.com/project/cafcekxkqyedvwstugqr | (login) |
+| Supabase | https://app.supabase.com/project/[PROJECT_ID] | (login) |
 | Namecheap | https://www.namecheap.com/myaccount/login/ | (login) |
 | Frontend | https://nexora-app.online | (público) |
 

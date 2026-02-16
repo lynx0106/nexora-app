@@ -7,6 +7,7 @@ import {
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ChatService } from './chat.service';
@@ -24,6 +25,8 @@ import { UsersService } from '../users/users.service';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
     private chatService: ChatService,
@@ -49,7 +52,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Store user info in socket
       client.data.user = payload;
-      console.log(`[ChatGateway] Connection Payload for ${client.id}:`, JSON.stringify(payload));
+      this.logger.debug(`Client ${client.id} connected, tenant: ${payload.tenantId}`);
 
       const { tenantId, role, sub: userId } = payload;
 
@@ -81,17 +84,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.join(`tenant-${tenantId}-customers-all`);
       }
 
-      console.log(
-        `Client connected: ${client.id}, User: ${payload.email}, Tenant: ${tenantId}`,
-      );
     } catch (error) {
-      console.error('Connection unauthorized:', error.message);
+      this.logger.warn(`Connection unauthorized: ${error.message}`);
       client.disconnect();
     }
   }
 
   handleDisconnect(client: Socket) {
-    console.log(`Client disconnected: ${client.id}`);
+    this.logger.debug(`Client disconnected: ${client.id}`);
   }
 
   @SubscribeMessage('sendMessage')
@@ -116,9 +116,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       dbTargetUserId = user.sub;
     }
 
-    console.log(
-      `[ChatGateway] handleMessage - User: ${user.sub}, Role: ${user.role}, Scope: ${scope}, Target: ${dbTargetUserId}, Tenant: ${user.tenantId}, FullUser: ${JSON.stringify(user)}`,
-    );
+    this.logger.debug(`Message from user ${user.sub}, scope: ${scope}, tenant: ${user.tenantId}`);
 
     try {
       // Save User Message
@@ -136,18 +134,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Helper to Broadcast
       const broadcastMessage = (msg: any) => {
         const tenantId = user.tenantId;
-        console.log(
-          `[ChatGateway] Broadcasting message ${msg.id} to scope ${scope}`,
-        );
+        this.logger.debug(`Broadcasting message ${msg.id} to scope ${scope}`);
         if (scope === 'INTERNAL') {
           this.server.to(`tenant-${tenantId}-INTERNAL`).emit('newMessage', msg);
         } else if (scope === 'SUPPORT') {
           this.server.to(`tenant-${tenantId}-SUPPORT`).emit('newMessage', msg);
         } else if (scope === 'CUSTOMER') {
           const effectiveTargetId = dbTargetUserId || user.sub;
-          console.log(
-            `[ChatGateway] Target Room: tenant-${tenantId}-customer-${effectiveTargetId}`,
-          );
+          this.logger.debug(`Target room: tenant-${tenantId}-customer-${effectiveTargetId}`);
           this.server
             .to(`tenant-${tenantId}-customer-${effectiveTargetId}`)
             .emit('newMessage', msg);
@@ -175,12 +169,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       if (!isAiActive) {
-        console.log(`[ChatGateway] AI is paused for user ${dbTargetUserId}`);
+        this.logger.debug(`AI paused for user ${dbTargetUserId}`);
         return; // AI is paused for this user
       }
 
       // Trigger AI response if applicable
-      console.log(`[ChatGateway] Triggering AI for tenant ${user.tenantId}`);
+      this.logger.debug(`Triggering AI for tenant ${user.tenantId}`);
 
       // Fetch context (previous messages)
       let context: any[] = [];
@@ -200,7 +194,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             content: m.content,
           }));
       } catch (err) {
-        console.error('Error fetching chat history for AI context:', err);
+        this.logger.error('Error fetching chat history for AI context', err);
       }
 
       const aiResult = await this.aiService.generateReply(
@@ -237,7 +231,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         broadcastMessage(aiMessage);
       }
     } catch (error) {
-      console.error('[ChatGateway] Error handling message:', error);
+      this.logger.error('Error handling message', error);
     }
   }
 

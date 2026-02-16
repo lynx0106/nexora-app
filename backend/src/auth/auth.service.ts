@@ -23,6 +23,10 @@ export class AuthService {
       throw new UnauthorizedException('El correo ya está en uso');
     }
     const passwordHash = await bcrypt.hash(data.password, 10);
+    // Roles privilegiados no se pueden auto-asignar via registro público
+    const SAFE_ROLES = ['user', 'client', 'employee', 'staff'];
+    const safeRole = data.role && SAFE_ROLES.includes(data.role) ? data.role : 'user';
+
     const user = await this.usersService.createUser({
       firstName: data.firstName,
       lastName: data.lastName,
@@ -30,7 +34,7 @@ export class AuthService {
       phone: data.phone,
       passwordHash,
       tenantId: data.tenantId,
-      role: data.role ?? 'user',
+      role: safeRole,
     });
     const { passwordHash: _, ...safeUser } = user;
     void _;
@@ -42,10 +46,6 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
-    console.log(
-      `[AuthDebug] User found. ID: ${user.id}. Hash starts with: ${user.passwordHash?.substring(0, 10)}`,
-    );
-
     const isValid = await bcrypt.compare(password, user.passwordHash);
 
     if (!isValid) {

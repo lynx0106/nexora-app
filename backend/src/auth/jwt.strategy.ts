@@ -18,12 +18,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: (req: Request) => {
         const authHeader = req.headers.authorization;
         if (!authHeader) {
-          console.log('No Authorization header found');
           return null;
         }
         const [scheme, token] = authHeader.split(' ');
         if (scheme !== 'Bearer' || !token) {
-          console.log('Invalid Authorization header scheme');
           return null;
         }
         return token;
@@ -34,7 +32,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   validate(payload: JwtPayload) {
-    console.log('JWT Payload:', payload);
     return {
       userId: payload.sub,
       email: payload.email,

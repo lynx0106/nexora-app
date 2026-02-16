@@ -48,11 +48,8 @@ export class NotificationsGateway
         client.join(`tenant-${tenantId}-admins`);
       }
 
-      console.log(
-        `[Notifications] Client connected: ${client.id}, User: ${payload.email}`,
-      );
     } catch (error) {
-      console.error('[Notifications] Connection unauthorized:', error.message);
+      void error;
       client.disconnect();
     }
   }

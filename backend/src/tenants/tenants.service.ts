@@ -192,7 +192,7 @@ export class TenantsService {
   }
 
   async updateTenantProfile(tenantId: string, input: UpdateTenantProfileInput) {
-    console.log(`Updating tenant ${tenantId} with:`, input);
+    // Actualizar perfil del tenant
     const tenant = await this.getOrCreateTenant(tenantId);
 
     if (input.name !== undefined) {
@@ -263,7 +263,7 @@ export class TenantsService {
   }
 
   async cleanupTestTenants() {
-    console.log('Cleaning up test tenants...');
+    // Cleanup test tenants
     // Find test tenants to delete
     const testTenants = await this.tenantsRepository
       .createQueryBuilder('tenant')
@@ -280,7 +280,7 @@ export class TenantsService {
     const tenantIds = testTenants.map((t) => t.id);
     if (tenantIds.length === 0) return { count: 0, message: 'No test tenants found' };
 
-    console.log(`Found ${tenantIds.length} tenants to delete:`, tenantIds);
+    // Found tenants to delete
 
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
