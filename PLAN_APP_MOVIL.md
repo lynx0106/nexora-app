@@ -11,14 +11,14 @@ Crear una aplicación móvil nativa (React Native) que consuma la API existente 
 |------|--------|----------|
 | **FASE 0: Planificación** | ✅ Completado | 100% |
 | **FASE 1: Configuración Base** | ✅ Completado | 100% |
-| **FASE 2: Autenticación** | ⏳ Pendiente | 0% |
-| **FASE 3: Catálogo y Productos** | ⏳ Pendiente | 0% |
+| **FASE 2: Autenticación** | ✅ Completado | 100% |
+| **FASE 3: Catálogo y Productos** | ✅ Completado | 100% |
 | **FASE 4: Pedidos y Pagos** | ⏳ Pendiente | 0% |
 | **FASE 5: Chat y Citas** | ⏳ Pendiente | 0% |
 | **FASE 6: Dashboard Admin** | ⏳ Pendiente | 0% |
 | **FASE 7: Testing y Deploy** | ⏳ Pendiente | 0% |
 
-**Progreso Total: 25% (2/8 fases)**
+**Progreso Total: 50% (4/8 fases)**
 
 ---
 
@@ -32,7 +32,7 @@ Crear una aplicación móvil nativa (React Native) que consuma la API existente 
 │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐       │
 │  │  Web App     │  │  Mobile App  │  │  API Externa │       │
 │  │  (Next.js)   │  │(React Native)│  │  (Terceros)  │       │
-│  │  ✅ Existe   │  │  🆕 Nueva    │  │  ✅ Existe   │       │
+│  │  ✅ Existe   │  │  ✅ Creada   │  │  ✅ Existe   │       │
 │  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘       │
 │         │                 │                 │                │
 │         └────────────────┬┴─────────────────┘                │
@@ -149,18 +149,20 @@ nexora-mobile/
 
 ---
 
-## 📋 FASE 2: Autenticación ⏳ (0%)
+## 📋 FASE 2: Autenticación ✅ (100%)
 
 **Tiempo estimado:** 2-3 días
 
 ### Checklist
-- [ ] Crear pantalla de Login
-- [ ] Crear pantalla de Registro
-- [ ] Crear pantalla de Recuperar Contraseña
-- [ ] Implementar Context de Autenticación
-- [ ] Implementar almacenamiento seguro de token
-- [ ] Crear flujo de navegación condicional
-- [ ] Implementar logout
+- [x] Crear pantalla de Login
+- [x] Crear pantalla de Registro
+- [x] Crear pantalla de Recuperar Contraseña
+- [x] Implementar Context de Autenticación
+- [x] Implementar almacenamiento seguro de token (SecureStore)
+- [x] Crear flujo de navegación condicional
+- [x] Implementar logout
+- [x] Validación de formularios
+- [x] Tests de autenticación (16 tests)
 
 ### Pantallas
 | Pantalla | Descripción | Endpoint |
@@ -170,31 +172,41 @@ nexora-mobile/
 | ForgotPassword | Recuperar contraseña | POST /auth/password-reset/request |
 
 ### Componentes
-- `LoginForm` - Formulario de login
-- `RegisterForm` - Formulario de registro
-- `AuthContext` - Context de autenticación
+- `AuthContext` - Context de autenticación con persistencia
+- `LoginScreen` - Pantalla de login con validación
+- `RegisterScreen` - Pantalla de registro con validación
+- `ForgotPasswordScreen` - Pantalla de recuperación
 
 ---
 
-## 📋 FASE 3: Catálogo y Productos ⏳ (0%)
+## 📋 FASE 3: Catálogo y Productos ✅ (100%)
 
 **Tiempo estimado:** 3-4 días
 
 ### Checklist
-- [ ] Crear pantalla de Home
-- [ ] Crear lista de productos
-- [ ] Crear detalle de producto
-- [ ] Implementar búsqueda de productos
-- [ ] Implementar filtros por categoría
-- [ ] Crear pantalla de favoritos
+- [x] Crear pantalla de Home
+- [x] Crear lista de productos
+- [x] Crear detalle de producto
+- [x] Implementar búsqueda de productos
+- [x] Implementar filtros (ordenamiento, stock)
+- [x] Crear pantalla de favoritos
+- [x] Persistir favoritos en AsyncStorage
+- [x] Mostrar métricas del dashboard
+- [x] Alertas de stock bajo
 
 ### Pantallas
 | Pantalla | Descripción | Endpoint |
 |----------|-------------|----------|
-| Home | Dashboard inicial | GET /dashboard/metrics |
-| ProductList | Lista de productos | GET /products |
+| Home | Dashboard inicial con métricas | GET /dashboard/metrics |
+| ProductList | Lista de productos con filtros | GET /products |
 | ProductDetail | Detalle de producto | GET /products/:id |
-| Search | Búsqueda | GET /products?search= |
+| Favorites | Productos favoritos | Local (AsyncStorage) |
+
+### Componentes
+- `FavoritesContext` - Context para favoritos
+- `ProductsScreen` - Lista con búsqueda y filtros
+- `ProductDetailScreen` - Detalle con selector de cantidad
+- `FavoritesScreen` - Lista de favoritos
 
 ---
 
