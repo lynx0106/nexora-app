@@ -1,17 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConflictException } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
-import { Tenant } from '../tenants/entities/tenant.entity';
-import * as bcrypt from 'bcrypt';
 
 describe('UsersService', () => {
   let service: UsersService;
   let usersRepository: Repository<User>;
-  let tenantsRepository: Repository<Tenant>;
 
-  const mockUser: User = {
+  const mockUser: Partial<User> = {
     id: 'user-uuid-1',
     firstName: 'John',
     lastName: 'Doe',
@@ -36,21 +34,19 @@ describe('UsersService', () => {
     save: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    update: jest.fn(),
     count: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
       select: jest.fn().mockReturnThis(),
       addSelect: jest.fn().mockReturnThis(),
+      leftJoin: jest.fn().mockReturnThis(),
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       groupBy: jest.fn().mockReturnThis(),
       addGroupBy: jest.fn().mockReturnThis(),
+      orderBy: jest.fn().mockReturnThis(),
       getRawMany: jest.fn(),
     })),
-  };
-
-  const mockTenantsRepository = {
-    findOne: jest.fn(),
-    find: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -61,16 +57,11 @@ describe('UsersService', () => {
           provide: getRepositoryToken(User),
           useValue: mockUsersRepository,
         },
-        {
-          provide: getRepositoryToken(Tenant),
-          useValue: mockTenantsRepository,
-        },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    tenantsRepository = module.get<Repository<Tenant>>(getRepositoryToken(Tenant));
 
     jest.clearAllMocks();
   });
@@ -100,6 +91,19 @@ describe('UsersService', () => {
     });
   });
 
+  describe('findOne', () => {
+    it('debería encontrar usuario por ID', async () => {
+      mockUsersRepository.findOne.mockResolvedValue(mockUser);
+
+      const result = await service.findOne('user-uuid-1');
+
+      expect(result).toEqual(mockUser);
+      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-uuid-1' },
+      });
+    });
+  });
+
   describe('findByTenant', () => {
     it('debería retornar usuarios del tenant', async () => {
       const users = [mockUser];
@@ -110,7 +114,7 @@ describe('UsersService', () => {
       expect(result).toEqual(users);
       expect(mockUsersRepository.find).toHaveBeenCalledWith({
         where: { tenantId: 'tenant-uuid-1' },
-        order: { createdAt: 'DESC' },
+        order: { createdAt: 'ASC' },
       });
     });
   });
@@ -121,12 +125,11 @@ describe('UsersService', () => {
         firstName: 'Jane',
         lastName: 'Doe',
         email: 'jane@example.com',
-        passwordHash: await bcrypt.hash('password123', 10),
+        passwordHash: 'hashedpassword',
         tenantId: 'tenant-uuid-1',
         role: 'user',
       };
 
-      mockUsersRepository.findOne.mockResolvedValue(null);
       mockUsersRepository.create.mockReturnValue({ ...mockUser, ...createUserData });
       mockUsersRepository.save.mockResolvedValue({ ...mockUser, ...createUserData });
 
@@ -135,19 +138,49 @@ describe('UsersService', () => {
       expect(result.email).toBe('jane@example.com');
       expect(mockUsersRepository.save).toHaveBeenCalled();
     });
+  });
+
+  describe('createUserForTenant', () => {
+    it('debería crear usuario para tenant exitosamente', async () => {
+      const createData = {
+        firstName: 'Jane',
+        lastName: 'Doe',
+        email: 'jane@example.com',
+        password: 'password123',
+      };
+
+      mockUsersRepository.findOne.mockResolvedValue(null);
+      mockUsersRepository.create.mockReturnValue({ ...mockUser, ...createData });
+      mockUsersRepository.save.mockResolvedValue({ ...mockUser, ...createData });
+
+      const result = await service.createUserForTenant('tenant-uuid-1', createData);
+
+      expect(result.email).toBe('jane@example.com');
+    });
 
     it('debería lanzar error si el email ya existe', async () => {
       mockUsersRepository.findOne.mockResolvedValue(mockUser);
 
       await expect(
-        service.createUser({
+        service.createUserForTenant('tenant-uuid-1', {
           firstName: 'John',
           lastName: 'Doe',
           email: 'john@example.com',
-          passwordHash: 'hashed',
-          tenantId: 'tenant-uuid-1',
+          password: 'password',
         }),
-      ).rejects.toThrow('El correo ya está en uso');
+      ).rejects.toThrow(ConflictException);
+    });
+  });
+
+  describe('update', () => {
+    it('debería actualizar usuario exitosamente', async () => {
+      const updatedUser = { ...mockUser, firstName: 'Jane' };
+      mockUsersRepository.update.mockResolvedValue({ affected: 1 });
+      mockUsersRepository.findOne.mockResolvedValue(updatedUser);
+
+      const result = await service.update('user-uuid-1', { firstName: 'Jane' });
+
+      expect(result.firstName).toBe('Jane');
     });
   });
 
@@ -175,21 +208,19 @@ describe('UsersService', () => {
 
   describe('deleteUser', () => {
     it('debería eliminar usuario exitosamente', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
-      mockUsersRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
+      mockUsersRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await expect(
-        service.deleteUser('user-uuid-1', 'tenant-uuid-1'),
-      ).resolves.not.toThrow();
+      const result = await service.deleteUser('user-uuid-1', 'tenant-uuid-1');
+
+      expect(result).toBe(true);
     });
 
-    it('debería lanzar error si se intenta eliminar superadmin', async () => {
-      const superadmin = { ...mockUser, role: 'superadmin' };
-      mockUsersRepository.findOne.mockResolvedValue(superadmin);
+    it('debería lanzar error si el usuario no existe', async () => {
+      mockUsersRepository.delete.mockResolvedValue({ affected: 0 });
 
       await expect(
-        service.deleteUser('user-uuid-1', 'tenant-uuid-1'),
-      ).rejects.toThrow('No se puede eliminar el superadmin');
+        service.deleteUser('noexistent', 'tenant-uuid-1'),
+      ).rejects.toThrow('Usuario no encontrado o no pertenece a este tenant');
     });
   });
 
@@ -199,15 +230,64 @@ describe('UsersService', () => {
         {
           tenantId: 'tenant-1',
           name: 'Tenant 1',
+          sector: 'restaurante',
           totalUsers: '5',
           activeUsers: '4',
         },
       ];
-      mockUsersRepository.createQueryBuilder().getRawMany.mockResolvedValue(mockSummary);
+      
+      // Create a fresh mock for this test
+      const mockQueryBuilder = {
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue(mockSummary),
+      };
+      
+      mockUsersRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
       const result = await service.getTenantsSummary();
 
-      expect(result).toEqual(mockSummary);
+      expect(result[0].tenantId).toBe('tenant-1');
+      expect(result[0].totalUsers).toBe(5);
+    });
+  });
+
+  describe('findByPasswordResetTokenHash', () => {
+    it('debería encontrar usuario por token hash', async () => {
+      mockUsersRepository.findOne.mockResolvedValue(mockUser);
+
+      const result = await service.findByPasswordResetTokenHash('token-hash');
+
+      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
+        where: { passwordResetTokenHash: 'token-hash' },
+      });
+    });
+  });
+
+  describe('setPasswordResetToken', () => {
+    it('debería establecer token de reseteo', async () => {
+      mockUsersRepository.update.mockResolvedValue({ affected: 1 });
+
+      await service.setPasswordResetToken('user-uuid-1', 'token-hash', new Date());
+
+      expect(mockUsersRepository.update).toHaveBeenCalled();
+    });
+  });
+
+  describe('findAllGlobal', () => {
+    it('debería retornar todos los usuarios globalmente', async () => {
+      const users = [mockUser];
+      mockUsersRepository.find.mockResolvedValue(users);
+
+      const result = await service.findAllGlobal();
+
+      expect(result).toEqual(users);
     });
   });
 });

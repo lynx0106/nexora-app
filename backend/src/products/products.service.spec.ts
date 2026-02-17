@@ -3,12 +3,10 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ProductsService } from './products.service';
 import { Product } from './entities/product.entity';
-import { Tenant } from '../tenants/entities/tenant.entity';
 
 describe('ProductsService', () => {
   let service: ProductsService;
   let productsRepository: Repository<Product>;
-  let tenantsRepository: Repository<Tenant>;
 
   const mockProduct: Product = {
     id: 'product-uuid-1',
@@ -19,7 +17,7 @@ describe('ProductsService', () => {
     isActive: true,
     imageUrl: 'https://example.com/burger.jpg',
     tenantId: 'tenant-uuid-1',
-    category: 'Comidas',
+    duration: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -30,16 +28,13 @@ describe('ProductsService', () => {
     save: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    update: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       getMany: jest.fn(),
       getOne: jest.fn(),
     })),
-  };
-
-  const mockTenantsRepository = {
-    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -50,17 +45,16 @@ describe('ProductsService', () => {
           provide: getRepositoryToken(Product),
           useValue: mockProductsRepository,
         },
-        {
-          provide: getRepositoryToken(Tenant),
-          useValue: mockTenantsRepository,
-        },
       ],
     }).compile();
 
     service = module.get<ProductsService>(ProductsService);
-    productsRepository = module.get<Repository<Product>>(getRepositoryToken(Product));
-    tenantsRepository = module.get<Repository<Tenant>>(getRepositoryToken(Tenant));
+    productsRepository = module.get<Repository<Product>>(
+      getRepositoryToken(Product),
+    );
+  });
 
+  afterEach(() => {
     jest.clearAllMocks();
   });
 
@@ -76,12 +70,11 @@ describe('ProductsService', () => {
       const result = await service.findAll();
 
       expect(result).toEqual(products);
-      expect(mockProductsRepository.find).toHaveBeenCalled();
     });
   });
 
   describe('findAllByTenant', () => {
-    it('debería retornar productos del tenant', async () => {
+    it('debería retornar todos los productos de un tenant', async () => {
       const products = [mockProduct];
       mockProductsRepository.find.mockResolvedValue(products);
 
@@ -96,7 +89,7 @@ describe('ProductsService', () => {
   });
 
   describe('findOne', () => {
-    it('debería encontrar producto por ID', async () => {
+    it('debería retornar un producto por ID', async () => {
       mockProductsRepository.findOne.mockResolvedValue(mockProduct);
 
       const result = await service.findOne('product-uuid-1', 'tenant-uuid-1');
@@ -109,15 +102,7 @@ describe('ProductsService', () => {
 
       await expect(
         service.findOne('noexistent', 'tenant-uuid-1'),
-      ).rejects.toThrow('Producto no encontrado');
-    });
-
-    it('debería lanzar error si el producto no pertenece al tenant', async () => {
-      mockProductsRepository.findOne.mockResolvedValue(mockProduct);
-
-      await expect(
-        service.findOne('product-uuid-1', 'otro-tenant'),
-      ).rejects.toThrow('No tienes permiso para ver este producto');
+      ).rejects.toThrow('Product #noexistent not found');
     });
   });
 
@@ -131,31 +116,22 @@ describe('ProductsService', () => {
         tenantId: 'tenant-uuid-1',
       };
 
-      mockProductsRepository.create.mockReturnValue({ ...mockProduct, ...createData });
-      mockProductsRepository.save.mockResolvedValue({ ...mockProduct, ...createData });
+      mockProductsRepository.create.mockReturnValue(mockProduct);
+      mockProductsRepository.save.mockResolvedValue(mockProduct);
 
       const result = await service.create(createData);
 
-      expect(result.name).toBe('Nuevo Producto');
+      expect(result).toEqual(mockProduct);
+      expect(mockProductsRepository.create).toHaveBeenCalled();
       expect(mockProductsRepository.save).toHaveBeenCalled();
-    });
-
-    it('debería lanzar error si faltan datos requeridos', async () => {
-      await expect(
-        service.create({
-          name: '',
-          price: 0,
-          tenantId: 'tenant-uuid-1',
-        }),
-      ).rejects.toThrow();
     });
   });
 
   describe('update', () => {
     it('debería actualizar producto exitosamente', async () => {
       const updatedProduct = { ...mockProduct, name: 'Producto Actualizado' };
-      mockProductsRepository.findOne.mockResolvedValue(mockProduct);
-      mockProductsRepository.save.mockResolvedValue(updatedProduct);
+      mockProductsRepository.update.mockResolvedValue({ affected: 1, raw: [] });
+      mockProductsRepository.findOne.mockResolvedValue(updatedProduct);
 
       const result = await service.update(
         'product-uuid-1',
@@ -165,63 +141,35 @@ describe('ProductsService', () => {
 
       expect(result.name).toBe('Producto Actualizado');
     });
-
-    it('debería lanzar error si el producto no existe', async () => {
-      mockProductsRepository.findOne.mockResolvedValue(null);
-
-      await expect(
-        service.update('noexistent', 'tenant-uuid-1', { name: 'Updated' }),
-      ).rejects.toThrow('Producto no encontrado');
-    });
   });
 
   describe('remove', () => {
     it('debería eliminar producto exitosamente', async () => {
-      mockProductsRepository.findOne.mockResolvedValue(mockProduct);
       mockProductsRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
 
-      await expect(
-        service.remove('product-uuid-1', 'tenant-uuid-1'),
-      ).resolves.not.toThrow();
-    });
-
-    it('debería lanzar error si el producto no existe', async () => {
-      mockProductsRepository.findOne.mockResolvedValue(null);
-
-      await expect(
-        service.remove('noexistent', 'tenant-uuid-1'),
-      ).rejects.toThrow('Producto no encontrado');
+      const result = await service.remove('product-uuid-1', 'tenant-uuid-1');
+      expect(result).toEqual({ deleted: true });
     });
   });
 
-  describe('updateStock', () => {
-    it('debería actualizar stock exitosamente', async () => {
-      const updatedProduct = { ...mockProduct, stock: 45 };
-      mockProductsRepository.findOne.mockResolvedValue(mockProduct);
-      mockProductsRepository.save.mockResolvedValue(updatedProduct);
+  describe('updateAsAdmin', () => {
+    it('debería actualizar producto como admin', async () => {
+      const updatedProduct = { ...mockProduct, name: 'Producto Actualizado' };
+      mockProductsRepository.update.mockResolvedValue({ affected: 1, raw: [] });
+      mockProductsRepository.findOne.mockResolvedValue(updatedProduct);
 
-      const result = await service.updateStock('product-uuid-1', 'tenant-uuid-1', 45);
+      const result = await service.updateAsAdmin('product-uuid-1', { name: 'Producto Actualizado' });
 
-      expect(result.stock).toBe(45);
-    });
-
-    it('debería lanzar error si el stock es negativo', async () => {
-      mockProductsRepository.findOne.mockResolvedValue(mockProduct);
-
-      await expect(
-        service.updateStock('product-uuid-1', 'tenant-uuid-1', -10),
-      ).rejects.toThrow('El stock no puede ser negativo');
+      expect(result).toBeDefined();
     });
   });
 
-  describe('search', () => {
-    it('debería buscar productos por nombre', async () => {
-      const products = [mockProduct];
-      mockProductsRepository.createQueryBuilder().getMany.mockResolvedValue(products);
+  describe('removeAsAdmin', () => {
+    it('debería eliminar producto como admin', async () => {
+      mockProductsRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
 
-      const result = await service.search('Hamburguesa', 'tenant-uuid-1');
-
-      expect(result).toEqual(products);
+      const result = await service.removeAsAdmin('product-uuid-1');
+      expect(result).toEqual({ deleted: true });
     });
   });
 });

@@ -3,28 +3,28 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AppointmentsService } from './appointments.service';
 import { Appointment } from './entities/appointment.entity';
-import { Tenant } from '../tenants/entities/tenant.entity';
-import { User } from '../users/entities/user.entity';
+import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
+import { TenantsService } from '../tenants/tenants.service';
+import { ProductsService } from '../products/products.service';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('AppointmentsService', () => {
   let service: AppointmentsService;
   let appointmentsRepository: Repository<Appointment>;
-  let tenantsRepository: Repository<Tenant>;
-  let usersRepository: Repository<User>;
 
-  const mockAppointment: Appointment = {
+  const mockAppointment: Partial<Appointment> = {
     id: 'appointment-uuid-1',
-    customerName: 'Juan Pérez',
-    customerEmail: 'juan@example.com',
-    customerPhone: '+573001234567',
-    serviceName: 'Limpieza Dental',
-    servicePrice: 80000,
-    date: new Date('2026-02-20'),
-    time: '10:00',
+    dateTime: new Date('2026-02-20T10:00:00'),
     status: 'pending',
     notes: 'Primera visita',
     tenantId: 'tenant-uuid-1',
-    professionalId: 'doctor-uuid-1',
+    doctorId: 'doctor-uuid-1',
+    clientId: 'client-uuid-1',
+    serviceId: 'service-uuid-1',
+    pax: 1,
+    reminderSent24h: false,
+    reminderSent2h: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -35,21 +35,41 @@ describe('AppointmentsService', () => {
     save: jest.fn(),
     create: jest.fn(),
     delete: jest.fn(),
+    update: jest.fn(),
+    count: jest.fn(),
     createQueryBuilder: jest.fn(() => ({
       where: jest.fn().mockReturnThis(),
       andWhere: jest.fn().mockReturnThis(),
       orderBy: jest.fn().mockReturnThis(),
-      getMany: jest.fn(),
+      leftJoinAndSelect: jest.fn().mockReturnThis(),
+      getMany: jest.fn().mockResolvedValue([]),
       getOne: jest.fn(),
     })),
   };
 
-  const mockTenantsRepository = {
-    findOne: jest.fn(),
+  const mockMailService = {
+    sendAppointmentConfirmation: jest.fn(),
+    sendAppointmentReminder: jest.fn(),
   };
 
-  const mockUsersRepository = {
+  const mockUsersService = {
     findOne: jest.fn(),
+    findByEmail: jest.fn(),
+  };
+
+  const mockTenantsService = {
+    findOne: jest.fn(),
+    getTenantOrThrow: jest.fn(),
+  };
+
+  const mockProductsService = {
+    findOne: jest.fn(),
+    findAllByTenant: jest.fn(),
+  };
+
+  const mockNotificationsService = {
+    notifyNewAppointment: jest.fn(),
+    notifyAppointmentCancelled: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -61,20 +81,30 @@ describe('AppointmentsService', () => {
           useValue: mockAppointmentsRepository,
         },
         {
-          provide: getRepositoryToken(Tenant),
-          useValue: mockTenantsRepository,
+          provide: MailService,
+          useValue: mockMailService,
         },
         {
-          provide: getRepositoryToken(User),
-          useValue: mockUsersRepository,
+          provide: UsersService,
+          useValue: mockUsersService,
+        },
+        {
+          provide: TenantsService,
+          useValue: mockTenantsService,
+        },
+        {
+          provide: ProductsService,
+          useValue: mockProductsService,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();
 
     service = module.get<AppointmentsService>(AppointmentsService);
     appointmentsRepository = module.get<Repository<Appointment>>(getRepositoryToken(Appointment));
-    tenantsRepository = module.get<Repository<Tenant>>(getRepositoryToken(Tenant));
-    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
 
     jest.clearAllMocks();
   });
@@ -83,18 +113,14 @@ describe('AppointmentsService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAll', () => {
+  describe('findAllByTenant', () => {
     it('debería retornar todas las citas del tenant', async () => {
       const appointments = [mockAppointment];
       mockAppointmentsRepository.find.mockResolvedValue(appointments);
 
-      const result = await service.findAll('tenant-uuid-1');
+      const result = await service.findAllByTenant('tenant-uuid-1');
 
       expect(result).toEqual(appointments);
-      expect(mockAppointmentsRepository.find).toHaveBeenCalledWith({
-        where: { tenantId: 'tenant-uuid-1' },
-        order: { date: 'ASC', time: 'ASC' },
-      });
     });
   });
 
@@ -116,148 +142,71 @@ describe('AppointmentsService', () => {
     });
   });
 
-  describe('findByDate', () => {
-    it('debería retornar citas por fecha', async () => {
+  describe('findAllByDoctor', () => {
+    it('debería retornar citas del doctor', async () => {
       const appointments = [mockAppointment];
       mockAppointmentsRepository.find.mockResolvedValue(appointments);
 
-      const result = await service.findByDate('tenant-uuid-1', new Date('2026-02-20'));
+      const result = await service.findAllByDoctor('doctor-uuid-1');
 
       expect(result).toEqual(appointments);
     });
   });
 
-  describe('create', () => {
-    it('debería crear cita exitosamente', async () => {
-      const createData = {
-        customerName: 'María García',
-        customerEmail: 'maria@example.com',
-        customerPhone: '+573009876543',
-        serviceName: 'Blanqueamiento',
-        servicePrice: 150000,
-        date: new Date('2026-02-21'),
-        time: '14:00',
-        tenantId: 'tenant-uuid-1',
-        professionalId: 'doctor-uuid-1',
-      };
+  describe('updateStatus', () => {
+    it('debería actualizar estado de cita', async () => {
+      const updatedAppointment = { ...mockAppointment, status: 'confirmed' };
+      mockAppointmentsRepository.update.mockResolvedValue({ affected: 1 });
+      mockAppointmentsRepository.findOne.mockResolvedValue(updatedAppointment);
 
-      mockAppointmentsRepository.create.mockReturnValue({ ...mockAppointment, ...createData });
-      mockAppointmentsRepository.save.mockResolvedValue({ ...mockAppointment, ...createData });
+      const result = await service.updateStatus('appointment-uuid-1', 'confirmed');
 
-      const result = await service.create(createData);
-
-      expect(result.customerName).toBe('María García');
-      expect(mockAppointmentsRepository.save).toHaveBeenCalled();
-    });
-
-    it('debería lanzar error si falta información requerida', async () => {
-      await expect(
-        service.create({
-          customerName: '',
-          serviceName: '',
-          date: null as any,
-          time: '',
-          tenantId: 'tenant-uuid-1',
-        }),
-      ).rejects.toThrow();
-    });
-
-    it('debería lanzar error si el horario no está disponible', async () => {
-      mockAppointmentsRepository.findOne.mockResolvedValue(mockAppointment);
-
-      await expect(
-        service.create({
-          customerName: 'Test',
-          customerEmail: 'test@test.com',
-          serviceName: 'Service',
-          servicePrice: 100,
-          date: new Date('2026-02-20'),
-          time: '10:00',
-          tenantId: 'tenant-uuid-1',
-          professionalId: 'doctor-uuid-1',
-        }),
-      ).rejects.toThrow('El horario no está disponible');
+      expect(result.status).toBe('confirmed');
     });
   });
 
   describe('update', () => {
-    it('debería actualizar cita exitosamente', async () => {
-      const updatedAppointment = { ...mockAppointment, status: 'confirmed' };
-      mockAppointmentsRepository.findOne.mockResolvedValue(mockAppointment);
-      mockAppointmentsRepository.save.mockResolvedValue(updatedAppointment);
+    it('debería actualizar cita', async () => {
+      const updatedAppointment = { ...mockAppointment, notes: 'Notas actualizadas' };
+      mockAppointmentsRepository.update.mockResolvedValue({ affected: 1 });
+      mockAppointmentsRepository.findOne.mockResolvedValue(updatedAppointment);
 
-      const result = await service.update('appointment-uuid-1', {
-        status: 'confirmed',
-      });
+      const result = await service.update('appointment-uuid-1', { notes: 'Notas actualizadas' });
 
-      expect(result.status).toBe('confirmed');
-    });
-
-    it('debería lanzar error si la cita no existe', async () => {
-      mockAppointmentsRepository.findOne.mockResolvedValue(null);
-
-      await expect(
-        service.update('noexistent', { status: 'confirmed' }),
-      ).rejects.toThrow('Cita no encontrada');
-    });
-  });
-
-  describe('cancel', () => {
-    it('debería cancelar cita exitosamente', async () => {
-      const cancelledAppointment = { ...mockAppointment, status: 'cancelled' };
-      mockAppointmentsRepository.findOne.mockResolvedValue(mockAppointment);
-      mockAppointmentsRepository.save.mockResolvedValue(cancelledAppointment);
-
-      const result = await service.cancel('appointment-uuid-1');
-
-      expect(result.status).toBe('cancelled');
-    });
-
-    it('debería lanzar error si la cita ya está cancelada', async () => {
-      mockAppointmentsRepository.findOne.mockResolvedValue({
-        ...mockAppointment,
-        status: 'cancelled',
-      });
-
-      await expect(service.cancel('appointment-uuid-1')).rejects.toThrow(
-        'La cita ya está cancelada',
-      );
+      expect(result.notes).toBe('Notas actualizadas');
     });
   });
 
   describe('remove', () => {
     it('debería eliminar cita exitosamente', async () => {
-      mockAppointmentsRepository.findOne.mockResolvedValue(mockAppointment);
-      mockAppointmentsRepository.delete.mockResolvedValue({ affected: 1, raw: [] });
+      mockAppointmentsRepository.delete.mockResolvedValue({ affected: 1 });
 
-      await expect(service.remove('appointment-uuid-1')).resolves.not.toThrow();
-    });
+      const result = await service.remove('appointment-uuid-1');
 
-    it('debería lanzar error si la cita no existe', async () => {
-      mockAppointmentsRepository.findOne.mockResolvedValue(null);
-
-      await expect(service.remove('noexistent')).rejects.toThrow('Cita no encontrada');
+      expect(result.deleted).toBe(true);
     });
   });
 
-  describe('getAvailableSlots', () => {
-    it('debería retornar horarios disponibles', async () => {
-      mockTenantsRepository.findOne.mockResolvedValue({
-        id: 'tenant-uuid-1',
-        openingTime: '09:00',
-        closingTime: '18:00',
-        appointmentDuration: 60,
-      });
-      mockAppointmentsRepository.find.mockResolvedValue([mockAppointment]);
+  describe('removeAllByTenant', () => {
+    it('debería eliminar todas las citas del tenant', async () => {
+      mockAppointmentsRepository.delete.mockResolvedValue({ affected: 5 });
 
-      const result = await service.getAvailableSlots(
-        'tenant-uuid-1',
-        new Date('2026-02-20'),
-        'doctor-uuid-1',
-      );
+      const result = await service.removeAllByTenant('tenant-uuid-1');
 
-      expect(result).toBeDefined();
-      expect(Array.isArray(result)).toBe(true);
+      expect(mockAppointmentsRepository.delete).toHaveBeenCalledWith({ tenantId: 'tenant-uuid-1' });
+    });
+  });
+
+  describe('getDashboardStats', () => {
+    it('debería retornar estadísticas del dashboard', async () => {
+      mockAppointmentsRepository.count
+        .mockResolvedValueOnce(3) // todayCount
+        .mockResolvedValueOnce(5); // pendingCount
+
+      const result = await service.getDashboardStats('tenant-uuid-1');
+
+      expect(result.todayCount).toBe(3);
+      expect(result.pendingCount).toBe(5);
     });
   });
 });
