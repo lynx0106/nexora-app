@@ -22,6 +22,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { AuditModule } from './audit/audit.module';
 import { ReportsModule } from './reports/reports.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import { InventoryModule } from './inventory/inventory.module';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -87,6 +88,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     AuditModule,
     ReportsModule,
     InvitationsModule,
+    InventoryModule,
   ],
   controllers: [AppController],
   providers: [

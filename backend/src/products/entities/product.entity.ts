@@ -36,6 +36,12 @@ export class Product {
   @Column({ default: 0 })
   stock: number;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+  cost: number; // Costo del producto para cálculo de margen
+
+  @Column({ type: 'int', default: 0 })
+  minStock: number; // Stock mínimo para alertas
+
   @Column({ default: true })
   isActive: boolean;
 
