@@ -13,12 +13,12 @@ Crear una aplicación móvil nativa (React Native) que consuma la API existente 
 | **FASE 1: Configuración Base** | ✅ Completado | 100% |
 | **FASE 2: Autenticación** | ✅ Completado | 100% |
 | **FASE 3: Catálogo y Productos** | ✅ Completado | 100% |
-| **FASE 4: Pedidos y Pagos** | ⏳ Pendiente | 0% |
+| **FASE 4: Pedidos y Pagos** | ✅ Completado | 100% |
 | **FASE 5: Chat y Citas** | ⏳ Pendiente | 0% |
 | **FASE 6: Dashboard Admin** | ⏳ Pendiente | 0% |
 | **FASE 7: Testing y Deploy** | ⏳ Pendiente | 0% |
 
-**Progreso Total: 50% (4/8 fases)**
+**Progreso Total: 62.5% (5/8 fases)**
 
 ---
 
@@ -210,27 +210,34 @@ nexora-mobile/
 
 ---
 
-## 📋 FASE 4: Pedidos y Pagos ⏳ (0%)
+## 📋 FASE 4: Pedidos y Pagos ✅ (100%)
 
 **Tiempo estimado:** 4-5 días
 
 ### Checklist
-- [ ] Crear carrito de compras
-- [ ] Implementar Context de Carrito
-- [ ] Crear pantalla de checkout
-- [ ] Integrar MercadoPago
-- [ ] Crear pantalla de confirmación
-- [ ] Crear historial de pedidos
-- [ ] Crear detalle de pedido
+- [x] Crear carrito de compras
+- [x] Implementar Context de Carrito (CartContext)
+- [x] Crear pantalla de checkout
+- [x] Integrar link de pago Wompi
+- [x] Crear pantalla de confirmación
+- [x] Crear historial de pedidos
+- [x] Crear detalle de pedido
+- [x] Tests pasando (26 tests)
 
-### Pantallas
+### Pantallas Implementadas
 | Pantalla | Descripción | Endpoint |
 |----------|-------------|----------|
-| Cart | Carrito de compras | Local state |
-| Checkout | Proceso de pago | POST /orders |
-| Payment | Pago MercadoPago | POST /payments/create-preference |
-| Orders | Historial de pedidos | GET /orders |
-| OrderDetail | Detalle de pedido | GET /orders/:id |
+| Cart | Carrito de compras con persistencia AsyncStorage | Local state |
+| Checkout | Proceso de pago con formulario de cliente | POST /orders |
+| Orders | Historial de pedidos con estados | GET /orders |
+| OrderDetail | Detalle de pedido con link de pago | GET /orders/:id, GET /orders/:id/payment-link |
+
+### Componentes
+- `CartContext` - Context para carrito con persistencia
+- `CartScreen` - Pantalla del carrito con gestión de cantidades
+- `CheckoutScreen` - Formulario de checkout
+- `OrdersScreen` - Lista de pedidos con pull-to-refresh
+- `OrderDetailScreen` - Detalle con estados y pago
 
 ---
 
@@ -362,4 +369,4 @@ nexora-mobile/
 ---
 
 *Documento creado: 17 de febrero de 2026*
-*Última actualización: FASE 0 completada*
+*Última actualización: FASE 4 completada - Sistema de Pedidos*
