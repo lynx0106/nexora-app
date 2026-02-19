@@ -7,6 +7,10 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { initSentry } from './config/sentry.config';
+
+// Initialize Sentry before bootstrap
+initSentry();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);

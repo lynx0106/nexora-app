@@ -18,4 +18,9 @@ export class DashboardController {
   async getSalesChart(@Param('tenantId') tenantId: string) {
     return this.dashboardService.getSalesChart(tenantId);
   }
+
+  @Get('metrics/:tenantId')
+  async getMetrics(@Param('tenantId') tenantId: string, @Req() req: any) {
+    return this.dashboardService.getDashboardByBusinessType(tenantId);
+  }
 }

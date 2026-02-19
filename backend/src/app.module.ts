@@ -23,6 +23,7 @@ import { AuditModule } from './audit/audit.module';
 import { ReportsModule } from './reports/reports.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { PushModule } from './push/push.module';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -35,8 +36,10 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     ThrottlerModule.forRoot({
       throttlers: [
         {
+          // Rate limiting: 100 requests per 60 seconds by default
+          // Production recommendation: 100-200 requests per minute
           ttl: Number(process.env.RATE_LIMIT_TTL || 60),
-          limit: Number(process.env.RATE_LIMIT_LIMIT || 120),
+          limit: Number(process.env.RATE_LIMIT_LIMIT || 100),
         },
       ],
     }),
@@ -89,6 +92,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     ReportsModule,
     InvitationsModule,
     InventoryModule,
+    PushModule,
   ],
   controllers: [AppController],
   providers: [

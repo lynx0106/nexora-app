@@ -1,69 +1,73 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { User } from './entities/user.entity';
+import * as bcrypt from 'bcrypt';
+
+// Mock bcrypt
+jest.mock('bcrypt', () => ({
+  hash: jest.fn().mockResolvedValue('hashedPassword123'),
+  compare: jest.fn().mockResolvedValue(true),
+}));
 
 describe('UsersService', () => {
   let service: UsersService;
-  let usersRepository: Repository<User>;
+  let userRepo: jest.Mocked<Repository<User>>;
 
-  const mockUser: Partial<User> = {
-    id: 'user-uuid-1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john@example.com',
-    passwordHash: 'hashedpassword',
-    phone: '+573001234567',
-    address: '123 Main St',
-    avatarUrl: 'https://example.com/avatar.jpg',
-    isActive: true,
+  const mockUser = {
+    id: 'user-123',
+    firstName: 'Test',
+    lastName: 'User',
+    email: 'test@example.com',
+    phone: '+1234567890',
+    passwordHash: 'hashedPassword123',
+    tenantId: 'tenant-123',
     role: 'user',
-    tenantId: 'tenant-uuid-1',
-    isAiChatActive: true,
-    passwordResetTokenHash: null,
-    passwordResetTokenExpiresAt: null,
+    isActive: true,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
 
-  const mockUsersRepository = {
-    findOne: jest.fn(),
-    find: jest.fn(),
-    save: jest.fn(),
-    create: jest.fn(),
-    delete: jest.fn(),
-    update: jest.fn(),
-    count: jest.fn(),
-    createQueryBuilder: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      addSelect: jest.fn().mockReturnThis(),
-      leftJoin: jest.fn().mockReturnThis(),
-      where: jest.fn().mockReturnThis(),
-      andWhere: jest.fn().mockReturnThis(),
-      groupBy: jest.fn().mockReturnThis(),
-      addGroupBy: jest.fn().mockReturnThis(),
-      orderBy: jest.fn().mockReturnThis(),
-      getRawMany: jest.fn(),
-    })),
-  };
-
   beforeEach(async () => {
+    const mockUserRepo = {
+      create: jest.fn(),
+      save: jest.fn(),
+      find: jest.fn(),
+      findOne: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+      createQueryBuilder: jest.fn(() => ({
+        leftJoin: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        addSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        addGroupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue([
+          {
+            tenantId: 'tenant-123',
+            name: 'Test Tenant',
+            sector: 'restaurant',
+            totalUsers: '10',
+            activeUsers: '8',
+          },
+        ]),
+      })),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
-        {
-          provide: getRepositoryToken(User),
-          useValue: mockUsersRepository,
-        },
+        { provide: getRepositoryToken(User), useValue: mockUserRepo },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
-    usersRepository = module.get<Repository<User>>(getRepositoryToken(User));
-
-    jest.clearAllMocks();
+    userRepo = module.get(getRepositoryToken(User));
   });
 
   it('should be defined', () => {
@@ -71,223 +75,372 @@ describe('UsersService', () => {
   });
 
   describe('findByEmail', () => {
-    it('debería encontrar usuario por email', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
+    it('should return a user by email', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
 
-      const result = await service.findByEmail('john@example.com');
+      const result = await service.findByEmail('test@example.com');
 
       expect(result).toEqual(mockUser);
-      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
-        where: { email: 'john@example.com' },
+      expect(userRepo.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@example.com' },
       });
     });
 
-    it('debería retornar null si el usuario no existe', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(null);
+    it('should return null if user not found', async () => {
+      userRepo.findOne.mockResolvedValue(null);
 
-      const result = await service.findByEmail('noexistent@example.com');
+      const result = await service.findByEmail('nonexistent@example.com');
 
       expect(result).toBeNull();
     });
   });
 
   describe('findOne', () => {
-    it('debería encontrar usuario por ID', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
+    it('should return a user by id', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
 
-      const result = await service.findOne('user-uuid-1');
+      const result = await service.findOne('user-123');
 
       expect(result).toEqual(mockUser);
-      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
-        where: { id: 'user-uuid-1' },
-      });
+      expect(userRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-123' } });
+    });
+  });
+
+  describe('createUser', () => {
+    it('should create a user successfully', async () => {
+      const userData = {
+        firstName: 'New',
+        lastName: 'User',
+        email: 'new@example.com',
+        passwordHash: 'hashedPassword',
+        tenantId: 'tenant-123',
+      };
+
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      const result = await service.createUser(userData);
+
+      expect(result).toBeDefined();
+      expect(userRepo.create).toHaveBeenCalledWith(userData);
+      expect(userRepo.save).toHaveBeenCalled();
     });
   });
 
   describe('findByTenant', () => {
-    it('debería retornar usuarios del tenant', async () => {
-      const users = [mockUser];
-      mockUsersRepository.find.mockResolvedValue(users);
+    it('should return all users for a tenant', async () => {
+      userRepo.find.mockResolvedValue([mockUser] as any);
 
-      const result = await service.findByTenant('tenant-uuid-1');
+      const result = await service.findByTenant('tenant-123');
 
-      expect(result).toEqual(users);
-      expect(mockUsersRepository.find).toHaveBeenCalledWith({
-        where: { tenantId: 'tenant-uuid-1' },
+      expect(result).toEqual([mockUser]);
+      expect(userRepo.find).toHaveBeenCalledWith({
+        where: { tenantId: 'tenant-123' },
         order: { createdAt: 'ASC' },
       });
     });
   });
 
-  describe('createUser', () => {
-    it('debería crear un usuario exitosamente', async () => {
-      const createUserData = {
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane@example.com',
-        passwordHash: 'hashedpassword',
-        tenantId: 'tenant-uuid-1',
-        role: 'user',
-      };
+  describe('update', () => {
+    it('should update a user', async () => {
+      const updatedUser = { ...mockUser, firstName: 'Updated' };
+      userRepo.update.mockResolvedValue({ affected: 1 } as any);
+      userRepo.findOne.mockResolvedValue(updatedUser as any);
 
-      mockUsersRepository.create.mockReturnValue({ ...mockUser, ...createUserData });
-      mockUsersRepository.save.mockResolvedValue({ ...mockUser, ...createUserData });
+      const result = await service.update('user-123', { firstName: 'Updated' });
 
-      const result = await service.createUser(createUserData);
-
-      expect(result.email).toBe('jane@example.com');
-      expect(mockUsersRepository.save).toHaveBeenCalled();
+      expect(result?.firstName).toBe('Updated');
+      expect(userRepo.update).toHaveBeenCalledWith('user-123', {
+        firstName: 'Updated',
+      });
     });
   });
 
   describe('createUserForTenant', () => {
-    it('debería crear usuario para tenant exitosamente', async () => {
+    it('should create a user for a tenant with hashed password', async () => {
       const createData = {
-        firstName: 'Jane',
-        lastName: 'Doe',
-        email: 'jane@example.com',
-        password: 'password123',
+        firstName: 'New',
+        lastName: 'User',
+        email: 'new@example.com',
+        password: 'plainPassword123',
+        role: 'user',
       };
 
-      mockUsersRepository.findOne.mockResolvedValue(null);
-      mockUsersRepository.create.mockReturnValue({ ...mockUser, ...createData });
-      mockUsersRepository.save.mockResolvedValue({ ...mockUser, ...createData });
+      userRepo.findOne.mockResolvedValue(null); // No existing user
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
 
-      const result = await service.createUserForTenant('tenant-uuid-1', createData);
+      const result = await service.createUserForTenant('tenant-123', createData);
 
-      expect(result.email).toBe('jane@example.com');
+      expect(result).toBeDefined();
+      expect(bcrypt.hash).toHaveBeenCalledWith('plainPassword123', 10);
+      expect(userRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          passwordHash: 'hashedPassword123',
+          tenantId: 'tenant-123',
+        }),
+      );
     });
 
-    it('debería lanzar error si el email ya existe', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
+    it('should throw ConflictException if email already exists', async () => {
+      const createData = {
+        firstName: 'New',
+        lastName: 'User',
+        email: 'existing@example.com',
+        password: 'plainPassword123',
+      };
+
+      userRepo.findOne.mockResolvedValue(mockUser as any); // Existing user
 
       await expect(
-        service.createUserForTenant('tenant-uuid-1', {
-          firstName: 'John',
-          lastName: 'Doe',
-          email: 'john@example.com',
-          password: 'password',
-        }),
+        service.createUserForTenant('tenant-123', createData),
       ).rejects.toThrow(ConflictException);
     });
   });
 
-  describe('update', () => {
-    it('debería actualizar usuario exitosamente', async () => {
-      const updatedUser = { ...mockUser, firstName: 'Jane' };
-      mockUsersRepository.update.mockResolvedValue({ affected: 1 });
-      mockUsersRepository.findOne.mockResolvedValue(updatedUser);
-
-      const result = await service.update('user-uuid-1', { firstName: 'Jane' });
-
-      expect(result.firstName).toBe('Jane');
-    });
-  });
-
   describe('updateUser', () => {
-    it('debería actualizar usuario exitosamente', async () => {
-      const updatedUser = { ...mockUser, firstName: 'Jane' };
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
-      mockUsersRepository.save.mockResolvedValue(updatedUser);
+    it('should update user fields', async () => {
+      const updateData = {
+        firstName: 'Updated',
+        lastName: 'Name',
+      };
 
-      const result = await service.updateUser('user-uuid-1', 'tenant-uuid-1', {
-        firstName: 'Jane',
-      });
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+      userRepo.save.mockResolvedValue({ ...mockUser, ...updateData } as any);
 
-      expect(result.firstName).toBe('Jane');
+      const result = await service.updateUser('user-123', 'tenant-123', updateData);
+
+      expect(result?.firstName).toBe('Updated');
+      expect(userRepo.save).toHaveBeenCalled();
     });
 
-    it('debería lanzar error si el usuario no existe', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(null);
+    it('should hash password when updating password', async () => {
+      const updateData = { password: 'newPassword123' };
+
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      await service.updateUser('user-123', 'tenant-123', updateData);
+
+      expect(bcrypt.hash).toHaveBeenCalledWith('newPassword123', 10);
+    });
+
+    it('should throw error if user not found', async () => {
+      userRepo.findOne.mockResolvedValue(null);
 
       await expect(
-        service.updateUser('noexistent', 'tenant-uuid-1', { firstName: 'Jane' }),
+        service.updateUser('nonexistent', 'tenant-123', { firstName: 'Test' }),
       ).rejects.toThrow('Usuario no encontrado');
+    });
+
+    it('should throw error if email is already in use by another user', async () => {
+      const updateData = { email: 'another@example.com' };
+      const existingUser = { ...mockUser, id: 'different-id' };
+
+      userRepo.findOne
+        .mockResolvedValueOnce(mockUser as any) // First call for finding user
+        .mockResolvedValueOnce(existingUser as any); // Second call for email check
+
+      await expect(
+        service.updateUser('user-123', 'tenant-123', updateData),
+      ).rejects.toThrow('El correo ya está en uso');
     });
   });
 
   describe('deleteUser', () => {
-    it('debería eliminar usuario exitosamente', async () => {
-      mockUsersRepository.delete.mockResolvedValue({ affected: 1 });
+    it('should delete a user', async () => {
+      userRepo.delete.mockResolvedValue({ affected: 1 } as any);
 
-      const result = await service.deleteUser('user-uuid-1', 'tenant-uuid-1');
+      const result = await service.deleteUser('user-123', 'tenant-123');
 
       expect(result).toBe(true);
+      expect(userRepo.delete).toHaveBeenCalledWith({
+        id: 'user-123',
+        tenantId: 'tenant-123',
+      });
     });
 
-    it('debería lanzar error si el usuario no existe', async () => {
-      mockUsersRepository.delete.mockResolvedValue({ affected: 0 });
+    it('should throw error if user not found', async () => {
+      userRepo.delete.mockResolvedValue({ affected: 0 } as any);
 
       await expect(
-        service.deleteUser('noexistent', 'tenant-uuid-1'),
+        service.deleteUser('nonexistent', 'tenant-123'),
       ).rejects.toThrow('Usuario no encontrado o no pertenece a este tenant');
     });
   });
 
   describe('getTenantsSummary', () => {
-    it('debería retornar resumen de tenants', async () => {
-      const mockSummary = [
-        {
-          tenantId: 'tenant-1',
-          name: 'Tenant 1',
-          sector: 'restaurante',
-          totalUsers: '5',
-          activeUsers: '4',
-        },
-      ];
-      
-      // Create a fresh mock for this test
-      const mockQueryBuilder = {
-        select: jest.fn().mockReturnThis(),
-        addSelect: jest.fn().mockReturnThis(),
-        leftJoin: jest.fn().mockReturnThis(),
-        where: jest.fn().mockReturnThis(),
-        andWhere: jest.fn().mockReturnThis(),
-        groupBy: jest.fn().mockReturnThis(),
-        addGroupBy: jest.fn().mockReturnThis(),
-        orderBy: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue(mockSummary),
-      };
-      
-      mockUsersRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
-
+    it('should return tenants summary with user counts', async () => {
       const result = await service.getTenantsSummary();
 
-      expect(result[0].tenantId).toBe('tenant-1');
-      expect(result[0].totalUsers).toBe(5);
-    });
-  });
-
-  describe('findByPasswordResetTokenHash', () => {
-    it('debería encontrar usuario por token hash', async () => {
-      mockUsersRepository.findOne.mockResolvedValue(mockUser);
-
-      const result = await service.findByPasswordResetTokenHash('token-hash');
-
-      expect(mockUsersRepository.findOne).toHaveBeenCalledWith({
-        where: { passwordResetTokenHash: 'token-hash' },
-      });
+      expect(result).toBeDefined();
+      expect(result.length).toBeGreaterThan(0);
+      expect(result[0]).toHaveProperty('tenantId');
+      expect(result[0]).toHaveProperty('totalUsers');
+      expect(result[0]).toHaveProperty('activeUsers');
     });
   });
 
   describe('setPasswordResetToken', () => {
-    it('debería establecer token de reseteo', async () => {
-      mockUsersRepository.update.mockResolvedValue({ affected: 1 });
+    it('should set password reset token for user', async () => {
+      userRepo.update.mockResolvedValue({ affected: 1 } as any);
 
-      await service.setPasswordResetToken('user-uuid-1', 'token-hash', new Date());
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour
+      await service.setPasswordResetToken('user-123', 'tokenHash', expiresAt);
 
-      expect(mockUsersRepository.update).toHaveBeenCalled();
+      expect(userRepo.update).toHaveBeenCalledWith('user-123', {
+        passwordResetTokenHash: 'tokenHash',
+        passwordResetTokenExpiresAt: expiresAt,
+      });
+    });
+  });
+
+  describe('findByPasswordResetTokenHash', () => {
+    it('should find user by reset token hash', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+
+      const result = await service.findByPasswordResetTokenHash('tokenHash');
+
+      expect(result).toEqual(mockUser);
+      expect(userRepo.findOne).toHaveBeenCalledWith({
+        where: { passwordResetTokenHash: 'tokenHash' },
+      });
+    });
+  });
+
+  describe('seedSuperAdmin', () => {
+    it('should create superadmin if not exists', async () => {
+      userRepo.findOne.mockResolvedValue(null);
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedSuperAdmin();
+
+      expect(result.message).toBe('Superadmin created successfully');
+      expect(bcrypt.hash).toHaveBeenCalled();
+    });
+
+    it('should update superadmin if exists', async () => {
+      const existingAdmin = {
+        ...mockUser,
+        email: 'superadmin@saas.com',
+        role: 'superadmin',
+      };
+      userRepo.findOne.mockResolvedValue(existingAdmin as any);
+      userRepo.save.mockResolvedValue(existingAdmin as any);
+
+      const result = await service.seedSuperAdmin();
+
+      expect(result.message).toBe('Superadmin updated (password reset)');
+    });
+  });
+
+  describe('findForReport', () => {
+    it('should return users for report within date range', async () => {
+      userRepo.find.mockResolvedValue([mockUser] as any);
+
+      const start = new Date('2024-01-01');
+      const end = new Date('2024-12-31');
+      const result = await service.findForReport('tenant-123', start, end);
+
+      expect(result).toEqual([mockUser]);
+      expect(userRepo.find).toHaveBeenCalledWith({
+        where: {
+          tenantId: 'tenant-123',
+          createdAt: expect.anything(),
+        },
+        order: { createdAt: 'DESC' },
+      });
     });
   });
 
   describe('findAllGlobal', () => {
-    it('debería retornar todos los usuarios globalmente', async () => {
-      const users = [mockUser];
-      mockUsersRepository.find.mockResolvedValue(users);
+    it('should return all users globally', async () => {
+      userRepo.find.mockResolvedValue([mockUser] as any);
 
       const result = await service.findAllGlobal();
 
-      expect(result).toEqual(users);
+      expect(result).toEqual([mockUser]);
+      expect(userRepo.find).toHaveBeenCalledWith({
+        order: { tenantId: 'ASC', firstName: 'ASC' },
+      });
+    });
+  });
+
+  describe('findAllUsersAllTenants', () => {
+    it('should return all users from all tenants', async () => {
+      userRepo.find.mockResolvedValue([mockUser] as any);
+
+      const result = await service.findAllUsersAllTenants();
+
+      expect(result).toEqual([mockUser]);
+      expect(userRepo.find).toHaveBeenCalledWith({
+        order: { tenantId: 'ASC', createdAt: 'ASC' },
+      });
+    });
+  });
+
+  describe('seedDoctors', () => {
+    it('should seed doctors for a tenant', async () => {
+      userRepo.findOne.mockResolvedValue(null);
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedDoctors('clinica-test');
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(2);
+    });
+
+    it('should return existing doctors if already exist', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedDoctors('clinica-test');
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('seedClients', () => {
+    it('should seed clients for a tenant', async () => {
+      userRepo.findOne.mockResolvedValue(null);
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedClients('tenant-123');
+
+      expect(result).toBeDefined();
+      expect(result.length).toBe(4);
+    });
+
+    it('should return existing clients if already exist', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedClients('tenant-123');
+
+      expect(result).toBeDefined();
+    });
+  });
+
+  describe('seedDemoUsers', () => {
+    it('should seed demo users', async () => {
+      userRepo.findOne.mockResolvedValue(null);
+      userRepo.create.mockReturnValue(mockUser as any);
+      userRepo.save.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedDemoUsers();
+
+      expect(result.message).toBe('Demo users seeded');
+      expect(result.count).toBe(4);
+      expect(result.demoPassword).toBe('Demo123!');
+    });
+
+    it('should return existing demo users if already exist', async () => {
+      userRepo.findOne.mockResolvedValue(mockUser as any);
+
+      const result = await service.seedDemoUsers();
+
+      expect(result.count).toBe(4);
     });
   });
 });

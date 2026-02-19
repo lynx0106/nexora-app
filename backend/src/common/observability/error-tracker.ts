@@ -3,6 +3,7 @@ type ErrorContext = {
   method?: string;
   path?: string;
   statusCode?: number;
+  code?: string;
   tenantId?: string;
   userId?: string;
 };

@@ -42,6 +42,8 @@
     "@nestjs/throttler": "^6.4.0",
     "@nestjs/typeorm": "^11.0.0",
     "@nestjs/websockets": "^11.1.12",
+    "@sentry/nestjs": "^10.39.0",
+    "@sentry/profiling-node": "^10.39.0",
     "@supabase/supabase-js": "^2.96.0",
     "@types/cron": "^2.0.1",
     "@types/multer": "^2.0.0",
@@ -104,9 +106,23 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "**/*.(t|j)s"
+      "**/*.(t|j)s",
+      "!**/*.module.ts",
+      "!**/*.entity.ts",
+      "!**/*.dto.ts",
+      "!**/*.gateway.ts",
+      "!**/*.controller.ts",
+      "!**/main.ts"
     ],
     "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "branches": 30,
+        "functions": 40,
+        "lines": 40,
+        "statements": 40
+      }
+    }
   }
 }
