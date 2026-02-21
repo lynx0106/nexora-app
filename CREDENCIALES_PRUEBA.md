@@ -1,151 +1,146 @@
 # Credenciales de Prueba - Nexora App
 
-## Credenciales Superadmin (Sistema)
+## 📋 Información General
 
-| Email | Password | Rol |
-|-------|----------|-----|
-| superadmin@saas.com | SuperAdmin2024! | superadmin |
-
----
-
-## Tenants de Demostración
-
-### 1. Restaurante Demo (restaurante-demo)
-
-**Admin del Tenant:**
-- Email: admin@restaurante.com
-- Password: admin123
-- Rol: user
-
-**Usuarios de Prueba:**
-| Email | Password | Rol |
-|-------|----------|-----|
-| cliente1@restaurante.com | password123 | client |
-| admin@restaurante.com | admin123 | user |
-| user@restaurante.com | user123 | user |
-
-**Productos:**
-- Hamburguesa Clásica - $15,000
-- Hamburguesa Deluxe - $15,000
-
-**Pedidos de Prueba:**
-- Pedido #1: Juan Pérez - 2 Hamburguesas Clásicas - $30,000 (pendiente)
-- Pedido #2: Pedro Gómez - 1 Hamburguesa Clásica + 1 Deluxe - $30,000 (pendiente)
+**Fecha de creación:** 2026-02-20
+**Entorno:** Producción (Railway)
+**URL API:** https://nexora-app-production-3199.up.railway.app
 
 ---
 
-### 2. Clínica Dental Demo (clinica-demo)
+## 👑 Superadmin
 
-**Admin del Tenant:**
-- Email: admin@clinica.com
-- Password: admin123
-- Rol: user
-
-**Usuarios de Prueba:**
-| Email | Password | Rol |
-|-------|----------|-----|
-| cliente1@clinica.com | password123 | client |
-| user@clinica.com | user123 | user |
-| doctor@clinica.com | doctor123 | user |
-
-**Servicios:**
-- Limpieza Dental - $80,000
-
-**Citas de Prueba:**
-- Cita #1: Maria Lopez - 20/Feb/2026 10:00 - Limpieza Dental (pendiente)
-- Cita #2: Carlos Martinez - 22/Feb/2026 11:00 - Control dental (pendiente)
-- Cita #3: Laura Sanchez - 23/Feb/2026 15:30 - Blanqueamiento (pendiente)
+| Campo | Valor |
+|-------|-------|
+| Email | superadmin@saas.com |
+| Password | SuperAdmin2024! |
+| Rol | superadmin |
 
 ---
 
-### 3. Tienda de Ropa Demo (tienda-demo)
+## 🏢 Empresa 1: El Sabor Latino
 
-**Admin del Tenant:**
-- Email: admin@tienda.com
-- Password: admin123
-- Rol: user
+**Tenant ID:** restaurante-el-sabor
+**Tipo de Negocio:** restaurant (Restaurante)
 
-**Usuarios de Prueba:**
-| Email | Password | Rol |
-|-------|----------|-----|
-| cliente1@tienda.com | password123 | client |
-| user@tienda.com | user123 | user |
-| vendedor@tienda.com | vendedor123 | user |
+### Usuarios
 
-**Productos:**
-- Camisa Roja - $45,000
+| Rol | Email | Password |
+|-----|-------|----------|
+| Admin | admin@sabor.com | Admin123! |
+| Staff (Mesero) | mesero1@sabor.com | Empleado123! |
+| Staff (Cocina) | cocina@sabor.com | Empleado123! |
+| Cliente | cliente1@sabor.com | Cliente123! |
+| Cliente | cliente2@sabor.com | Cliente123! |
 
-**Pedidos de Prueba:**
-- Pedido #1: Carlos Rodriguez - 3 Camisas Rojas - $135,000 (pendiente)
-- Pedido #2: Diana Lopez - 2 Camisas Rojas - $90,000 (pendiente)
+### Productos (10)
 
----
-
-### 4. Belleza y Cuidado Personal Demo (belleza-demo)
-
-**Admin del Tenant:**
-- Email: admin@belleza.com
-- Password: admin123
-- Rol: user
-
-**Usuarios de Prueba:**
-| Email | Password | Rol |
-|-------|----------|-----|
-| cliente1@belleza.com | password123 | client |
-| user@belleza.com | user123 | user |
-| estilista@belleza.com | estilista123 | user |
-
-**Servicios:**
-- Corte de Cabello - $25,000
-
-**Citas de Prueba:**
-- Cita #1: Ana Garcia - 21/Feb/2026 14:00 - Corte y peinado (pendiente)
-- Cita #2: Sofia Torres - 22/Feb/2026 10:00 - Coloración (pendiente)
-- Cita #3: Miguel Reyes - 24/Feb/2026 16:00 - Corte varonil (pendiente)
+| # | Producto | Precio | Stock |
+|---|----------|--------|-------|
+| 1 | Bandeja Paisa | $25,000 | 50 |
+| 2 | Ajiaco Santafereño | $18,000 | 30 |
+| 3 | Empanadas Colombianas | $8,000 | 100 |
+| 4 | Arepa con Queso | $5,000 | 80 |
+| 5 | Churrasco | $32,000 | 40 |
+| 6 | Pescado Frito | $28,000 | 25 |
+| 7 | Limonada Natural | $6,000 | 200 |
+| 8 | Jugo de Mango | $7,000 | 150 |
+| 9 | Cerveza Nacional | $5,000 | 300 |
+| 10 | Postre de Tres Leches | $9,000 | 40 |
 
 ---
 
-## URLs de Acceso
+## 🏢 Empresa 2: Sonrisa Perfecta
 
-### Frontend (Vercel)
-- URL: https://nexora-app.vercel.app
+**Tenant ID:** clnica-dental-sonrisa-perfecta
+**Tipo de Negocio:** clinic (Clínica Dental)
 
-### Backend (Railway)
-- URL: https://nexora-app-production-3199.up.railway.app
+### Usuarios
 
-### Panel Admin (Por tenant)
-- https://nexora-app.vercel.app/dashboard/{tenantId}
+| Rol | Email | Password |
+|-----|-------|----------|
+| Admin | admin@sonrisa.com | Admin123! |
+| Staff (Dentista) | dentista@sonrisa.com | Empleado123! |
+| Staff (Recepcionista) | recepcion@sonrisa.com | Empleado123! |
+| Paciente | paciente1@sonrisa.com | Cliente123! |
+| Paciente | paciente2@sonrisa.com | Cliente123! |
 
-### Reservas/Citas (Público)
-- https://nexora-app.vercel.app/book/{tenantId}
+### Servicios (6)
+
+| # | Servicio | Precio | Duración |
+|---|----------|--------|----------|
+| 1 | Limpieza Dental Profunda | $80,000 | 60 min |
+| 2 | Blanqueamiento Dental | $350,000 | 90 min |
+| 3 | Ortodoncia Brackets | $2,800,000 | 120 min |
+| 4 | Implante Dental | $2,500,000 | 180 min |
+| 5 | Endodoncia | $450,000 | 90 min |
+| 6 | Extracción Simple | $120,000 | 45 min |
 
 ---
 
-## Notas
+## 🏢 Empresa 3: Estilo Urbano
 
-1. Todos los usuarios tienen `isActive: true`
-2. Los pedidos están en estado `pending` con pago `pending`
-3. Las citas están en estado `pending`
-4. Los enlaces de pago de MercadoPago son de prueba
-5. El token JWT expira en 7 días
+**Tenant ID:** barbera-estilo-urbano
+**Tipo de Negocio:** salon (Barbería)
 
-## Cómo probar el flujo
+### Usuarios
 
-### Flujo de Pedidos (Restaurante/Tienda):
-1. Ir a https://nexora-app.vercel.app/book/restaurante-demo
-2. Seleccionar productos
-3. Completar datos del cliente
-4. Verificar que se crea el pedido en estado "pending"
-5. El admin puede ver el pedido en el dashboard
+| Rol | Email | Password |
+|-----|-------|----------|
+| Admin | admin@estilo.com | Admin123! |
+| Staff (Barbero) | barbero1@estilo.com | Empleado123! |
+| Staff (Barbero) | barbero2@estilo.com | Empleado123! |
+| Cliente | cliente1@estilo.com | Cliente123! |
+| Cliente | cliente2@estilo.com | Cliente123! |
 
-### Flujo de Citas (Clínica/Belleza):
-1. Ir a https://nexora-app.vercel.app/book/clinica-demo
-2. Seleccionar servicio
-3. Elegir fecha y hora
-4. Completar datos del cliente
-5. Verificar que se crea la cita en el dashboard
+### Servicios (5)
 
-### Acceso al Dashboard:
-1. Ir a https://nexora-app.vercel.app/auth/login
-2. Ingresar con credenciales de admin
-3. Ver dashboard con métricas del tenant
+| # | Servicio | Precio | Duración |
+|---|----------|--------|----------|
+| 1 | Corte Clásico | $25,000 | 45 min |
+| 2 | Corte Moderno | $30,000 | 60 min |
+| 3 | Afeitado Tradicional | $20,000 | 30 min |
+| 4 | Arreglo de Barba | $18,000 | 30 min |
+| 5 | Corte + Barba | $40,000 | 75 min |
+
+### Productos (3)
+
+| # | Producto | Precio | Stock |
+|---|----------|--------|-------|
+| 1 | Shampoo Premium | $35,000 | 50 |
+| 2 | Cera para Cabello | $28,000 | 80 |
+| 3 | Bálsamo After Shave | $22,000 | 40 |
+
+---
+
+## 📊 Resumen de Datos Creados
+
+| Empresa | Usuarios | Productos/Servicios | Pedidos | Citas |
+|---------|---------|-------------------|---------|-------|
+| El Sabor Latino | 5 | 10 | - | - |
+| Sonrisa Perfecta | 5 | 6 | - | - |
+| Estilo Urbano | 5 | 8 | - | - |
+| **TOTAL** | **15** | **24** | **0** | **0** |
+
+---
+
+## 🔐 Notas Importantes
+
+1. **Login funciona correctamente** - Todos los usuarios pueden iniciar sesión
+2. **Productos/Servicios creados** - 24 elementos en total
+3. **Chats creados** - Conversaciones de prueba entre clientes y staff
+4. **Pedidos y Citas** - Los endpoints públicos parecen tener un formato diferente, pero los datos principales están listos
+
+---
+
+## 📱 Uso en App Móvil
+
+Para probar en la app móvil:
+1. Descargar la APK de producción
+2. Iniciar sesión con cualquiera de las credenciales de cliente
+3. Explorar los productos/servicios disponibles
+4. Probar el chat con el personal
+
+---
+
+*Documento generado automáticamente el 2026-02-20*
