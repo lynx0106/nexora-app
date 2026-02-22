@@ -1,0 +1,383 @@
+import React, { useMemo } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { NavigationContainer, DrawerActions } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext';
+
+// Importar pantallas
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import HomeScreen from '../screens/HomeScreen';
+import ProductsScreen from '../screens/products/ProductsScreen';
+import ProductDetailScreen from '../screens/products/ProductDetailScreen';
+import FavoritesScreen from '../screens/products/FavoritesScreen';
+import ProfileScreen from '../screens/profile/ProfileScreen';
+import OrdersScreen from '../screens/orders/OrdersScreen';
+import CartScreen from '../screens/orders/CartScreen';
+import CheckoutScreen from '../screens/orders/CheckoutScreen';
+import OrderDetailScreen from '../screens/orders/OrderDetailScreen';
+import ChatListScreen from '../screens/chat/ChatListScreen';
+import ChatRoomScreen from '../screens/chat/ChatRoomScreen';
+import AppointmentsScreen from '../screens/appointments/AppointmentsScreen';
+import BookAppointmentScreen from '../screens/appointments/BookAppointmentScreen';
+import DashboardScreen from '../screens/admin/DashboardScreen';
+
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  ForgotPassword: undefined;
+};
+
+export type MainDrawerParamList = {
+  Inicio: undefined;
+  Productos: undefined;
+  Pedidos: undefined;
+  Citas: undefined;
+  Dashboard: undefined;
+  Perfil: undefined;
+  CerrarSesion: undefined;
+};
+
+export type RootStackParamList = {
+  Auth: undefined;
+  Main: undefined;
+  ProductDetail: { productId: string };
+  OrderDetail: { orderId: string };
+  Favorites: undefined;
+  Cart: undefined;
+  Checkout: undefined;
+  ChatList: undefined;
+  ChatRoom: { targetUserId: string; targetUserName?: string };
+  Appointments: undefined;
+  BookAppointment: { serviceId?: string };
+  Dashboard: undefined;
+  Home: undefined;
+  Products: undefined;
+  Profile: undefined;
+};
+
+const AuthStack = createNativeStackNavigator<AuthStackParamList>();
+const MainDrawer = createDrawerNavigator<MainDrawerParamList>();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
+
+function AuthNavigator() {
+  return (
+    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+      <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="Register" component={RegisterScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    </AuthStack.Navigator>
+  );
+}
+
+// Componente personalizado para el Drawer
+function CustomDrawerContent(props: DrawerContentComponentProps) {
+  const { user, logout } = useAuth();
+  
+  const handleSignOut = () => {
+    Alert.alert(
+      'Cerrar Sesión',
+      '¿Estás seguro de que quieres cerrar sesión?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { text: 'Cerrar Sesión', style: 'destructive', onPress: () => logout() },
+      ]
+    );
+  };
+
+  const fullName = user ? `${user.firstName} ${user.lastName}` : 'Usuario';
+
+  return (
+    <DrawerContentScrollView {...props} contentContainerStyle={styles.drawerContent}>
+      {/* Header del Drawer */}
+      <View style={styles.drawerHeader}>
+        <View style={styles.avatarContainer}>
+          <Ionicons name="person-circle" size={70} color="#6366f1" />
+        </View>
+        <Text style={styles.userName}>{fullName}</Text>
+        <Text style={styles.userEmail}>{user?.email || 'usuario@nexora.com'}</Text>
+        <View style={styles.roleBadge}>
+          <Text style={styles.roleText}>{user?.role === 'superadmin' ? 'Super Admin' : user?.role === 'admin' ? 'Admin' : 'Usuario'}</Text>
+        </View>
+      </View>
+      
+      {/* Items del Drawer */}
+      <View style={styles.drawerItems}>
+        <DrawerItemList {...props} />
+      </View>
+      
+      {/* Footer con Cerrar Sesión */}
+      <View style={styles.drawerFooter}>
+        <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
+          <Ionicons name="log-out-outline" size={22} color="#ef4444" />
+          <Text style={styles.signOutText}>Cerrar Sesión</Text>
+        </TouchableOpacity>
+        <Text style={styles.versionText}>Nexora v1.0.0</Text>
+      </View>
+    </DrawerContentScrollView>
+  );
+}
+
+function MainNavigator() {
+  const { user, businessType, logout } = useAuth();
+  
+  // Determinar si es restaurante
+  const isRestaurant = businessType === 'restaurant';
+  const appointmentLabel = isRestaurant ? 'Reservas' : 'Citas';
+  
+  // Determinar las opciones del drawer según el rol y tipo de negocio
+  const getDrawerScreens = useMemo(() => {
+    const role = user?.role;
+    const screens = [
+      { 
+        name: 'Inicio', 
+        title: 'Inicio', 
+        icon: 'home', 
+        iconOutline: 'home-outline',
+        component: HomeScreen 
+      },
+      { 
+        name: 'Productos', 
+        title: isRestaurant ? 'MENÚ' : 'Productos', 
+        icon: isRestaurant ? 'restaurant' : 'cube', 
+        iconOutline: isRestaurant ? 'restaurant-outline' : 'cube-outline',
+        component: ProductsScreen 
+      },
+      { 
+        name: 'Pedidos', 
+        title: isRestaurant ? 'Carrito' : 'Pedidos', 
+        icon: 'cart', 
+        iconOutline: 'cart-outline',
+        component: OrdersScreen 
+      },
+    ];
+    
+    // Agregar Citas/Reservas según el tipo de negocio (no para superadmin)
+    if (role !== 'superadmin') {
+      screens.push({ 
+        name: 'Citas', 
+        title: appointmentLabel, 
+        icon: 'calendar', 
+        iconOutline: 'calendar-outline',
+        component: AppointmentsScreen 
+      });
+    }
+    
+    // Agregar Dashboard para admin
+    if (role === 'admin' || role === 'superadmin') {
+      screens.push({ 
+        name: 'Dashboard', 
+        title: 'Panel Admin', 
+        icon: 'stats-chart', 
+        iconOutline: 'stats-chart-outline',
+        component: DashboardScreen 
+      });
+    }
+    
+    screens.push({ 
+      name: 'Perfil', 
+      title: 'Mi Perfil', 
+      icon: 'person', 
+      iconOutline: 'person-outline',
+      component: ProfileScreen 
+    });
+    
+    return screens;
+  }, [user?.role, businessType, appointmentLabel]);
+
+  return (
+    <MainDrawer.Navigator
+      drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={({ route }) => {
+        const screen = getDrawerScreens.find(s => s.name === route.name);
+        return {
+          headerShown: true,
+          headerStyle: {
+            backgroundColor: '#6366f1',
+          },
+          headerTintColor: '#ffffff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+          drawerActiveTintColor: '#6366f1',
+          drawerInactiveTintColor: '#64748b',
+          drawerLabel: screen?.title || route.name,
+          drawerIcon: ({ focused, color, size }) => {
+            const iconName = focused ? (screen?.icon as keyof typeof Ionicons.glyphMap) : (screen?.iconOutline as keyof typeof Ionicons.glyphMap);
+            return <Ionicons name={iconName} size={size} color={color} />;
+          },
+        };
+      }}
+    >
+      {getDrawerScreens.map((screen) => (
+        <MainDrawer.Screen 
+          key={screen.name}
+          name={screen.name as keyof MainDrawerParamList} 
+          component={screen.component}
+          options={{ 
+            title: screen.title,
+            drawerLabel: screen.title,
+          }}
+        />
+      ))}
+    </MainDrawer.Navigator>
+  );
+}
+
+export function AppNavigator() {
+  const { isAuthenticated, isLoading, businessType } = useAuth();
+  const isRestaurant = businessType === 'restaurant';
+
+  if (isLoading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#6366f1" />
+        <Text style={styles.loadingText}>Cargando...</Text>
+      </View>
+    );
+  }
+
+  return (
+    <NavigationContainer>
+      <RootStack.Navigator screenOptions={{ headerShown: false }}>
+        {isAuthenticated ? (
+          <>
+            <RootStack.Screen name="Main" component={MainNavigator} />
+            <RootStack.Screen 
+              name="ProductDetail" 
+              component={ProductDetailScreen}
+              options={{ headerShown: true, title: 'Detalle' }}
+            />
+            <RootStack.Screen 
+              name="Favorites" 
+              component={FavoritesScreen}
+              options={{ headerShown: true, title: 'Favoritos' }}
+            />
+            <RootStack.Screen 
+              name="Cart" 
+              component={CartScreen}
+              options={{ headerShown: true, title: 'Carrito' }}
+            />
+            <RootStack.Screen 
+              name="Checkout" 
+              component={CheckoutScreen}
+              options={{ headerShown: true, title: 'Checkout' }}
+            />
+            <RootStack.Screen 
+              name="OrderDetail" 
+              component={OrderDetailScreen}
+              options={{ headerShown: true, title: 'Pedido' }}
+            />
+            <RootStack.Screen 
+              name="ChatList" 
+              component={ChatListScreen}
+              options={{ headerShown: true, title: 'Chat' }}
+            />
+            <RootStack.Screen 
+              name="ChatRoom" 
+              component={ChatRoomScreen}
+              options={{ headerShown: true, title: 'Conversación' }}
+            />
+            <RootStack.Screen 
+              name="Appointments" 
+              component={AppointmentsScreen}
+              options={{ headerShown: true, title: isRestaurant ? 'Reservas' : 'Citas' }}
+            />
+            <RootStack.Screen 
+              name="BookAppointment" 
+              component={BookAppointmentScreen}
+              options={{ headerShown: true, title: isRestaurant ? 'Hacer Reserva' : 'Agendar Cita' }}
+            />
+            <RootStack.Screen 
+              name="Dashboard" 
+              component={DashboardScreen}
+              options={{ headerShown: true, title: 'Dashboard' }}
+            />
+          </>
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
+        )}
+      </RootStack.Navigator>
+    </NavigationContainer>
+  );
+}
+
+const styles = StyleSheet.create({
+  drawerContent: {
+    flex: 1,
+  },
+  drawerHeader: {
+    padding: 20,
+    backgroundColor: '#6366f1',
+    marginBottom: 10,
+    alignItems: 'center',
+  },
+  avatarContainer: {
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 4,
+  },
+  userEmail: {
+    fontSize: 14,
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginBottom: 10,
+  },
+  roleBadge: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  roleText: {
+    fontSize: 12,
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  drawerItems: {
+    flex: 1,
+    paddingTop: 8,
+  },
+  drawerFooter: {
+    borderTopWidth: 1,
+    borderTopColor: '#e2e8f0',
+    padding: 16,
+  },
+  signOutButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  signOutText: {
+    fontSize: 16,
+    color: '#ef4444',
+    marginLeft: 12,
+    fontWeight: '600',
+  },
+  versionText: {
+    fontSize: 12,
+    color: '#94a3b8',
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: '#6366f1',
+  },
+});
+
+export default AppNavigator;
