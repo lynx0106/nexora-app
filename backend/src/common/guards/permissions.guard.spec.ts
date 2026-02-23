@@ -21,8 +21,15 @@ const createContext = (
     getClass: () => DummyClass,
     switchToHttp: () => ({
       getRequest: () => ({ user }),
+      getResponse: () => null,
+      getNext: () => null,
     }),
-  } as ExecutionContext;
+    getArgs: () => [],
+    getArgByIndex: () => null,
+    switchToRpc: () => null as any,
+    switchToWs: () => null as any,
+    getType: () => 'http' as any,
+  } as unknown as ExecutionContext;
 };
 
 describe('PermissionsGuard', () => {

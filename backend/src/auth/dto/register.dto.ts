@@ -4,6 +4,7 @@ import {
   IsOptional,
   IsString,
   MinLength,
+  IsUUID,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../common/constants/roles';
@@ -41,9 +42,18 @@ export class RegisterDto {
   @MinLength(6)
   password: string;
 
-  @ApiProperty({ example: 'restaurante-demo', description: 'Tenant ID for multi-tenant organization' })
+  @ApiPropertyOptional({ example: 'restaurante-demo', description: 'Tenant ID (opcional si se usa invitationId)' })
+  @IsOptional()
   @IsString()
-  tenantId: string;
+  tenantId?: string;
+
+  @ApiPropertyOptional({ 
+    example: '550e8400-e29b-41d4-a716-446655440000', 
+    description: 'ID de la invitación (reemplaza tenantId y role)' 
+  })
+  @IsOptional()
+  @IsUUID()
+  invitationId?: string;
 
   @ApiPropertyOptional({ enum: Role, description: 'User role - defaults to user if not specified', default: 'user' })
   @IsOptional()

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   Text,
@@ -11,16 +11,21 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { RoleGuard } from '../../components/RoleGuard';
 import dashboardApi, { ActivityItem, SalesChartData } from '../../api/dashboard.api';
+import { getBusinessFeatures, toBusinessType, BusinessType } from '../../config/menuConfig';
 
 const { width } = Dimensions.get('window');
 
 export default function DashboardScreen() {
-  const { user } = useAuth();
+  const { user, businessType } = useAuth();
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [salesChart, setSalesChart] = useState<SalesChartData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Obtener features según el tipo de negocio
+  const typedBusinessType: BusinessType = useMemo(() => toBusinessType(businessType), [businessType]);
+  const features = useMemo(() => getBusinessFeatures(typedBusinessType), [typedBusinessType]);
 
   useEffect(() => {
     loadDashboard();
@@ -138,14 +143,18 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.metricsContainer}>
-        <View style={[styles.metricCard, { backgroundColor: '#f59e0b' }]}>
-          <Text style={styles.metricValue}>{orderCount}</Text>
-          <Text style={styles.metricLabel}>Pedidos</Text>
-        </View>
-        <View style={[styles.metricCard, { backgroundColor: '#3b82f6' }]}>
-          <Text style={styles.metricValue}>{appointmentCount}</Text>
-          <Text style={styles.metricLabel}>Citas</Text>
-        </View>
+        {features.hasOrders && (
+          <View style={[styles.metricCard, { backgroundColor: '#f59e0b' }]}>
+            <Text style={styles.metricValue}>{orderCount}</Text>
+            <Text style={styles.metricLabel}>{features.orderLabel}</Text>
+          </View>
+        )}
+        {features.hasAppointments && (
+          <View style={[styles.metricCard, { backgroundColor: '#3b82f6' }]}>
+            <Text style={styles.metricValue}>{appointmentCount}</Text>
+            <Text style={styles.metricLabel}>{features.appointmentLabel}</Text>
+          </View>
+        )}
       </View>
 
       {/* Sales Chart */}

@@ -95,7 +95,7 @@ export default function BookAppointmentScreen({ route, navigation }: Props) {
       const appointmentData = {
         dateTime: dateTime.toISOString(),
         clientId: user.id,
-        serviceId: isRestaurant ? null : selectedService,
+        serviceId: isRestaurant ? undefined : (selectedService || undefined),
         tenantId: user.tenantId,
         notes: notes || undefined,
         pax,

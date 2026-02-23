@@ -10,7 +10,9 @@ export interface RegisterRequest {
   password: string;
   firstName: string;
   lastName: string;
+  phone?: string;
   tenantId?: string;
+  invitationId?: string;
 }
 
 export interface AuthResponse {

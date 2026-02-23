@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
+    "scheme": "nexora",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -16,7 +17,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.nexora.app",
       "infoPlist": {
-        "NSCameraUsageDescription": "Nexora necesita acceso a la cámara para tomar fotos de productos.",
+        "NSCameraUsageDescription": "Nexora necesita acceso a la cámara para tomar fotos de productos y escanear códigos QR.",
         "NSPhotoLibraryUsageDescription": "Nexora necesita acceso a la galería para seleccionar fotos de productos."
       }
     },
@@ -30,6 +31,20 @@
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
         "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "nexora"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
       ]
     },
     "web": {

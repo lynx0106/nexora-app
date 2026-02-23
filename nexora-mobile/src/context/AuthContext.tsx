@@ -49,6 +49,10 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (userJson) {
           const storedUser = JSON.parse(userJson);
           setUser(storedUser);
+          // Restaurar businessType desde el usuario almacenado
+          if (storedUser.businessType) {
+            setBusinessType(storedUser.businessType);
+          }
         }
       }
     } catch (error) {

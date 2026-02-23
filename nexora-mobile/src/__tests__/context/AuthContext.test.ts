@@ -15,13 +15,14 @@ jest.mock('../../api/client', () => ({
   clearToken: jest.fn(),
 }));
 
-const mockApi = apiClient as jest.Mocked<typeof apiClient>;
+const mockApi = apiClient as any;
+const mockSecureStore = SecureStore as any;
 
 describe('AuthContext Logic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockApi.getToken.mockResolvedValue(null);
-    SecureStore.getItemAsync.mockResolvedValue(null);
+    mockSecureStore.getItemAsync.mockResolvedValue(null);
   });
 
   describe('Email Validation', () => {
@@ -104,11 +105,11 @@ describe('AuthContext Logic', () => {
         tenantId: 'tenant-1',
       };
 
-      SecureStore.setItemAsync.mockResolvedValue(undefined);
+      mockSecureStore.setItemAsync.mockResolvedValue(undefined);
 
       await SecureStore.setItemAsync('user_data', JSON.stringify(userData));
 
-      expect(SecureStore.setItemAsync).toHaveBeenCalledWith(
+      expect(mockSecureStore.setItemAsync).toHaveBeenCalledWith(
         'user_data',
         JSON.stringify(userData)
       );
@@ -124,7 +125,7 @@ describe('AuthContext Logic', () => {
         tenantId: 'tenant-1',
       };
 
-      SecureStore.getItemAsync.mockResolvedValue(JSON.stringify(userData));
+      mockSecureStore.getItemAsync.mockResolvedValue(JSON.stringify(userData));
 
       const result = await SecureStore.getItemAsync('user_data');
 
@@ -133,11 +134,11 @@ describe('AuthContext Logic', () => {
     });
 
     it('should delete user data on logout', async () => {
-      SecureStore.deleteItemAsync.mockResolvedValue(undefined);
+      mockSecureStore.deleteItemAsync.mockResolvedValue(undefined);
 
       await SecureStore.deleteItemAsync('user_data');
 
-      expect(SecureStore.deleteItemAsync).toHaveBeenCalledWith('user_data');
+      expect(mockSecureStore.deleteItemAsync).toHaveBeenCalledWith('user_data');
     });
   });
 

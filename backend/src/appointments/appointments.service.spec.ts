@@ -133,13 +133,13 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
       appointmentRepo.create.mockReturnValue(mockAppointment as any);
       appointmentRepo.save.mockResolvedValue(mockAppointment as any);
       appointmentRepo.findOne.mockResolvedValue(mockAppointment as any);
       tenantsService.findOne.mockResolvedValue(mockTenant as any);
 
-      const result = await service.create(createDto);
+      const result = await service.create(createDto as any);
 
       expect(result).toBeDefined();
       expect(appointmentRepo.create).toHaveBeenCalledWith(createDto);
@@ -150,12 +150,12 @@ describe('AppointmentsService', () => {
       const createDto = {
         tenantId: 'tenant-123',
         serviceId: 'nonexistent',
-        dateTime: new Date(),
+        dateTime: new Date().toISOString(),
       };
 
-      productsService.findOne.mockResolvedValue(null);
+      productsService.findOne.mockResolvedValue(null as any);
 
-      await expect(service.create(createDto)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createDto as any)).rejects.toThrow(NotFoundException);
     });
 
     it('should throw ConflictException for doctor schedule conflict', async () => {
@@ -163,7 +163,7 @@ describe('AppointmentsService', () => {
         tenantId: 'tenant-123',
         doctorId: 'doctor-123',
         serviceId: 'service-123',
-        dateTime: new Date('2024-12-15T10:00:00'),
+        dateTime: new Date('2024-12-15T10:00:00').toISOString(),
       };
 
       const existingAppointment = {
@@ -180,9 +180,9 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto as any)).rejects.toThrow(ConflictException);
     });
 
     it('should throw ConflictException for client double booking', async () => {
@@ -190,7 +190,7 @@ describe('AppointmentsService', () => {
         tenantId: 'tenant-123',
         clientId: 'client-123',
         serviceId: 'service-123',
-        dateTime: new Date('2024-12-15T10:00:00'),
+        dateTime: new Date('2024-12-15T10:00:00').toISOString(),
       };
 
       const existingAppointment = {
@@ -208,9 +208,9 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
+      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
 
-      await expect(service.create(createDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto as any)).rejects.toThrow(ConflictException);
     });
   });
 

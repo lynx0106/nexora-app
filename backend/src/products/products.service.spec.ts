@@ -158,7 +158,7 @@ describe('ProductsService', () => {
 
       const result = await service.updateAsAdmin('product-123', updateData);
 
-      expect(result.name).toBe('Admin Updated');
+      expect(result!.name).toBe('Admin Updated');
       expect(productRepo.update).toHaveBeenCalledWith({ id: 'product-123' }, updateData);
     });
   });

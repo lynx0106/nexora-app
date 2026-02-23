@@ -1,16 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, forwardRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
-import { NavigationContainer, DrawerActions } from '@react-navigation/native';
+import { NavigationContainer, DrawerActions, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerContentComponentProps } from '@react-navigation/drawer';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
+import { getBusinessFeatures, toBusinessType, hasOrders, hasAppointments, BusinessType } from '../config/menuConfig';
 
 // Importar pantallas
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import InviteRegisterScreen from '../screens/auth/InviteRegisterScreen';
 import HomeScreen from '../screens/HomeScreen';
 import ProductsScreen from '../screens/products/ProductsScreen';
 import ProductDetailScreen from '../screens/products/ProductDetailScreen';
@@ -30,6 +32,12 @@ export type AuthStackParamList = {
   Login: undefined;
   Register: undefined;
   ForgotPassword: undefined;
+  InviteRegister: {
+    invitationId?: string;
+    tenantId?: string;
+    tenantName?: string;
+    role?: string;
+  };
 };
 
 export type MainDrawerParamList = {
@@ -70,6 +78,11 @@ function AuthNavigator() {
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen 
+        name="InviteRegister" 
+        component={InviteRegisterScreen}
+        options={{ headerShown: true, title: 'Completar Registro' }}
+      />
     </AuthStack.Navigator>
   );
 }
@@ -125,14 +138,20 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
 function MainNavigator() {
   const { user, businessType, logout } = useAuth();
   
-  // Determinar si es restaurante
-  const isRestaurant = businessType === 'restaurant';
-  const appointmentLabel = isRestaurant ? 'Reservas' : 'Citas';
+  // Convertir businessType al tipo correcto y obtener features
+  const typedBusinessType: BusinessType = useMemo(() => toBusinessType(businessType), [businessType]);
+  const features = useMemo(() => getBusinessFeatures(typedBusinessType), [typedBusinessType]);
   
   // Determinar las opciones del drawer según el rol y tipo de negocio
   const getDrawerScreens = useMemo(() => {
     const role = user?.role;
-    const screens = [
+    const screens: Array<{
+      name: string;
+      title: string;
+      icon: keyof typeof Ionicons.glyphMap;
+      iconOutline: keyof typeof Ionicons.glyphMap;
+      component: React.ComponentType<any>;
+    }> = [
       { 
         name: 'Inicio', 
         title: 'Inicio', 
@@ -142,25 +161,29 @@ function MainNavigator() {
       },
       { 
         name: 'Productos', 
-        title: isRestaurant ? 'MENÚ' : 'Productos', 
-        icon: isRestaurant ? 'restaurant' : 'cube', 
-        iconOutline: isRestaurant ? 'restaurant-outline' : 'cube-outline',
+        title: features.productLabel, 
+        icon: typedBusinessType === 'restaurant' ? 'restaurant' : 'cube', 
+        iconOutline: typedBusinessType === 'restaurant' ? 'restaurant-outline' : 'cube-outline',
         component: ProductsScreen 
-      },
-      { 
-        name: 'Pedidos', 
-        title: isRestaurant ? 'Carrito' : 'Pedidos', 
-        icon: 'cart', 
-        iconOutline: 'cart-outline',
-        component: OrdersScreen 
       },
     ];
     
-    // Agregar Citas/Reservas según el tipo de negocio (no para superadmin)
-    if (role !== 'superadmin') {
+    // Agregar Pedidos solo si el negocio tiene pedidos
+    if (features.hasOrders) {
+      screens.push({ 
+        name: 'Pedidos', 
+        title: features.orderLabel, 
+        icon: 'cart', 
+        iconOutline: 'cart-outline',
+        component: OrdersScreen 
+      });
+    }
+    
+    // Agregar Citas/Reservas solo si el negocio tiene citas (no para superadmin)
+    if (features.hasAppointments && role !== 'superadmin') {
       screens.push({ 
         name: 'Citas', 
-        title: appointmentLabel, 
+        title: features.appointmentLabel, 
         icon: 'calendar', 
         iconOutline: 'calendar-outline',
         component: AppointmentsScreen 
@@ -187,7 +210,7 @@ function MainNavigator() {
     });
     
     return screens;
-  }, [user?.role, businessType, appointmentLabel]);
+  }, [user?.role, typedBusinessType, features]);
 
   return (
     <MainDrawer.Navigator
@@ -207,8 +230,8 @@ function MainNavigator() {
           drawerInactiveTintColor: '#64748b',
           drawerLabel: screen?.title || route.name,
           drawerIcon: ({ focused, color, size }) => {
-            const iconName = focused ? (screen?.icon as keyof typeof Ionicons.glyphMap) : (screen?.iconOutline as keyof typeof Ionicons.glyphMap);
-            return <Ionicons name={iconName} size={size} color={color} />;
+            const iconName = focused ? screen?.icon : screen?.iconOutline;
+            return iconName ? <Ionicons name={iconName} size={size} color={color} /> : null;
           },
         };
       }}
@@ -228,7 +251,7 @@ function MainNavigator() {
   );
 }
 
-export function AppNavigator() {
+export const AppNavigator = forwardRef<NavigationContainerRef<any>>((props, ref) => {
   const { isAuthenticated, isLoading, businessType } = useAuth();
   const isRestaurant = businessType === 'restaurant';
 
@@ -242,7 +265,7 @@ export function AppNavigator() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer ref={ref}>
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {isAuthenticated ? (
           <>
@@ -304,7 +327,7 @@ export function AppNavigator() {
       </RootStack.Navigator>
     </NavigationContainer>
   );
-}
+});
 
 const styles = StyleSheet.create({
   drawerContent: {

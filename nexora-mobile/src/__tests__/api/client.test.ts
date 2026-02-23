@@ -1,6 +1,4 @@
-import axios from 'axios';
-
-// Mock axios
+// Mock axios - no import needed since we mock it
 const mockCreate = jest.fn(() => ({
   interceptors: {
     request: { use: jest.fn() },

@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, RefreshControl, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, DrawerActions } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import dashboardApi, { DashboardMetrics } from '../api/dashboard.api';
 import { colors, spacing, typography, borderRadius, shadows } from '../theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
+import { getMenuItems, toBusinessType, getBusinessFeatures, BusinessType } from '../config/menuConfig';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -16,9 +17,9 @@ export default function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Determinar si es restaurante (usa "Reservas" en lugar de "Citas")
-  const isRestaurant = businessType === 'restaurant';
-  const appointmentLabel = isRestaurant ? 'Reservas' : 'Citas';
+  // Convertir businessType al tipo correcto
+  const typedBusinessType: BusinessType = useMemo(() => toBusinessType(businessType), [businessType]);
+  const features = useMemo(() => getBusinessFeatures(typedBusinessType), [typedBusinessType]);
 
   const loadMetrics = async () => {
     // Superadmin doesn't have a specific tenant, so skip metrics
@@ -50,52 +51,10 @@ export default function HomeScreen() {
     loadMetrics();
   }, []);
 
-  // Menu items based on user role
-  const getMenuItems = () => {
-    const role = user?.role;
-    
-    // Common items for all users
-    const commonItems = [
-      { icon: '📦', title: 'Productos', subtitle: 'Ver catálogo', route: 'Products' },
-    ];
-    
-    // Items for regular users (customers)
-    const userItems = [
-      ...commonItems,
-      { icon: '🛒', title: 'Pedidos', subtitle: 'Mis pedidos', route: 'Orders' },
-      { icon: '📅', title: appointmentLabel, subtitle: `Mis ${appointmentLabel.toLowerCase()}`, route: 'Appointments' },
-      { icon: '💬', title: 'Soporte', subtitle: 'Chat con nosotros', route: 'ChatList' },
-    ];
-    
-    // Items for staff (can see orders and chat)
-    const staffItems = [
-      ...commonItems,
-      { icon: '🛒', title: 'Pedidos', subtitle: 'Gestionar pedidos', route: 'Orders' },
-      { icon: '💬', title: 'Chat', subtitle: 'Conversaciones', route: 'ChatList' },
-      { icon: '📅', title: appointmentLabel, subtitle: 'Agenda', route: 'Appointments' },
-    ];
-    
-    // Items for admin/superadmin (full access)
-    const adminItems = [
-      ...commonItems,
-      { icon: '🛒', title: 'Pedidos', subtitle: 'Gestionar pedidos', route: 'Orders' },
-      { icon: '💬', title: 'Chat', subtitle: 'Conversaciones', route: 'ChatList' },
-      { icon: '📅', title: appointmentLabel, subtitle: 'Agenda', route: 'Appointments' },
-      { icon: '📊', title: 'Dashboard', subtitle: 'Métricas', route: 'Dashboard' },
-    ];
-    
-    if (role === 'user') {
-      return userItems;
-    } else if (role === 'staff') {
-      return staffItems;
-    } else if (role === 'admin' || role === 'superadmin') {
-      return adminItems;
-    }
-    
-    return commonItems;
-  };
-
-  const menuItems = getMenuItems();
+  // Obtener items del menú usando la configuración centralizada
+  const menuItems = useMemo(() => {
+    return getMenuItems(user?.role || 'user', typedBusinessType);
+  }, [user?.role, typedBusinessType]);
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
@@ -216,23 +175,16 @@ export default function HomeScreen() {
               key={index} 
               style={styles.menuItem}
               onPress={() => {
-                // Navigate based on route
-                switch (item.route) {
-                  case 'Products':
-                    (navigation as any).navigate('Main');
-                    break;
-                  case 'Orders':
-                    (navigation as any).navigate('Main');
-                    break;
-                  case 'ChatList':
-                    navigation.navigate('ChatList');
-                    break;
-                  case 'Appointments':
-                    navigation.navigate('Appointments');
-                    break;
-                  case 'Dashboard':
-                    navigation.navigate('Dashboard');
-                    break;
+                // Navegación usando DrawerActions para pantallas del drawer
+                // y navigation.navigate para pantallas del RootStack
+                const drawerScreens = ['Productos', 'Pedidos', 'Citas', 'Dashboard'];
+                
+                if (drawerScreens.includes(item.route)) {
+                  // Navegar dentro del drawer usando jumpTo
+                  navigation.dispatch(DrawerActions.jumpTo(item.route as any));
+                } else {
+                  // Navegar a pantallas del RootStack (ChatList, etc.)
+                  navigation.navigate(item.route as any);
                 }
               }}
             >

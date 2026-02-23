@@ -1,141 +1,211 @@
 import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
   Injectable,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, MoreThan, Repository } from 'typeorm';
-import * as crypto from 'crypto';
-import * as bcrypt from 'bcrypt';
-import { Invitation } from './entities/invitation.entity';
-import { UsersService } from '../users/users.service';
-import { MailService } from '../mail/mail.service';
+import { Repository } from 'typeorm';
+import { v4 as uuidv4 } from 'uuid';
+import { InvitationCode, InvitationStatus } from './entities/invitation-code.entity';
+import { GenerateInvitationDto } from './dto/generate-invitation.dto';
 import { TenantsService } from '../tenants/tenants.service';
-import { Role } from '../common/constants/roles';
-import { CreateInvitationDto } from './dto/create-invitation.dto';
-import { AcceptInvitationDto } from './dto/accept-invitation.dto';
+import { ConfigService } from '@nestjs/config';
 
-const DEFAULT_INVITE_TTL_HOURS = 72;
+export interface InvitationResponse {
+  id: string;
+  qrData: string;
+  deepLink: string;
+  webUrl: string;
+  expiresAt: Date;
+}
+
+export interface ValidatedInvitation {
+  valid: boolean;
+  invitationId: string;
+  tenantId: string;
+  tenantName: string;
+  role: string;
+  expiresAt: Date;
+}
 
 @Injectable()
 export class InvitationsService {
+  private readonly baseUrl: string;
+  private readonly invitationExpirationDays = 3;
+
   constructor(
-    @InjectRepository(Invitation)
-    private readonly invitationsRepository: Repository<Invitation>,
-    private readonly usersService: UsersService,
-    private readonly tenantsService: TenantsService,
-    private readonly mailService: MailService,
-  ) {}
-
-  async createInvitation(
-    tenantId: string,
-    dto: CreateInvitationDto,
-    inviterUserId: string | undefined,
-    inviterRole: string | undefined,
+    @InjectRepository(InvitationCode)
+    private invitationsRepository: Repository<InvitationCode>,
+    private tenantsService: TenantsService,
+    private configService: ConfigService,
   ) {
-    if (!Object.values(Role).includes(dto.role as Role)) {
-      throw new BadRequestException('Rol invalido');
+    this.baseUrl = this.configService.get<string>('BASE_URL') || 'https://nexora-app.online';
+  }
+
+  /**
+   * Genera una nueva invitación
+   */
+  async generate(
+    dto: GenerateInvitationDto,
+    userId: string,
+    userTenantId: string,
+    userRole: string,
+  ): Promise<InvitationResponse> {
+    // Determinar el tenant objetivo
+    let targetTenantId = userTenantId;
+    
+    // Superadmin puede especificar tenant
+    if (userRole === 'superadmin' && dto.tenantId) {
+      targetTenantId = dto.tenantId;
     }
 
-    if (dto.role === Role.Superadmin && inviterRole !== Role.Superadmin) {
-      throw new ForbiddenException('No puedes invitar superadmin');
+    if (!targetTenantId) {
+      throw new ForbiddenException('No tienes permiso para generar invitaciones');
     }
 
-    const email = dto.email.toLowerCase().trim();
-    const existingUser = await this.usersService.findByEmail(email);
-    if (existingUser) {
-      throw new ConflictException('El correo ya esta registrado');
+    // Verificar que el tenant existe
+    const tenant = await this.tenantsService.findOne(targetTenantId);
+    if (!tenant) {
+      throw new NotFoundException('Tenant no encontrado');
     }
 
-    const now = new Date();
-    const pendingInvite = await this.invitationsRepository.findOne({
-      where: {
-        tenantId,
-        email,
-        acceptedAt: IsNull(),
-        expiresAt: MoreThan(now),
-      },
-    });
-
-    if (pendingInvite) {
-      throw new ConflictException('Ya existe una invitacion activa');
-    }
-
-    const token = crypto.randomBytes(32).toString('hex');
-    const tokenHash = this.hashToken(token);
-    const ttlHours = Number(process.env.INVITE_TTL_HOURS || DEFAULT_INVITE_TTL_HOURS);
-    const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
+    // Crear la invitación
+    const invitationId = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + this.invitationExpirationDays);
 
     const invitation = this.invitationsRepository.create({
-      tenantId,
-      email,
-      role: dto.role,
-      inviterUserId: inviterUserId || null,
-      tokenHash,
+      id: invitationId,
+      tenantId: targetTenantId,
+      role: dto.role || 'client',
+      createdBy: userId,
+      status: 'pending',
       expiresAt,
-      acceptedAt: null,
     });
 
     await this.invitationsRepository.save(invitation);
 
-    const tenant = await this.tenantsService.findOne(tenantId);
-    const inviter = inviterUserId
-      ? await this.usersService.findOne(inviterUserId)
-      : null;
-
-    await this.mailService.sendInvitation({
-      email,
-      token,
-      tenantName: tenant?.name || 'Nexora',
-      role: dto.role,
-      inviterName: inviter
-        ? `${inviter.firstName || ''} ${inviter.lastName || ''}`.trim()
-        : undefined,
+    // Generar datos para QR
+    const qrData = JSON.stringify({
+      type: 'nexora-invite',
+      version: 1,
+      invitationId,
+      tenantId: targetTenantId,
+      role: dto.role || 'client',
+      tenantName: tenant.name,
+      createdAt: Date.now(),
     });
 
-    return { ok: true };
+    const deepLink = `nexora://invite?id=${invitationId}&tenant=${targetTenantId}&role=${dto.role || 'client'}&name=${encodeURIComponent(tenant.name)}`;
+    const webUrl = `${this.baseUrl}/register?invitationId=${invitationId}&tenant=${targetTenantId}&role=${dto.role || 'client'}`;
+
+    return {
+      id: invitationId,
+      qrData,
+      deepLink,
+      webUrl,
+      expiresAt,
+    };
   }
 
-  async acceptInvitation(dto: AcceptInvitationDto) {
-    const tokenHash = this.hashToken(dto.token);
-
+  /**
+   * Valida una invitación
+   */
+  async validate(invitationId: string): Promise<ValidatedInvitation> {
     const invitation = await this.invitationsRepository.findOne({
-      where: { tokenHash, acceptedAt: IsNull() },
+      where: { id: invitationId },
+      relations: ['tenant'],
     });
 
     if (!invitation) {
-      throw new BadRequestException('Invitacion invalida');
+      return {
+        valid: false,
+        invitationId,
+        tenantId: '',
+        tenantName: '',
+        role: '',
+        expiresAt: new Date(),
+      };
     }
 
-    if (invitation.expiresAt.getTime() < Date.now()) {
-      throw new BadRequestException('Invitacion expirada');
+    // Verificar si está expirada
+    if (invitation.isExpired() && invitation.status === 'pending') {
+      invitation.status = 'expired';
+      await this.invitationsRepository.save(invitation);
     }
 
-    const existingUser = await this.usersService.findByEmail(invitation.email);
-    if (existingUser) {
-      throw new ConflictException('El correo ya esta registrado');
-    }
+    const isValid = invitation.isValid();
 
-    const passwordHash = await bcrypt.hash(dto.password, 10);
-    const user = await this.usersService.createUser({
-      firstName: dto.firstName,
-      lastName: dto.lastName,
-      email: invitation.email,
-      passwordHash,
+    return {
+      valid: isValid,
+      invitationId: invitation.id,
       tenantId: invitation.tenantId,
+      tenantName: invitation.tenant?.name || '',
       role: invitation.role,
-      isActive: true,
-    });
-
-    await this.invitationsRepository.update(invitation.id, {
-      acceptedAt: new Date(),
-    });
-
-    return { ok: true, userId: user.id, tenantId: invitation.tenantId };
+      expiresAt: invitation.expiresAt,
+    };
   }
 
-  private hashToken(token: string) {
-    return crypto.createHash('sha256').update(token).digest('hex');
+  /**
+   * Marca una invitación como usada
+   */
+  async markAsUsed(invitationId: string, userId: string): Promise<void> {
+    const invitation = await this.invitationsRepository.findOne({
+      where: { id: invitationId },
+    });
+
+    if (!invitation) {
+      throw new NotFoundException('Invitación no encontrada');
+    }
+
+    if (!invitation.isValid()) {
+      throw new BadRequestException(
+        invitation.status === 'used'
+          ? 'Esta invitación ya fue utilizada'
+          : 'Esta invitación ha expirado',
+      );
+    }
+
+    invitation.status = 'used';
+    invitation.usedBy = userId;
+    invitation.usedAt = new Date();
+
+    await this.invitationsRepository.save(invitation);
+  }
+
+  /**
+   * Obtiene la invitación por ID con información del tenant
+   */
+  async findById(invitationId: string): Promise<InvitationCode | null> {
+    return this.invitationsRepository.findOne({
+      where: { id: invitationId },
+      relations: ['tenant'],
+    });
+  }
+
+  /**
+   * Obtiene todas las invitaciones de un tenant (para admin)
+   */
+  async findByTenant(tenantId: string): Promise<InvitationCode[]> {
+    return this.invitationsRepository.find({
+      where: { tenantId },
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Marca todas las invitaciones expiradas (job programado)
+   */
+  async markExpiredInvitations(): Promise<number> {
+    const result = await this.invitationsRepository
+      .createQueryBuilder()
+      .update(InvitationCode)
+      .set({ status: 'expired' as InvitationStatus })
+      .where('status = :status', { status: 'pending' })
+      .andWhere('expiresAt < :now', { now: new Date() })
+      .execute();
+
+    return result.affected || 0;
   }
 }

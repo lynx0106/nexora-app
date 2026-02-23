@@ -1,9 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, forwardRef, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { MailService } from '../mail/mail.service';
+import { InvitationsService } from '../invitations/invitations.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
@@ -13,8 +15,11 @@ import { ConfirmPasswordResetDto } from './dto/confirm-password-reset.dto';
 export class AuthService {
   constructor(
     private readonly usersService: UsersService,
+    private readonly tenantsService: TenantsService,
     private readonly jwtService: JwtService,
     private readonly mailService: MailService,
+    @Inject(forwardRef(() => InvitationsService))
+    private readonly invitationsService: InvitationsService,
   ) {}
 
   async register(data: RegisterDto) {
@@ -22,10 +27,38 @@ export class AuthService {
     if (existing) {
       throw new UnauthorizedException('El correo ya está en uso');
     }
+
+    // Validar invitación si se proporciona invitationId
+    let tenantId = data.tenantId;
+    let role = data.role;
+
+    if (data.invitationId) {
+      const invitation = await this.invitationsService.findById(data.invitationId);
+      
+      if (!invitation) {
+        throw new BadRequestException('Código de invitación inválido');
+      }
+
+      if (!invitation.isValid()) {
+        if (invitation.status === 'used') {
+          throw new BadRequestException('Este código de invitación ya fue utilizado');
+        }
+        throw new BadRequestException('Este código de invitación ha expirado');
+      }
+
+      // Usar datos de la invitación
+      tenantId = invitation.tenantId;
+      role = invitation.role;
+    }
+
+    if (!tenantId) {
+      throw new BadRequestException('Se requiere un código de invitación válido para registrarse');
+    }
+
     const passwordHash = await bcrypt.hash(data.password, 10);
     // Roles privilegiados no se pueden auto-asignar via registro público
     const SAFE_ROLES = ['user', 'client', 'employee', 'staff'];
-    const safeRole = data.role && SAFE_ROLES.includes(data.role) ? data.role : 'user';
+    const safeRole = role && SAFE_ROLES.includes(role) ? role : 'user';
 
     const user = await this.usersService.createUser({
       firstName: data.firstName,
@@ -33,9 +66,15 @@ export class AuthService {
       email: data.email,
       phone: data.phone,
       passwordHash,
-      tenantId: data.tenantId,
+      tenantId,
       role: safeRole,
     });
+
+    // Marcar invitación como usada si se proporcionó
+    if (data.invitationId) {
+      await this.invitationsService.markAsUsed(data.invitationId, user.id);
+    }
+
     const { passwordHash: _, ...safeUser } = user;
     void _;
     return safeUser;
@@ -58,6 +97,19 @@ export class AuthService {
 
   async login(data: LoginDto) {
     const user = await this.validateUser(data.email, data.password);
+    
+    // Obtener businessType del tenant
+    let businessType: string | null = null;
+    if (user.tenantId && user.tenantId !== 'system') {
+      try {
+        const tenant = await this.tenantsService.findOne(user.tenantId);
+        businessType = tenant?.businessType || null;
+      } catch (error) {
+        // Si no se puede obtener el tenant, continuar sin businessType
+        console.error('Error fetching tenant for businessType:', error);
+      }
+    }
+    
     const payload = {
       sub: user.id,
       email: user.email,
@@ -65,7 +117,15 @@ export class AuthService {
       role: user.role,
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    return { accessToken, user };
+    
+    // user ya viene sin passwordHash desde validateUser
+    return { 
+      accessToken, 
+      user: {
+        ...user,
+        businessType,
+      }
+    };
   }
 
   async requestPasswordReset(data: RequestPasswordResetDto) {

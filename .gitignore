@@ -25,3 +25,28 @@ coverage/
 *.bat
 *.vbs
 docker-compose.yml
+
+# ============================================
+# PATRONES AGREGADOS PARA PREVENIR PROBLEMAS
+# ============================================
+
+# Mobile build artifacts
+*.apk
+*.aab
+*.ipa
+*.app
+
+# Credentials and sensitive files
+CREDENCIALES*.md
+*credenciales*.md
+*credentials*.md
+.env.local
+.env.*.local
+
+# Local session files
+SESION_*.md
+RESUMEN_SESION*.md
+
+# Temp files (logs ya están cubiertos arriba)
+*.tmp
+*.temp

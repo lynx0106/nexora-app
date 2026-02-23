@@ -526,7 +526,7 @@ describe('OrdersService', () => {
         },
       };
       
-      dataSource.createQueryRunner.mockReturnValue(mockCancelQueryRunner);
+      dataSource.createQueryRunner.mockReturnValue(mockCancelQueryRunner as any);
 
       const result = await service.update('order-123', { status: 'cancelled' });
 
