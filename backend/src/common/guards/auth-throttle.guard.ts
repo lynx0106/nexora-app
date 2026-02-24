@@ -1,5 +1,5 @@
 import { Injectable, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
-import { ThrottlerGuard, ThrottlerRequest } from '@nestjs/throttler';
+import { ThrottlerGuard } from '@nestjs/throttler';
 
 /**
  * Extended ThrottlerGuard that provides specific rate limiting for auth endpoints
@@ -16,9 +16,9 @@ export class AuthThrottleGuard extends ThrottlerGuard {
   // Block duration in milliseconds (15 minutes)
   private readonly blockDuration = 15 * 60 * 1000;
 
-  async handleRequest(requestProps: ThrottlerRequest): Promise<boolean> {
-    const { context } = requestProps;
-    const { req, res } = this.getReqRes(context);
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
     const ip = this.getClientIp(req);
     
     // Check if IP is currently blocked due to failed attempts
@@ -36,7 +36,7 @@ export class AuthThrottleGuard extends ThrottlerGuard {
     }
 
     // Call parent method for standard rate limiting
-    const allowed = await super.handleRequest(requestProps);
+    const allowed = await super.canActivate(context);
     
     if (!allowed) {
       // Track this as a failed attempt
@@ -108,17 +108,6 @@ export class AuthThrottleGuard extends ThrottlerGuard {
     }
     
     return req.ip || req.connection?.remoteAddress || 'unknown';
-  }
-
-  /**
-   * Get request and response objects
-   */
-  private getReqRes(context: ExecutionContext): { req: any; res: any } {
-    const http = context.switchToHttp();
-    return {
-      req: http.getRequest(),
-      res: http.getResponse(),
-    };
   }
 }
 
