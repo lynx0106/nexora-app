@@ -179,7 +179,7 @@ export class UsersInitController {
       },
     ];
 
-    const results = [];
+    const results: Array<{email: string; action: string; error?: string}> = [];
 
     for (const user of demoUsers) {
       try {
