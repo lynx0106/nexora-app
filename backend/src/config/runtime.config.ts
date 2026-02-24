@@ -8,22 +8,38 @@ export function getJwtSecret(): string {
   return secret;
 }
 
+/**
+ * Get allowed CORS origins
+ * Priority: CORS_ORIGINS env var > FRONTEND_URL env var > Production defaults > Localhost
+ */
 export function getCorsOrigins(): string[] {
+  // If explicit CORS_ORIGINS is set, use it
   const raw = process.env.CORS_ORIGINS;
-  const parsed = raw
-    ? raw
-        .split(',')
-        .map((origin) => origin.trim())
-        .filter((origin) => origin.length > 0)
-    : [];
-
-  if (parsed.length > 0) {
-    return parsed;
+  if (raw) {
+    return raw
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
   }
 
+  // Production domains (always allowed in production)
+  const productionOrigins = [
+    'https://nexora-app.online',
+    'https://www.nexora-app.online',
+    'https://nexora-app-production-3199.up.railway.app',
+  ];
+
+  // If FRONTEND_URL is set, add it
   if (process.env.FRONTEND_URL) {
-    return [process.env.FRONTEND_URL];
+    productionOrigins.push(process.env.FRONTEND_URL);
   }
 
-  return ['http://localhost:3002'];
+  // In production, return production origins
+  if (process.env.NODE_ENV === 'production') {
+    // Remove duplicates
+    return [...new Set(productionOrigins)];
+  }
+
+  // In development, allow localhost
+  return ['http://localhost:3002', 'http://localhost:3000', ...productionOrigins];
 }
