@@ -513,21 +513,18 @@ export class UsersController {
     const email = 'superadmin@saas.com';
     const password = 'NexoraTemp2026!';
     
-    // Import bcrypt dynamically
-    const bcrypt = await import('bcrypt');
-    const passwordHash = await bcrypt.hash(password, 10);
-    
     // Check if user exists
     const existing = await this.usersService.findByEmail(email);
     
     if (existing) {
-      // Update password
-      await this.usersService.updateUser(existing.id, 'system', { password } as any);
+      // Update password - superadmin uses 'system' tenant
+      await this.usersService.updateUser(existing.id, existing.tenantId || 'system', { password });
       return {
         message: 'Superadmin password reset',
         email,
         password,
         userId: existing.id,
+        tenantId: existing.tenantId || 'system',
         action: 'PASSWORD_RESET'
       };
     } else {
