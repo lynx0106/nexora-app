@@ -9,6 +9,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { AuditService } from './audit.service';
 import { Reflector } from '@nestjs/core';
+import { sanitizeLogData } from '../common/logger';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
@@ -49,6 +50,9 @@ export class AuditInterceptor implements NestInterceptor {
           
           const entityId = segments[1] || (response && response.id ? response.id : null);
 
+          // Sanitize request body to remove PII
+          const sanitizedBody = sanitizeLogData(req.body);
+          
           await this.auditService.logAction({
             tenantId: user.tenantId,
             userId: user.userId,
@@ -56,7 +60,7 @@ export class AuditInterceptor implements NestInterceptor {
             action: method, // POST=CREATE, PATCH=UPDATE, DELETE=DELETE
             entityType: entityType, // e.g., 'Order'
             entityId: entityId,
-            details: JSON.stringify({ url, body: req.body }), // Be careful with PII in body
+            details: JSON.stringify({ url, body: sanitizedBody }),
             ipAddress: req.ip || req.connection.remoteAddress,
           });
         } catch (err) {

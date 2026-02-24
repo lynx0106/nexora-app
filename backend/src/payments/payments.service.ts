@@ -86,7 +86,7 @@ export class PaymentsService {
         sandboxInitPoint: result.sandbox_init_point,
       };
     } catch (error) {
-      console.error('Error creating MercadoPago preference:', error);
+      this.logger.error('Error creating MercadoPago preference:', error);
       throw new InternalServerErrorException(
         'Failed to create payment preference',
       );

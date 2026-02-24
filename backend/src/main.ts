@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { StructuredLogger } from './common/logger';
 import helmet from 'helmet';
 import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -13,16 +15,23 @@ import { initSentry } from './config/sentry.config';
 initSentry();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const logger = new Logger('HTTP');
+  const app = await NestFactory.create(AppModule, {
+    logger: new StructuredLogger('Bootstrap'),
+  });
+  const logger = new StructuredLogger('HTTP');
   // Valida configuracion critica al inicio.
   getJwtSecret();
 
   const corsOrigins = getCorsOrigins();
 
+  // Enable cookie parsing
+  app.use(cookieParser());
+
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token'],
   });
 
   // Headers de seguridad basicos.
@@ -77,6 +86,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  logger.log('Application bootstrap completed');
 
   const port = Number(process.env.PORT) || 4001;
 

@@ -5,6 +5,7 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { getCorsOrigins, getJwtSecret } from '../config/runtime.config';
 
@@ -21,12 +22,34 @@ export class NotificationsGateway
   @WebSocketServer()
   server: Server;
 
+  private readonly logger = new Logger(NotificationsGateway.name);
+
   constructor(private jwtService: JwtService) {}
 
   async handleConnection(client: Socket) {
     try {
-      const token =
-        client.handshake.auth.token || client.handshake.headers.authorization;
+      // Try to get token from multiple sources
+      let token: string | undefined;
+      
+      // 1. Try handshake.auth (for backward compatibility)
+      if (client.handshake.auth.token) {
+        token = client.handshake.auth.token;
+      }
+      
+      // 2. Try Authorization header
+      if (!token && client.handshake.headers.authorization) {
+        token = client.handshake.headers.authorization;
+      }
+      
+      // 3. Try cookies (new secure method)
+      if (!token && client.handshake.headers.cookie) {
+        const cookieString = client.handshake.headers.cookie;
+        const accessTokenMatch = cookieString.match(/access_token=([^;]+)/);
+        if (accessTokenMatch) {
+          token = accessTokenMatch[1];
+        }
+      }
+      
       if (!token) {
         client.disconnect();
         return;
@@ -55,14 +78,15 @@ export class NotificationsGateway
   }
 
   handleDisconnect(client: Socket) {
-    // console.log(`[Notifications] Client disconnected: ${client.id}`);
+    // Client disconnected - cleanup is automatic via Socket.io
+    void client;
   }
 
   // Method to send notification to a specific user
   sendToUser(userId: string, notification: any) {
     if (!this.server) {
-      console.warn(
-        '[NotificationsGateway] WebSocket server not initialized. Skipping notification to user.',
+      this.logger.warn(
+        'WebSocket server not initialized. Skipping notification to user.',
       );
       return;
     }
@@ -72,8 +96,8 @@ export class NotificationsGateway
   // Method to send notification to all admins of a tenant
   sendToTenantAdmins(tenantId: string, notification: any) {
     if (!this.server) {
-      console.warn(
-        '[NotificationsGateway] WebSocket server not initialized. Skipping notification to admins.',
+      this.logger.warn(
+        'WebSocket server not initialized. Skipping notification to admins.',
       );
       return;
     }

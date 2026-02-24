@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchAPIWithAuth } from "../../lib/api";
+import { fetchAPIWithAuth, logout } from "../../lib/api";
 import { AgendaSection } from "../../components/AgendaSection";
 import { OrdersSection } from "../../components/OrdersSection";
 import { ProductsSection } from "../../components/ProductsSection";
@@ -20,26 +20,31 @@ import NotificationsDropdown from "../../components/NotificationsDropdown";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
 
-function getUserFromToken() {
+/**
+ * Get user info from localStorage (stored during login)
+ * The JWT token is now stored in httpOnly cookie and managed by the browser
+ */
+function getUserFromStorage() {
   if (typeof window === "undefined") {
     return null;
   }
-  const token = window.localStorage.getItem("token");
-  if (!token) {
-    return null;
+  
+  // Try to get user data from localStorage (stored during login)
+  const userJson = window.localStorage.getItem("user");
+  if (userJson) {
+    try {
+      const user = JSON.parse(userJson);
+      return {
+        userId: user.id as string,
+        role: (user.role as string | undefined) ?? "user",
+        tenantId: (user.tenantId as string | undefined) ?? "",
+      };
+    } catch {
+      // Fall through to null
+    }
   }
-  try {
-    const payloadBase64 = token.split(".")[1];
-    const payloadJson = atob(payloadBase64);
-    const payload = JSON.parse(payloadJson);
-    return {
-      userId: payload.sub as string,
-      role: (payload.role as string | undefined) ?? "user",
-      tenantId: (payload.tenantId as string | undefined) ?? "",
-    };
-  } catch {
-    return null;
-  }
+  
+  return null;
 }
 
 export default function DashboardPage() {
@@ -50,7 +55,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const checkAuth = () => {
-      const user = getUserFromToken();
+      const user = getUserFromStorage();
       setUserInfo(user);
       setIsAuthChecking(false);
       
@@ -85,14 +90,7 @@ export default function DashboardPage() {
 
   const [tenantCurrency, setTenantCurrency] = useState("USD");
   const [tenantSector, setTenantSector] = useState<string | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setToken(localStorage.getItem('token'));
-    }
-  }, []);
 
   // Sector-based visibility logic
   const isRetail = !tenantSector || ['retail', 'comercio', 'restaurante', 'belleza', 'otros'].includes(tenantSector);
@@ -333,8 +331,7 @@ export default function DashboardPage() {
           </nav>
           <button
             onClick={() => {
-              window.localStorage.removeItem("token");
-              router.push("/");
+              logout();
             }}
             className="mt-6 rounded-md border border-red-500/40 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-950/40"
           >
@@ -381,8 +378,7 @@ export default function DashboardPage() {
                    {/* Mobile Menu or Logout */}
                    <button
                     onClick={() => {
-                      window.localStorage.removeItem("token");
-                      router.push("/");
+                      logout();
                     }}
                     className="text-xs font-medium text-red-300"
                   >
@@ -587,8 +583,8 @@ export default function DashboardPage() {
         </div>
       </div>
       {/* Chat Widget */}
-      {currentUserId && token && activeSection !== 'mensajes' && (
-        <ChatWidget token={token} currentUserId={currentUserId} role={role} />
+      {currentUserId && activeSection !== 'mensajes' && (
+        <ChatWidget currentUserId={currentUserId} role={role} />
       )}
     </div>
   );

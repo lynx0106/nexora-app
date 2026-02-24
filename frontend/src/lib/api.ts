@@ -2,9 +2,44 @@ import { showToast } from './toast';
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4001';
 
+/**
+ * Check if user is authenticated by looking at the auth cookie
+ * This is a client-side only check using a non-httpOnly cookie
+ */
+export function isAuthenticated(): boolean {
+  if (typeof window === 'undefined') return false;
+  
+  // Check for the auth indicator cookie (non-httpOnly)
+  const cookies = document.cookie.split(';');
+  return cookies.some(cookie => 
+    cookie.trim().startsWith('is_authenticated=')
+  );
+}
+
+/**
+ * Clear auth cookies by calling the logout endpoint
+ */
+export async function logout(): Promise<void> {
+  try {
+    await fetchAPIWithAuth('/auth/logout', { method: 'POST' });
+  } catch {
+    // Even if the request fails, clear local state
+  }
+  
+  // Clear any legacy localStorage data
+  if (typeof window !== 'undefined') {
+    window.localStorage.removeItem('token');
+    window.localStorage.removeItem('user');
+  }
+  
+  // Reload to clear any in-memory state
+  window.location.href = '/';
+}
+
 export async function fetchAPI(endpoint: string, options: RequestInit = {}) {
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
+    credentials: 'include', // Include cookies in requests
     headers: {
       'Content-Type': 'application/json',
       ...options.headers,
@@ -38,8 +73,6 @@ export async function uploadFile(file: File, type: 'avatars' | 'products' | 'cha
 }
 
 export async function fetchAPIWithAuth(endpoint: string, options: RequestInit = {}) {
-  const token = typeof window !== 'undefined' ? window.localStorage.getItem('token') : null;
-
   const headers: Record<string, string> = {
     ...(options.headers as Record<string, string> || {}),
   };
@@ -49,12 +82,19 @@ export async function fetchAPIWithAuth(endpoint: string, options: RequestInit = 
       headers['Content-Type'] = 'application/json';
   }
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  // Note: We no longer read from localStorage.
+  // The JWT is automatically sent via httpOnly cookie.
+  // For backward compatibility during transition, we'll still send the header if it exists
+  if (typeof window !== 'undefined') {
+    const legacyToken = window.localStorage.getItem('token');
+    if (legacyToken) {
+      headers.Authorization = `Bearer ${legacyToken}`;
+    }
   }
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
+    credentials: 'include', // Critical: include cookies in the request
     headers,
   });
 
@@ -70,6 +110,14 @@ export async function fetchAPIWithAuth(endpoint: string, options: RequestInit = 
     if (res.status === 401) {
       const authMessage = 'Tu sesión ha expirado o no tienes permisos. Vuelve a iniciar sesión.';
       showToast(authMessage, 'error');
+      
+      // Clear legacy storage and redirect
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('token');
+        window.localStorage.removeItem('user');
+        window.location.href = '/';
+      }
+      
       throw new Error(authMessage);
     }
 

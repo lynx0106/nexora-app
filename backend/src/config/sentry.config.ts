@@ -1,12 +1,13 @@
 import * as Sentry from '@sentry/nestjs';
 import { nodeProfilingIntegration } from '@sentry/profiling-node';
+import { Logger } from '@nestjs/common';
 
 export function initSentry() {
   const dsn = process.env.SENTRY_DSN;
   const environment = process.env.NODE_ENV || 'development';
   
   if (!dsn) {
-    console.log('⚠️ SENTRY_DSN not configured, skipping Sentry initialization');
+    Logger.log('⚠️ SENTRY_DSN not configured, skipping Sentry initialization');
     return;
   }
 
@@ -31,7 +32,7 @@ export function initSentry() {
     ],
   });
 
-  console.log(`✅ Sentry initialized in ${environment} environment`);
+  Logger.log(`✅ Sentry initialized in ${environment} environment`);
 }
 
 // Helper to capture errors with context
