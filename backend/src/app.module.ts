@@ -5,6 +5,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { getDatabaseConfig, logDatabaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
@@ -47,32 +48,17 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      url: process.env.DATABASE_URL,
-      host: process.env.DATABASE_URL
-        ? undefined
-        : process.env.POSTGRES_HOST || 'localhost',
-      port: process.env.DATABASE_URL
-        ? undefined
-        : parseInt(process.env.POSTGRES_PORT || '5432') || 5432,
-      username: process.env.DATABASE_URL
-        ? undefined
-        : process.env.POSTGRES_USER || 'postgres',
-      password: process.env.DATABASE_URL
-        ? undefined
-        : process.env.POSTGRES_PASSWORD || 'adminpassword',
-      database: process.env.DATABASE_URL
-        ? undefined
-        : process.env.POSTGRES_DB || 'postgres', // Default DB for local install usually 'postgres'
-      ssl: process.env.DATABASE_URL
-        ? {
-            rejectUnauthorized: false,
-          }
-        : false,
-      autoLoadEntities: true,
-      // En produccion debe estar en false y usarse migraciones.
-      synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        logDatabaseConfig();
+        const config = getDatabaseConfig();
+        return {
+          ...config,
+          autoLoadEntities: true,
+          // En produccion debe estar en false y usarse migraciones.
+          synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
+        };
+      },
     }),
     UsersModule,
     AuthModule,

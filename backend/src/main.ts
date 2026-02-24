@@ -7,6 +7,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
+import { getDatabaseConfig } from './config/database.config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { initSentry } from './config/sentry.config';
 
@@ -16,6 +17,15 @@ initSentry();
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   try {
+    // Log database info at startup
+    const dbConfig = getDatabaseConfig();
+    if (dbConfig.url) {
+      const maskedUrl = dbConfig.url.replace(/:\/\/[^:]+:[^@]+@/, '://***:***@');
+      logger.log(`Database URL: ${maskedUrl}`);
+    } else {
+      logger.log(`Database: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
+    }
+    
     const app = await NestFactory.create(AppModule);
     
     // Valida configuracion critica al inicio.
