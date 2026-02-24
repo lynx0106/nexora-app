@@ -1,0 +1,4 @@
+# EAS Build ignore file
+# Make sure assets are NOT ignored
+!assets/
+!assets/*.png
