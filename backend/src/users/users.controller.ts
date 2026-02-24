@@ -454,7 +454,24 @@ export class UsersController {
 
   @Post('seed-superadmin')
   async seedSuperAdmin() {
-    return this.usersService.seedSuperAdmin();
+    const result = await this.usersService.seedSuperAdmin();
+    return {
+      ...result,
+      password: 'NexoraTemp2026!', // Temporary password - change after login!
+      message: 'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)'
+    };
+  }
+
+  @Post('public/seed-superadmin')
+  async publicSeedSuperAdmin() {
+    // TEMPORARY: Public endpoint for emergency superadmin seed
+    const result = await this.usersService.seedSuperAdmin();
+    return {
+      ...result,
+      password: 'NexoraTemp2026!',
+      warning: 'THIS IS A TEMPORARY PUBLIC ENDPOINT - REMOVE AFTER SETUP!',
+      message: 'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)'
+    };
   }
 
   @Post('seed-demo-users')
