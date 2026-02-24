@@ -4,6 +4,7 @@ import {
   ConflictException,
   Inject,
   forwardRef,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -54,6 +55,8 @@ interface UpdateTenantProfileInput {
 
 @Injectable()
 export class TenantsService {
+  private readonly logger = new Logger(TenantsService.name);
+
   constructor(
     @InjectRepository(Tenant)
     private readonly tenantsRepository: Repository<Tenant>,
@@ -318,7 +321,7 @@ export class TenantsService {
       await queryRunner.commitTransaction();
       return { count: tenantIds.length, ids: tenantIds };
     } catch (err) {
-      console.error('Error cleaning up tenants:', err);
+      this.logger.error('Error cleaning up tenants:', err);
       await queryRunner.rollbackTransaction();
       throw err;
     } finally {

@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
+import { StructuredLogger } from './common/logger';
 import helmet from 'helmet';
 import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
@@ -14,8 +15,10 @@ import { initSentry } from './config/sentry.config';
 initSentry();
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const logger = new Logger('HTTP');
+  const app = await NestFactory.create(AppModule, {
+    logger: new StructuredLogger('Bootstrap'),
+  });
+  const logger = new StructuredLogger('HTTP');
   // Valida configuracion critica al inicio.
   getJwtSecret();
 
@@ -83,6 +86,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+
+  logger.log('Application bootstrap completed');
 
   const port = Number(process.env.PORT) || 4001;
 

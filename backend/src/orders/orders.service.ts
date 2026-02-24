@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Order } from './entities/order.entity';
@@ -14,6 +14,8 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
@@ -160,7 +162,7 @@ export class OrdersService {
                 }
               }
             } catch (error) {
-              console.error(
+              this.logger.error(
                 '⚠️ Failed to generate payment link or chat msg:',
                 error,
               );
@@ -178,10 +180,10 @@ export class OrdersService {
                 link: `/dashboard/orders`,
               })
               .catch((err) =>
-                console.error('⚠️ Failed to send notification (promise):', err),
+                this.logger.error('⚠️ Failed to send notification (promise):', err),
               );
           } catch (error) {
-            console.error('⚠️ Failed to initiate notification:', error);
+            this.logger.error('⚠️ Failed to initiate notification:', error);
           }
 
           // 3. Send Email Notification
@@ -208,16 +210,16 @@ export class OrdersService {
                     tenant,
                   )
                   .catch((err) =>
-                    console.error('⚠️ Failed to send email (promise):', err),
+                    this.logger.error('⚠️ Failed to send email (promise):', err),
                   );
               }
             } catch (error) {
-              console.error('⚠️ Failed to initiate email:', error);
+              this.logger.error('⚠️ Failed to initiate email:', error);
             }
           }
         }
       } catch (postProcessError) {
-        console.error(
+        this.logger.error(
           '❌ Critical Error in Order Post-Processing:',
           postProcessError,
         );

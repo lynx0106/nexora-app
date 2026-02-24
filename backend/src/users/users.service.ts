@@ -2,6 +2,7 @@ import {
   Injectable,
   ConflictException,
   NotFoundException,
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
@@ -11,6 +12,8 @@ import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
@@ -262,7 +265,7 @@ export class UsersService {
         });
         createdDoctors.push(await this.usersRepository.save(user));
       } catch (e) {
-        console.error(`Error creating doctor ${doc.email}`, e);
+        this.logger.error(`Error creating doctor ${doc.email}`, e);
       }
     }
     return createdDoctors;
@@ -313,7 +316,7 @@ export class UsersService {
         });
         createdClients.push(await this.usersRepository.save(user));
       } catch (e) {
-        console.error(`Error creating client ${client.email}`, e);
+        this.logger.error(`Error creating client ${client.email}`, e);
       }
     }
     return createdClients;

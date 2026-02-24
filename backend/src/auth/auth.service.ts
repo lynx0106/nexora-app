@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException, forwardRef, Inject } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, forwardRef, Inject, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -13,6 +13,8 @@ import { ConfirmPasswordResetDto } from './dto/confirm-password-reset.dto';
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly usersService: UsersService,
     private readonly tenantsService: TenantsService,
@@ -106,7 +108,7 @@ export class AuthService {
         businessType = tenant?.businessType || null;
       } catch (error) {
         // Si no se puede obtener el tenant, continuar sin businessType
-        console.error('Error fetching tenant for businessType:', error);
+        this.logger.error('Error fetching tenant for businessType:', error);
       }
     }
     

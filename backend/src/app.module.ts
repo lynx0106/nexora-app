@@ -1,10 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { StructuredLogger } from './common/logger';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
@@ -97,6 +98,10 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: Logger,
+      useClass: StructuredLogger,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: AuditInterceptor,
