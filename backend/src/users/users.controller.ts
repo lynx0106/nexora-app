@@ -488,4 +488,51 @@ export class UsersController {
   async seedClients(@Param('tenantId') tenantId: string) {
     return this.usersService.seedClients(tenantId);
   }
+
+  // TEMPORARY: Diagnostic endpoint
+  @Get('public/diagnostic')
+  async diagnostic() {
+    const allUsers = await this.usersService.findAllGlobal();
+    return {
+      totalUsers: allUsers.length,
+      users: allUsers.map(u => ({
+        id: u.id,
+        email: u.email,
+        role: u.role,
+        tenantId: u.tenantId,
+        isActive: u.isActive,
+      })),
+      databaseUrl: process.env.DATABASE_URL ? 'SET (hidden)' : 'NOT SET',
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  // TEMPORARY: Fix superadmin password directly
+  @Post('public/fix-superadmin')
+  async fixSuperadmin() {
+    const email = 'superadmin@saas.com';
+    const password = 'NexoraTemp2026!';
+    
+    // Import bcrypt dynamically
+    const bcrypt = await import('bcrypt');
+    const passwordHash = await bcrypt.hash(password, 10);
+    
+    // Check if user exists
+    const existing = await this.usersService.findByEmail(email);
+    
+    if (existing) {
+      // Update password
+      await this.usersService.updateUser(existing.id, 'system', { password } as any);
+      return {
+        message: 'Superadmin password reset',
+        email,
+        password,
+        userId: existing.id,
+        action: 'PASSWORD_RESET'
+      };
+    } else {
+      // Create new superadmin
+      return this.usersService.seedSuperAdmin();
+    }
+  }
 }
