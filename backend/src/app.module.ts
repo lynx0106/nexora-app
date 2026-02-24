@@ -52,11 +52,16 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
       useFactory: () => {
         logDatabaseConfig();
         const config = getDatabaseConfig();
+        // Auto-enable synchronize for Supabase fresh setup
+        // Set TYPEORM_SYNCHRONIZE=false after initial setup
+        const shouldSync = process.env.TYPEORM_SYNCHRONIZE !== 'false';
+        if (shouldSync) {
+          console.log('⚠️ TYPEORM_SYNCHRONIZE is enabled - tables will be auto-created');
+        }
         return {
           ...config,
           autoLoadEntities: true,
-          // En produccion debe estar en false y usarse migraciones.
-          synchronize: process.env.TYPEORM_SYNCHRONIZE === 'true',
+          synchronize: shouldSync,
         };
       },
     }),
