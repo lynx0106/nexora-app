@@ -21,12 +21,11 @@ interface Message {
 }
 
 interface ChatWidgetProps {
-  token: string | null;
   currentUserId: string | null;
   role?: string | null;
 }
 
-export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
+export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -71,38 +70,28 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
 
   // Fetch Tenant Info for bot identity
   useEffect(() => {
-    if (!token) return;
+    if (!currentUserId) return;
     
-    // Extract tenantId from token to fetch public info or use an endpoint
-    // For now, let's use the public endpoint if we can parse the token, 
-    // or assume we are in the context of the current dashboard.
-    // DashboardPage passes currentUserId but not tenantId explicitly to ChatWidget.
-    // We can decode the token here again or pass it as prop.
-    // Let's decode safely.
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const tId = payload.tenantId;
-        if (tId) {
-            fetchAPIWithAuth(`/public/tenant/${tId}`)
-                .then(data => {
-                    if (data) {
-                        setTenantInfo({ name: data.name, sector: data.sector || 'Negocio' });
-                    } else {
-                        setTenantInfo({ name: 'nuestro negocio', sector: 'Servicios' });
-                    }
-                })
-                .catch(err => {
-                    console.error("Failed to fetch tenant info for chat", err);
-                    setTenantInfo({ name: 'nuestro negocio', sector: 'Servicios' });
-                });
-        } else {
-             setTenantInfo({ name: 'nuestro negocio', sector: 'Servicios' });
+    // Get current user info from API (which includes tenant info)
+    fetchAPIWithAuth('/auth/me')
+      .then(response => {
+        if (response?.user?.tenantId) {
+          return fetchAPIWithAuth(`/public/tenant/${response.user.tenantId}`);
         }
-    } catch (e) {
-        console.error("Error decoding token in chat", e);
+        return null;
+      })
+      .then(data => {
+        if (data) {
+          setTenantInfo({ name: data.name, sector: data.sector || 'Negocio' });
+        } else {
+          setTenantInfo({ name: 'nuestro negocio', sector: 'Servicios' });
+        }
+      })
+      .catch(err => {
+        console.error("Failed to fetch tenant info for chat", err);
         setTenantInfo({ name: 'nuestro negocio', sector: 'Servicios' });
-    }
-  }, [token]);
+      });
+  }, [currentUserId]);
 
   // Helper function to play sound
   const playNotificationSound = () => {
@@ -127,14 +116,13 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
 
   // Initialize Socket
   useEffect(() => {
-    if (!token) return;
+    if (!currentUserId) return;
 
     console.log('[ChatWidget] Initializing socket...');
 
     const newSocket = io(API_URL, {
-      auth: {
-        token: `Bearer ${token}`,
-      },
+      withCredentials: true, // Send cookies with the connection
+      transports: ['websocket', 'polling'], // Fallback for compatibility
     });
 
     newSocket.on('connect', () => {
@@ -196,7 +184,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
         socketRef.current = null;
       }
     };
-  }, [token]);
+  }, [currentUserId]);
 
   // Toggle AI Function
   const toggleAi = () => {
@@ -210,7 +198,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
 
   // Fetch History when opening or changing tabs
   useEffect(() => {
-    if (isOpen && token) {
+    if (isOpen && currentUserId) {
       const scope = activeTab;
       
       // Mark as read when opening this tab
@@ -229,7 +217,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
         })
         .catch(console.error);
     }
-  }, [isOpen, token, activeTab]);
+  }, [isOpen, currentUserId, activeTab]);
 
   // Show welcome message for users if history is empty
   useEffect(() => {
@@ -303,7 +291,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
 
   const handleAudioUpload = async (audioBlob: Blob) => {
       const socket = socketRef.current;
-      if (!token || !socket) return;
+      if (!currentUserId || !socket) return;
 
       setIsUploading(true);
       const formData = new FormData();
@@ -314,9 +302,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
       try {
           const res = await fetch(`${API_URL}/uploads/chat`, {
               method: 'POST',
-              headers: {
-                  'Authorization': `Bearer ${token}`
-              },
+              credentials: 'include', // Send cookies
               body: formData
           });
 
@@ -342,7 +328,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       const socket = socketRef.current;
-      if (!file || !token || !socket) return;
+      if (!file || !currentUserId || !socket) return;
 
       setIsUploading(true);
       const formData = new FormData();
@@ -351,9 +337,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
       try {
           const res = await fetch(`${API_URL}/uploads/chat`, {
               method: 'POST',
-              headers: {
-                  'Authorization': `Bearer ${token}`
-              },
+              credentials: 'include', // Send cookies
               body: formData
           });
 
@@ -393,7 +377,7 @@ export function ChatWidget({ token, currentUserId, role }: ChatWidgetProps) {
     setNewMessage('');
   };
 
-  if (!token) return null;
+  if (!currentUserId) return null;
 
   // Filter messages for display (Double check)
   const displayedMessages = messages.filter(m => m.scope === activeTab);

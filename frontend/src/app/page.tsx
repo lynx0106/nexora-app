@@ -79,14 +79,15 @@ function HomeContent() {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
+          credentials: 'include', // Important: include cookies
           body: JSON.stringify({ email, password }),
         });
         
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || t('auth.generic_error'));
 
-        // Store token
-        localStorage.setItem("token", data.accessToken);
+        // Note: Token is now stored in httpOnly cookie by the server
+        // We only store user data in localStorage for client-side use
         const user = data.user;
         localStorage.setItem("user", JSON.stringify(user));
 

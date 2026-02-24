@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { randomUUID } from 'crypto';
 import type { Request, Response, NextFunction } from 'express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { getCorsOrigins, getJwtSecret } from './config/runtime.config';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
@@ -20,9 +21,14 @@ async function bootstrap() {
 
   const corsOrigins = getCorsOrigins();
 
+  // Enable cookie parsing
+  app.use(cookieParser());
+
   app.enableCors({
     origin: corsOrigins,
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token'],
   });
 
   // Headers de seguridad basicos.

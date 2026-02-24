@@ -37,9 +37,30 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   async handleConnection(client: Socket) {
     try {
-      const token =
-        client.handshake.auth.token || client.handshake.headers.authorization;
+      // Try to get token from multiple sources
+      let token: string | undefined;
+      
+      // 1. Try handshake.auth (for backward compatibility)
+      if (client.handshake.auth.token) {
+        token = client.handshake.auth.token;
+      }
+      
+      // 2. Try Authorization header
+      if (!token && client.handshake.headers.authorization) {
+        token = client.handshake.headers.authorization;
+      }
+      
+      // 3. Try cookies (new secure method)
+      if (!token && client.handshake.headers.cookie) {
+        const cookieString = client.handshake.headers.cookie;
+        const accessTokenMatch = cookieString.match(/access_token=([^;]+)/);
+        if (accessTokenMatch) {
+          token = accessTokenMatch[1];
+        }
+      }
+      
       if (!token) {
+        this.logger.warn('Connection rejected: No token provided');
         client.disconnect();
         return;
       }

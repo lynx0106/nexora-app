@@ -172,6 +172,30 @@ export class AuthService {
     return { ok: true };
   }
 
+  async getUserById(userId: string) {
+    const user = await this.usersService.findOne(userId);
+    if (!user) {
+      return null;
+    }
+    
+    // Get business type from tenant
+    let businessType: string | null = null;
+    if (user.tenantId && user.tenantId !== 'system') {
+      try {
+        const tenant = await this.tenantsService.findOne(user.tenantId);
+        businessType = tenant?.businessType || null;
+      } catch (error) {
+        // Silently fail, businessType is optional
+      }
+    }
+    
+    const { passwordHash, passwordResetTokenHash, passwordResetTokenExpiresAt, ...safeUser } = user;
+    return {
+      ...safeUser,
+      businessType,
+    };
+  }
+
   private hashToken(token: string) {
     return crypto.createHash('sha256').update(token).digest('hex');
   }

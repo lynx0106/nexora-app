@@ -1,11 +1,13 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post, Res, Get, UseGuards, Req } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
+import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import { ConfirmPasswordResetDto } from './dto/confirm-password-reset.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,11 +28,70 @@ export class AuthController {
   @Post('login')
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 intentos por minuto para login
   @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'Login successful - returns JWT token' })
+  @ApiResponse({ status: 200, description: 'Login successful - sets httpOnly cookie' })
   @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
   @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
-  login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  async login(
+    @Body() dto: LoginDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.login(dto);
+    
+    // Set HTTP-only cookie with JWT
+    const isProduction = process.env.NODE_ENV === 'production';
+    res.cookie('access_token', result.accessToken, {
+      httpOnly: true,
+      secure: isProduction, // Only HTTPS in production
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/',
+    });
+
+    // Also set a non-httpOnly cookie for client-side "is logged in" checks
+    res.cookie('is_authenticated', 'true', {
+      httpOnly: false,
+      secure: isProduction,
+      sameSite: isProduction ? 'strict' : 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    // Return user data (without token in body for security)
+    return { 
+      user: result.user,
+      message: 'Login successful' 
+    };
+  }
+
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'User logout' })
+  @ApiResponse({ status: 200, description: 'Logout successful - cookies cleared' })
+  async logout(@Res({ passthrough: true }) res: Response) {
+    // Clear cookies
+    res.clearCookie('access_token', { path: '/' });
+    res.clearCookie('is_authenticated', { path: '/' });
+    res.clearCookie('refresh_token', { path: '/' });
+
+    return { message: 'Logout successful' };
+  }
+
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current user info' })
+  @ApiResponse({ status: 200, description: 'Returns current user data' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getCurrentUser(@Req() req: Request) {
+    const user = (req as any).user;
+    if (!user) {
+      return { user: null };
+    }
+    
+    // Fetch fresh user data from database
+    const userData = await this.authService.getUserById(user.userId);
+    return { user: userData };
   }
 
   @Post('password-reset/request')
