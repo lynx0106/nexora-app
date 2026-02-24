@@ -14,6 +14,31 @@ import { extname } from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { StorageService, StorageBucket } from '../storage/storage.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import { fileTypeFromFile } from 'file-type';
+import { readFile, unlink } from 'fs/promises';
+
+// Maximum file size: 5MB
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+// Allowed MIME types
+const ALLOWED_MIME_TYPES = [
+  // Images
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+  // Documents
+  'application/pdf',
+  // Audio
+  'audio/mpeg',
+  'audio/mp3',
+  'audio/wav',
+  'audio/webm',
+  'audio/ogg',
+];
+
+// Allowed file extensions
+const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.mp3', '.wav', '.webm', '.ogg'];
 
 @ApiTags('uploads')
 @Controller('uploads')
@@ -25,7 +50,7 @@ export class UploadsController {
   @Post(':type')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Upload a file (image, PDF, or audio)' })
+  @ApiOperation({ summary: 'Upload a file (image, PDF, or audio) - Max 5MB' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {
@@ -34,16 +59,19 @@ export class UploadsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'The file to upload',
+          description: 'The file to upload (max 5MB). Allowed: images, PDF, audio',
         },
       },
     },
   })
   @ApiResponse({ status: 201, description: 'File uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid file type or upload type' })
+  @ApiResponse({ status: 400, description: 'Invalid file type, size, or upload type' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseInterceptors(
     FileInterceptor('file', {
+      limits: {
+        fileSize: MAX_FILE_SIZE, // 5MB limit
+      },
       storage: diskStorage({
         destination: (req, file, cb) => {
           const type = req.params.type as string;
@@ -68,13 +96,23 @@ export class UploadsController {
         },
       }),
       fileFilter: (req, file, cb) => {
-        // Allow images, PDFs, and audio files
-        if (!file.mimetype.match(/\/(jpg|jpeg|png|gif|pdf|mpeg|mp3|wav|webm|ogg|webp)$/)) {
+        // Check file extension
+        const ext = extname(file.originalname).toLowerCase();
+        if (!ALLOWED_EXTENSIONS.includes(ext)) {
           return cb(
-            new BadRequestException('Only image, PDF, or audio files are allowed!'),
+            new BadRequestException(`File extension not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`),
             false,
           );
         }
+
+        // Check MIME type (first line of defense)
+        if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
+          return cb(
+            new BadRequestException('File type not allowed'),
+            false,
+          );
+        }
+
         cb(null, true);
       },
     }),
@@ -87,10 +125,67 @@ export class UploadsController {
       throw new BadRequestException('File is required');
     }
 
-    // Validate type
+    // Validate file size (double-check)
+    if (file.size > MAX_FILE_SIZE) {
+      // Clean up the saved file
+      try {
+        await unlink(file.path);
+      } catch {
+        // Ignore cleanup errors
+      }
+      throw new BadRequestException(`File size exceeds maximum allowed (5MB)`);
+    }
+
+    // Validate type parameter
     const validTypes: StorageBucket[] = ['avatars', 'products', 'chat', 'tenants'];
     if (!validTypes.includes(type as StorageBucket)) {
+      await unlink(file.path).catch(() => {});
       throw new BadRequestException(`Invalid upload type: ${type}. Valid types are: ${validTypes.join(', ')}`);
+    }
+
+    // Validate file by magic bytes (content-based validation)
+    try {
+      const fileType = await fileTypeFromFile(file.path);
+      
+      if (!fileType) {
+        await unlink(file.path).catch(() => {});
+        throw new BadRequestException('Could not determine file type');
+      }
+
+      if (!ALLOWED_MIME_TYPES.includes(fileType.mime)) {
+        await unlink(file.path).catch(() => {});
+        throw new BadRequestException(`File content type not allowed: ${fileType.mime}`);
+      }
+
+      // Verify that the extension matches the actual content
+      const ext = extname(file.originalname).toLowerCase();
+      const mimeToExt: Record<string, string[]> = {
+        'image/jpeg': ['.jpg', '.jpeg'],
+        'image/png': ['.png'],
+        'image/gif': ['.gif'],
+        'image/webp': ['.webp'],
+        'application/pdf': ['.pdf'],
+        'audio/mpeg': ['.mp3'],
+        'audio/mp3': ['.mp3'],
+        'audio/wav': ['.wav'],
+        'audio/webm': ['.webm'],
+        'audio/ogg': ['.ogg'],
+      };
+
+      const validExts = mimeToExt[fileType.mime] || [];
+      if (!validExts.includes(ext)) {
+        await unlink(file.path).catch(() => {});
+        throw new BadRequestException(`File extension does not match content. Expected: ${validExts.join(' or ')}`);
+      }
+
+      this.logger.log(`File validated: ${fileType.mime}, size: ${file.size} bytes`);
+
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      await unlink(file.path).catch(() => {});
+      throw new BadRequestException('File validation failed');
     }
 
     // Try Supabase Storage first
@@ -101,6 +196,10 @@ export class UploadsController {
           file,
         );
         this.logger.log(`File uploaded to Supabase: ${result.url}`);
+        
+        // Clean up local file after successful upload
+        await unlink(file.path).catch(() => {});
+        
         return {
           url: result.url,
           path: result.path,
