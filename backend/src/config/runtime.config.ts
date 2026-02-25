@@ -26,7 +26,7 @@ export function getCorsOrigins(): string[] {
   const productionOrigins = [
     'https://nexora-app.online',
     'https://www.nexora-app.online',
-    'https://nexora-app-production-3199.up.railway.app',
+    'https://nexora-app-production-3104.up.railway.app',
   ];
 
   // If FRONTEND_URL is set, add it
