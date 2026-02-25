@@ -32,7 +32,10 @@ async function bootstrap() {
     getJwtSecret();
 
     const corsOrigins = getCorsOrigins();
-    logger.log(`CORS origins configured: ${corsOrigins.join(', ')}`);
+    logger.log(`CORS v2 - Origins: ${corsOrigins.join(', ')}`);
+    
+    // Debug CORS
+    console.log('[CORS DEBUG] Allowed origins:', corsOrigins);
 
     // Enable cookie parsing
     app.use(cookieParser());
