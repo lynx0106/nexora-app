@@ -1,0 +1,18 @@
+{
+  "name": "nexora-app",
+  "version": "1.0.0",
+  "description": "Nexora App - SaaS Multi-tenant Platform",
+  "private": true,
+  "scripts": {
+    "build": "cd backend && npm ci && npm run build",
+    "start": "cd backend && npm run start:prod",
+    "test": "cd backend && npm test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lynx0106/nexora-app"
+  }
+}
