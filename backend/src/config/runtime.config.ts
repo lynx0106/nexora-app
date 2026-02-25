@@ -22,7 +22,7 @@ export function getCorsOrigins(): string[] {
       .filter((origin) => origin.length > 0);
   }
 
-  // Production domains (always allowed in production)
+  // Production domains (always included)
   const productionOrigins = [
     'https://nexora-app.online',
     'https://www.nexora-app.online',
@@ -34,12 +34,13 @@ export function getCorsOrigins(): string[] {
     productionOrigins.push(process.env.FRONTEND_URL);
   }
 
-  // In production, return production origins
-  if (process.env.NODE_ENV === 'production') {
-    // Remove duplicates
-    return [...new Set(productionOrigins)];
-  }
+  // Always include production origins + localhost for development
+  const allOrigins = [
+    'http://localhost:3002',
+    'http://localhost:3000',
+    ...productionOrigins
+  ];
 
-  // In development, allow localhost
-  return ['http://localhost:3002', 'http://localhost:3000', ...productionOrigins];
+  // Remove duplicates
+  return [...new Set(allOrigins)];
 }
