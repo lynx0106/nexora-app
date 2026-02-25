@@ -28,6 +28,7 @@ Skill para garantizar calidad de código y configuración correcta antes de comm
 | `pre-commit-check.ps1` | Validaciones locales rápidas | Antes de `git commit` |
 | `pre-deploy-check.ps1` | Validaciones completas de producción | Antes de `git push origin main` |
 | `validate-deployment-config.ps1` | Verificar configuración Railway/Vercel | Cuando se modifican configs de deploy |
+| `validate-cors.ps1` | Verificar CORS backend-frontend | Cuando hay errores de CORS o cambio de URLs |
 
 ## Uso Rápido
 
@@ -63,6 +64,27 @@ Skill para garantizar calidad de código y configuración correcta antes de comm
 - ✅ Checklist de despliegue revisado
 
 **Si todo OK:** Procede con `git push origin main`
+
+### Validación CORS (Cuando hay problemas de conexión)
+
+```powershell
+# Si ves errores como:
+# - "Failed to fetch"
+# - "CORS policy" bloqueando
+# - "405 Method Not Allowed"
+.agents/skills/nexora-validation/scripts/validate-cors.ps1
+```
+
+**Valida:**
+- ✅ Backend responde correctamente
+- ✅ Headers CORS presentes (Allow-Origin, Allow-Credentials)
+- ✅ OPTIONS preflight responde 204
+- ✅ Backend y Frontend URLs coinciden
+
+**Si hay errores CORS:**
+1. Verificar variable `CORS_ORIGINS` en Railway
+2. Verificar que Railway tiene último commit
+3. Verificar `frontend/src/lib/api.ts` tiene URL correcta
 
 ## Flujo de Trabajo Recomendado
 
