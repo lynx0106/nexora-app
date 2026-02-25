@@ -89,7 +89,7 @@ async function bootstrap() {
       }),
     );
 
-    logger.log('Application bootstrap completed');
+    logger.log('Application bootstrap completed - v2026.02.24');
 
     const port = Number(process.env.PORT) || 4001;
 
