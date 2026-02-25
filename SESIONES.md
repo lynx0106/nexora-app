@@ -5,7 +5,7 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
-## 2026-02-25 - Configuración CORS, Deploy y Skills
+## 2026-02-25 - Configuración CORS, Deploy y Skills (Parte 1)
 **Duración:** 4 horas  
 **Estado:** 🔴 Bloqueado - CORS no resuelto
 
@@ -36,13 +36,6 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - Crear skill `nexora-session-tracker` para documentar sesiones y mantener contexto
 - Documentar todo en `SESIONES.md` para próximas sesiones
 
-### ✅ Avances de Esta Sesión (Continuación)
-- [x] Creada skill `nexora-troubleshooting` para diagnóstico rápido de errores
-- [x] Creado script `diagnostico-rapido.ps1` para detectar problemas en minutos
-- [x] Mejorada skill `nexora-validation` con validación específica de CORS
-- [x] Agregado `validate-cors.ps1` para verificar configuración backend-frontend
-- [x] Optimizado uso de tokens y tiempos de desarrollo con guías paso a paso
-
 ### 📋 Tareas Pendientes (Próxima Sesión)
 P0 - Crítico:
 - [ ] Investigar por qué Railway no detecta commits de GitHub
@@ -72,3 +65,62 @@ P2 - Mejora:
 - Backend responde a requests directos (curl) pero no desde frontend por CORS
 
 ---
+
+## 2026-02-25 - Creación de Skills de Gestión (Parte 2)
+**Duración:** 1.5 horas  
+**Estado:** ✅ Completada - 2 skills creadas
+
+### ✅ Avances
+- [x] Creada skill `nexora-troubleshooting` para diagnóstico rápido de errores
+- [x] Creado script `diagnostico-rapido.ps1` para detectar problemas en minutos
+- [x] Mejorada skill `nexora-validation` con validación específica de CORS (`validate-cors.ps1`)
+- [x] Creada skill `nexora-session-manager` para gestionar saturación de sesiones
+- [x] Creada skill `nexora-cleanup` para analizar y limpiar archivos obsoletos
+- [x] Documentados scripts de ayuda en cada skill
+- [x] Creadas referencias y guías de uso
+
+### 🔴 Problemas Encontrados
+- Ninguno en esta sesión enfocada
+
+### 🎯 Decisiones
+- Mantener sesiones cortas y enfocadas (15-20 mensajes máximo)
+- Documentar cada sesión en SESIONES.md antes de cerrar
+- Usar skills para automatizar tareas repetitivas
+- Separar troubleshooting de CORS (pendiente) de creación de skills (completado)
+
+### 📋 Tareas Pendientes (Próxima Sesión)
+**Enfoque: Resolver sync Railway-GitHub y CORS**
+
+P0 - Crítico:
+- [ ] Investigar por qué Railway no detecta commits de GitHub
+- [ ] Verificar GitHub Settings → Webhooks para Railway
+- [ ] Verificar si hay múltiples servicios en Railway dashboard
+- [ ] Probar crear nuevo proyecto Railway desde cero
+
+P1 - Importante:
+- [ ] Validar que el login funcione después de sincronizar código
+- [ ] Restringir CORS de `*` a orígenes específicos
+
+P2 - Mejora:
+- [ ] Probar scripts de validación creados
+- [ ] Aplicar `nexora-cleanup` para organizar archivos del proyecto
+
+### 🔗 Recursos
+- Skills creadas:
+  - `.agents/skills/nexora-troubleshooting/` - Diagnóstico de errores
+  - `.agents/skills/nexora-session-manager/` - Gestión de sesiones
+  - `.agents/skills/nexora-cleanup/` - Limpieza de archivos
+- Scripts disponibles:
+  - `diagnostico-rapido.ps1` - Diagnóstico general
+  - `validate-cors.ps1` - Validación CORS específica
+  - `estado-sesion.ps1` - Ver estado de sesión actual
+  - `new-session-entry.ps1` - Documentar sesión
+
+### 📝 Notas Adicionales
+- Total de skills activas: 7
+- Ecosistema completo: validación, troubleshooting, gestión de sesiones, advisor
+- Sesión cerrada después de 21 mensajes (dentro de rango recomendado)
+- Próxima sesión debe enfocarse exclusivamente en CORS/Railway
+
+---
+
