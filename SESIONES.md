@@ -36,6 +36,13 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - Crear skill `nexora-session-tracker` para documentar sesiones y mantener contexto
 - Documentar todo en `SESIONES.md` para próximas sesiones
 
+### ✅ Avances de Esta Sesión (Continuación)
+- [x] Creada skill `nexora-troubleshooting` para diagnóstico rápido de errores
+- [x] Creado script `diagnostico-rapido.ps1` para detectar problemas en minutos
+- [x] Mejorada skill `nexora-validation` con validación específica de CORS
+- [x] Agregado `validate-cors.ps1` para verificar configuración backend-frontend
+- [x] Optimizado uso de tokens y tiempos de desarrollo con guías paso a paso
+
 ### 📋 Tareas Pendientes (Próxima Sesión)
 P0 - Crítico:
 - [ ] Investigar por qué Railway no detecta commits de GitHub
