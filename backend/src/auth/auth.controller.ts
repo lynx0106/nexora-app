@@ -47,10 +47,12 @@ export class AuthController {
       
       // Set HTTP-only cookie with JWT
       const isProduction = process.env.NODE_ENV === 'production';
+      // Use 'none' for cross-domain in production (frontend on Vercel, backend on Railway)
+      // Requires secure: true when using sameSite: 'none'
       res.cookie('access_token', result.accessToken, {
         httpOnly: true,
-        secure: isProduction, // Only HTTPS in production
-        sameSite: isProduction ? 'strict' : 'lax',
+        secure: true, // Always HTTPS in production
+        sameSite: 'none', // Allow cross-domain requests (Vercel → Railway)
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         path: '/',
       });
@@ -58,8 +60,8 @@ export class AuthController {
       // Also set a non-httpOnly cookie for client-side "is logged in" checks
       res.cookie('is_authenticated', 'true', {
         httpOnly: false,
-        secure: isProduction,
-        sameSite: isProduction ? 'strict' : 'lax',
+        secure: true,
+        sameSite: 'none', // Allow cross-domain
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         path: '/',
       });
@@ -83,10 +85,15 @@ export class AuthController {
   @ApiOperation({ summary: 'User logout' })
   @ApiResponse({ status: 200, description: 'Logout successful - cookies cleared' })
   async logout(@Res({ passthrough: true }) res: Response) {
-    // Clear cookies
-    res.clearCookie('access_token', { path: '/' });
-    res.clearCookie('is_authenticated', { path: '/' });
-    res.clearCookie('refresh_token', { path: '/' });
+    // Clear cookies with same options used when setting them
+    const clearOptions = {
+      path: '/',
+      secure: true,
+      sameSite: 'none' as const,
+    };
+    res.clearCookie('access_token', clearOptions);
+    res.clearCookie('is_authenticated', clearOptions);
+    res.clearCookie('refresh_token', clearOptions);
 
     this.logger.log('User logged out');
     return { message: 'Logout successful' };
