@@ -136,4 +136,21 @@ export class AppController {
       }
     };
   }
+
+  /**
+   * Debug endpoint to check if cookies are being received
+   */
+  @Get('debug-cookies')
+  @ApiOperation({ summary: 'Debug cookies - check if they are being received' })
+  debugCookies(@Req() req: Request) {
+    return {
+      cookies: req.cookies,
+      headers: {
+        origin: req.headers.origin,
+        host: req.headers.host,
+        referer: req.headers.referer,
+      },
+      timestamp: new Date().toISOString(),
+    };
+  }
 }
