@@ -82,19 +82,18 @@ export async function fetchAPIWithAuth(endpoint: string, options: RequestInit = 
       headers['Content-Type'] = 'application/json';
   }
 
-  // Note: We no longer read from localStorage.
-  // The JWT is automatically sent via httpOnly cookie.
-  // For backward compatibility during transition, we'll still send the header if it exists
+  // Send JWT token in Authorization header as primary auth method
+  // (Cookies are blocked in cross-domain / incognito mode)
   if (typeof window !== 'undefined') {
-    const legacyToken = window.localStorage.getItem('token');
-    if (legacyToken) {
-      headers.Authorization = `Bearer ${legacyToken}`;
+    const token = window.localStorage.getItem('token');
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
     }
   }
 
   const res = await fetch(`${API_URL}${endpoint}`, {
     ...options,
-    credentials: 'include', // Critical: include cookies in the request
+    credentials: 'include', // Still try to include cookies as fallback
     headers,
   });
 

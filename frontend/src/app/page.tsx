@@ -86,8 +86,12 @@ function HomeContent() {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || t('auth.generic_error'));
 
-        // Note: Token is now stored in httpOnly cookie by the server
-        // We only store user data in localStorage for client-side use
+        // Save token to localStorage for cross-domain auth (cookies blocked in incognito)
+        if (data.accessToken) {
+          localStorage.setItem("token", data.accessToken);
+        }
+        
+        // Also store user data
         const user = data.user;
         localStorage.setItem("user", JSON.stringify(user));
 

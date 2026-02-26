@@ -34,7 +34,7 @@ export class AuthController {
   @UseGuards(AuthThrottleGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 intentos por minuto
   @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'Login successful - sets httpOnly cookie' })
+  @ApiResponse({ status: 200, description: 'Login successful - sets httpOnly cookie and returns token' })
   @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
   @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
   async login(
@@ -45,15 +45,12 @@ export class AuthController {
     try {
       const result = await this.authService.login(dto);
       
-      // Set HTTP-only cookie with JWT
-      const isProduction = process.env.NODE_ENV === 'production';
-      // Use 'none' for cross-domain in production (frontend on Vercel, backend on Railway)
-      // Requires secure: true when using sameSite: 'none'
+      // Set HTTP-only cookie with JWT (for same-domain deployments)
       res.cookie('access_token', result.accessToken, {
         httpOnly: true,
-        secure: true, // Always HTTPS in production
-        sameSite: 'none', // Allow cross-domain requests (Vercel → Railway)
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        secure: true,
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000,
         path: '/',
       });
 
@@ -61,16 +58,17 @@ export class AuthController {
       res.cookie('is_authenticated', 'true', {
         httpOnly: false,
         secure: true,
-        sameSite: 'none', // Allow cross-domain
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        sameSite: 'none',
+        maxAge: 24 * 60 * 60 * 1000,
         path: '/',
       });
 
       this.logger.log(`Successful login for user: ${result.user.email} from IP: ${ip}`);
 
-      // Return user data (without token in body for security)
+      // Return token in body for cross-domain deployments (cookies blocked by browser)
       return { 
         user: result.user,
+        accessToken: result.accessToken,
         message: 'Login successful' 
       };
     } catch (error) {
