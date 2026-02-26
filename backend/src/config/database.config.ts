@@ -29,6 +29,27 @@ export function getDatabaseConfig(): DatabaseConfig {
   
   if (supabaseUrl?.includes('supabase')) {
     console.log('🔗 Using Supabase database');
+    
+    // Check if using pooler (pgbouncer)
+    const isPooler = supabaseUrl?.includes('pooler');
+    
+    if (isPooler) {
+      console.log('   Using connection pooler (pgbouncer)');
+      // For pooler, we need specific settings to avoid prepared statement issues
+      return {
+        type: 'postgres',
+        url: supabaseUrl,
+        ssl: { rejectUnauthorized: false },
+        extra: {
+          // Pooler settings - disable prepared statements
+          max: 5,
+          connectionTimeoutMillis: 30000,
+          idleTimeoutMillis: 30000,
+          statement_timeout: 30000,
+        },
+      } as any;
+    }
+    
     return {
       type: 'postgres',
       url: supabaseUrl,
