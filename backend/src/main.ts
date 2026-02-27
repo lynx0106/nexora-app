@@ -40,6 +40,21 @@ async function bootstrap() {
     // Enable cookie parsing
     app.use(cookieParser());
 
+    // Handle OPTIONS preflight requests BEFORE CORS setup
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.method === 'OPTIONS') {
+        const origin = req.headers.origin;
+        if (!origin || corsOrigins.includes(origin)) {
+          res.header('Access-Control-Allow-Origin', origin || '*');
+          res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
+          res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-request-id, x-csrf-token');
+          res.header('Access-Control-Allow-Credentials', 'true');
+          return res.status(204).send();
+        }
+      }
+      next();
+    });
+
     // CORS configuration - single source of truth
     app.enableCors({
       origin: (origin, callback) => {
