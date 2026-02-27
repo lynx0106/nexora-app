@@ -1,7 +1,7 @@
 // HTTP Client para React Native usando fetch nativo
 // Evita problemas de compatibilidad con axios en React Native
 
-const API_URL = 'https://nexora-app-production-3199.up.railway.app';
+import { API_URL } from '../config/api.config';
 
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
