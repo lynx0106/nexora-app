@@ -65,11 +65,7 @@ function HomeContent() {
     try {
       const endpoint = isLogin 
         ? `${API_URL}/auth/login`
-        : `${API_URL}/tenants/register`;
-      
-      // Debug: log the exact URL being used
-      console.log('[Auth Debug] API_URL:', API_URL);
-      console.log('[Auth Debug] Endpoint:', endpoint); // Only for tenant register or generic register?
+        : `${API_URL}/tenants/register`; // Only for tenant register or generic register?
       
       // If inviting user (client/employee) to EXISTING tenant, we need a different endpoint 
       // OR the tenant register endpoint must handle user creation if tenantId is provided.
