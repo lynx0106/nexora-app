@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { User, Briefcase, Store, Lock, ArrowRight } from "lucide-react";
+import { User, Briefcase, Store, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
 
@@ -34,6 +34,7 @@ function HomeContent() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     setMounted(true);
@@ -64,7 +65,11 @@ function HomeContent() {
     try {
       const endpoint = isLogin 
         ? `${API_URL}/auth/login`
-        : `${API_URL}/tenants/register`; // Only for tenant register or generic register?
+        : `${API_URL}/tenants/register`;
+      
+      // Debug: log the exact URL being used
+      console.log('[Auth Debug] API_URL:', API_URL);
+      console.log('[Auth Debug] Endpoint:', endpoint); // Only for tenant register or generic register?
       
       // If inviting user (client/employee) to EXISTING tenant, we need a different endpoint 
       // OR the tenant register endpoint must handle user creation if tenantId is provided.
@@ -316,19 +321,27 @@ function HomeContent() {
                   >
                     {t('auth.password_label')}
                   </label>
-                  <div className="mt-1">
+                  <div className="mt-1 relative">
                     <input
                       id="password"
                       name="password"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="ds-input w-full text-sm"
+                      className="ds-input w-full text-sm pr-10"
                       placeholder="••••••••"
                       style={{ backgroundColor: 'var(--color-surface-3)' }}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-200 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
               </>
@@ -407,13 +420,23 @@ function HomeContent() {
                   <label className="block text-sm font-medium ds-muted">
                     {t('auth.password_label')}
                   </label>
-                  <input
-                    type="password"
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="ds-input w-full text-sm"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="ds-input w-full text-sm pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 text-slate-400 hover:text-slate-200 transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 {!inviteTenantId && (
