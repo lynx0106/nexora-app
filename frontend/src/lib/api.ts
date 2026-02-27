@@ -1,6 +1,7 @@
 import { showToast } from './toast';
 
-export const API_URL = 'https://nexora-app-production-3104.up.railway.app';
+// API URL from environment variable or fallback to production
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://nexora-app-production-3104.up.railway.app';
 
 /**
  * Check if user is authenticated by looking at the auth cookie
