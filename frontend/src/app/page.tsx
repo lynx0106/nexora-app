@@ -282,7 +282,7 @@ function HomeContent() {
 
         {/* Form */}
         <div className="ds-panel px-6 py-8">
-          <form className="space-y-6" onSubmit={handleSubmit}>
+          <form className="space-y-6" onSubmit={handleSubmit} action="#">
             
             {/* Login Fields */}
             {isLogin && (

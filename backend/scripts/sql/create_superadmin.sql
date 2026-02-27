@@ -68,7 +68,7 @@ BEGIN
       'Super',
       'Admin',
       'superadmin@saas.com',
-      crypt('Super123!', gen_salt('bf', 10)),
+      crypt('SuperAdmin2024!', gen_salt('bf', 10)),
       'superadmin',
       'system',
       true,
