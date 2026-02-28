@@ -32,6 +32,9 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# Allow public env files (non-secret, compiled into JS bundle)
+!.env.production
+!.env.example
 
 # vercel
 .vercel

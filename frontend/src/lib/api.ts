@@ -1,6 +1,8 @@
 import { showToast } from './toast';
 
-// API URL from environment variable or fallback to production
+// API URL: production Railway backend (hardcoded for reliability)
+// Note: .env files are gitignored in this repo. Configure NEXT_PUBLIC_API_URL
+// in the Vercel Dashboard → Environment Variables to override this default.
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://nexora-app-production-3104.up.railway.app';
 
 /**
