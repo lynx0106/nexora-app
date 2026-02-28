@@ -3,6 +3,8 @@ backend/node_modules/
 frontend/node_modules/
 .env
 .env.*
+# Allow public (non-secret) env files for Vercel builds
+!frontend/.env.production
 uploads/
 backend/uploads/
 frontend/.next/
