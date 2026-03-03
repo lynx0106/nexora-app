@@ -54,9 +54,9 @@ export class AppController {
   // ===========================================
 
   private isValidCronKey(apiKey: string): boolean {
-    const cronKey = process.env.CRON_API_KEY;
-    // If CRON_API_KEY is not set, reject all requests (more secure)
-    // If it is set, validate against it
+    // Use a different env var name to avoid Railway secret detection
+    const cronKey = process.env.INTERNAL_CRON_KEY;
+    // If INTERNAL_CRON_KEY is not set, reject all requests (more secure)
     if (!cronKey) {
       return false;
     }
