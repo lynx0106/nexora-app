@@ -117,10 +117,10 @@ function HomeContent() {
               body: JSON.stringify({
                 name: tenantName,
                 sector: sector,
-                firstName,
-                lastName,
-                email,
-                password,
+                adminFirstName: firstName,
+                adminLastName: lastName,
+                adminEmail: email,
+                adminPassword: password,
                 country,
                 currency
               }),
