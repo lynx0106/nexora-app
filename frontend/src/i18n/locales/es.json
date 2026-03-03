@@ -456,6 +456,8 @@
     "technical_support": "Soporte Técnico",
     "header_support": "Soporte Técnico",
     "select_chat": "Selecciona un chat",
+    "no_team_members": "No hay miembros en el equipo",
+    "no_team_members_desc": "No se encontraron usuarios en esta empresa",
     "ai_responding": "🤖 IA Respondiendo",
     "ai_active": "🤖 IA Respondiendo",
     "manual_mode": "👤 Modo Manual",

@@ -633,6 +633,8 @@
     "internal_team": "Internal Team",
     "technical_support": "Technical Support",
     "select_chat": "Select a chat",
+    "no_team_members": "No team members",
+    "no_team_members_desc": "No users found in this company",
     "ai_responding": "🤖 AI Responding",
     "manual_mode": "👤 Manual Mode",
     "pause_ai": "Pause AI",

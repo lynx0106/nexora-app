@@ -26,6 +26,7 @@ interface User {
   lastName: string;
   email: string;
   isAiChatActive: boolean;
+  role?: string;
 }
 
 interface ChatSectionProps {
@@ -60,6 +61,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
 
   // Customer Chat State
   const [conversations, setConversations] = useState<User[]>([]);
+  const [internalUsers, setInternalUsers] = useState<User[]>([]); // Users in the tenant for internal chat
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [loadingConversations, setLoadingConversations] = useState(false);
 
@@ -150,12 +152,23 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         .finally(() => setLoadingConversations(false));
   };
 
+  // Fetch internal users (team members) when on INTERNAL tab
+  const fetchInternalUsers = () => {
+      setLoadingConversations(true);
+      const tenantQuery = role === 'superadmin' ? `&tenantId=${selectedTenantId}` : '';
+      fetchAPIWithAuth(`/chat/users?${tenantQuery}`)
+        .then(data => {
+            setInternalUsers(data || []);
+        })
+        .catch(console.error)
+        .finally(() => setLoadingConversations(false));
+  };
+
   useEffect(() => {
       if (activeTab === 'CUSTOMER') {
           fetchConversations();
-      } else {
-          // Reset customer selection when changing tabs? Maybe not, keep state.
-          // But clear messages? Yes, messages depend on scope.
+      } else if (activeTab === 'INTERNAL') {
+          fetchInternalUsers();
       }
   }, [activeTab, selectedTenantId]);
 
@@ -272,11 +285,34 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         {/* List */}
         <div className="flex-1 overflow-y-auto">
             {activeTab === 'INTERNAL' && (
-                <div className="p-4">
-                    <div className="p-3 bg-indigo-50 border border-indigo-100 rounded-lg cursor-pointer">
-                        <h4 className="font-semibold text-indigo-900">{t('chat.team_chat_title')}</h4>
-                        <p className="text-xs text-indigo-700">{t('chat.team_chat_desc')}</p>
-                    </div>
+                <div className="divide-y divide-gray-100">
+                    {loadingConversations && (
+                        <div className="p-4 space-y-3">
+                            <Skeleton className="h-4 w-3/4" />
+                            <Skeleton className="h-4 w-2/3" />
+                        </div>
+                    )}
+                    {!loadingConversations && internalUsers.length === 0 && (
+                        <div className="p-4">
+                            <EmptyState
+                                titulo={t('chat.no_team_members')}
+                                descripcion={t('chat.no_team_members_desc')}
+                            />
+                        </div>
+                    )}
+                    {internalUsers.map(user => (
+                        <div 
+                            key={user.id}
+                            onClick={() => setSelectedCustomerId(user.id)}
+                            className={`p-4 cursor-pointer hover:bg-gray-100 transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''}`}
+                        >
+                            <h4 className="font-medium text-sm text-gray-900">{user.firstName} {user.lastName}</h4>
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                            <span className="inline-block mt-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                                {(user.role || 'user').toUpperCase()}
+                            </span>
+                        </div>
+                    ))}
                 </div>
             )}
             

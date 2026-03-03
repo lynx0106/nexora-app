@@ -33,6 +33,24 @@ export class ChatController {
     return users.filter((u) => u !== null);
   }
 
+  /**
+   * Get all users in the tenant for internal chat
+   * This allows admin/staff to see all team members
+   */
+  @Get('users')
+  async getTenantUsers(@Req() req, @Query('tenantId') tenantId?: string) {
+    const user = req.user;
+
+    let effectiveTenantId = user.tenantId;
+    if (user.role === 'superadmin' && tenantId) {
+      effectiveTenantId = tenantId;
+    }
+
+    // Return all active users in the tenant
+    const users = await this.usersService.findByTenant(effectiveTenantId);
+    return users.filter((u) => u.isActive !== false);
+  }
+
   @Get('history')
   async getHistory(
     @Req() req,
