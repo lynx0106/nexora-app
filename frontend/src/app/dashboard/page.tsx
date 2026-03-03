@@ -16,6 +16,7 @@ import { ChatWidget } from "../../components/ChatWidget";
 import { ChatSection } from "../../components/ChatSection";
 import { AuditSection } from "../../components/AuditSection";
 import { InviteManager } from "../../components/InviteManager";
+import { GlobalUserRow } from "../../components/GlobalUserRow";
 import NotificationsDropdown from "../../components/NotificationsDropdown";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
@@ -521,7 +522,7 @@ export default function DashboardPage() {
                     Usuarios globales del SaaS
                   </h3>
                   <p className="mt-2 text-sm text-zinc-800">
-                    Vista solo lectura de todos los usuarios, agrupados por negocio.
+                    Gestión de todos los usuarios del sistema. Aquí puedes editar roles y permisos.
                   </p>
                 </div>
 
@@ -541,30 +542,18 @@ export default function DashboardPage() {
                           <th className="py-2 pr-4">Correo</th>
                           <th className="py-2 pr-4">Rol</th>
                           <th className="py-2 pr-4">Estado</th>
+                          <th className="py-2 pr-4">Acciones</th>
                         </tr>
                       </thead>
                       <tbody className="text-zinc-800">
                         {allUsers.map((user) => (
-                          <tr
-                            key={user.id}
-                            className="border-b border-zinc-100 last:border-0"
-                          >
-                            <td className="py-2 pr-4 font-mono text-xs">
-                              {user.tenantId || "-"}
-                            </td>
-                            <td className="py-2 pr-4">
-                              {user.firstName} {user.lastName}
-                            </td>
-                            <td className="py-2 pr-4">
-                              {user.email}
-                            </td>
-                            <td className="py-2 pr-4">
-                              {(user.role || "user").toUpperCase()}
-                            </td>
-                            <td className="py-2 pr-4">
-                              {user.isActive ? "Activo" : "Inactivo"}
-                            </td>
-                          </tr>
+                          <GlobalUserRow 
+                            key={user.id} 
+                            user={user} 
+                            onUpdate={(updatedUser) => {
+                              setAllUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+                            }}
+                          />
                         ))}
                       </tbody>
                     </table>
