@@ -27,6 +27,22 @@ export interface Conversation {
   role: string;
   lastMessage?: string;
   unreadCount?: number;
+  // Internal chat specific fields
+  scope?: 'INTERNAL' | 'SUPPORT' | 'CUSTOMER';
+  targetUserId?: string;
+  targetUserName?: string;
+  targetUserRole?: string;
+  targetUserAvatar?: string;
+  lastMessageAt?: string;
+}
+
+// User interface for tenant users response
+export interface TenantUser {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string;
+  role: string;
 }
 
 export interface SendMessageDto {
@@ -40,11 +56,19 @@ export interface SendMessageDto {
 
 class ChatApi {
   /**
-   * Get list of conversations (admin/staff only)
+   * Get list of conversations (admin/staff only - shows customers who have started conversations)
    */
   async getConversations(tenantId?: string): Promise<Conversation[]> {
     const params = tenantId ? { tenantId } : {};
     return await apiClient.get<Conversation[]>('/chat/conversations', params);
+  }
+
+  /**
+   * Get list of all users in the tenant for internal chat (admin/staff only)
+   */
+  async getTenantUsers(tenantId?: string): Promise<TenantUser[]> {
+    const params = tenantId ? { tenantId } : {};
+    return await apiClient.get<Conversation[]>('/chat/users', params);
   }
 
   /**

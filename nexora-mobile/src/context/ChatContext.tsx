@@ -1,10 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { Message, Conversation, chatApi } from '../api/chat.api';
+import { Message, Conversation, TenantUser, chatApi } from '../api/chat.api';
 import socketService from '../services/socket.service';
 import { useAuth } from './AuthContext';
 
 interface ChatContextType {
   conversations: Conversation[];
+  teamUsers: Conversation[]; // Users in the tenant for internal chat
   messages: Message[];
   unreadCount: number;
   isConnected: boolean;
@@ -12,6 +13,7 @@ interface ChatContextType {
   currentScope: 'INTERNAL' | 'SUPPORT' | 'CUSTOMER';
   currentTargetUserId: string | null;
   loadConversations: () => Promise<void>;
+  loadTeamUsers: () => Promise<void>; // Load team members for internal chat
   loadMessages: (scope: 'INTERNAL' | 'SUPPORT' | 'CUSTOMER', targetUserId?: string) => Promise<void>;
   sendMessage: (content: string, mediaUrl?: string, type?: 'text' | 'image' | 'file' | 'audio') => Promise<void>;
   markAsRead: () => Promise<void>;
@@ -25,6 +27,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
   const tenantId = user?.tenantId;
   const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [teamUsers, setTeamUsers] = useState<Conversation[]>([]); // Users in tenant for internal chat
   const [messages, setMessages] = useState<Message[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isConnected, setIsConnected] = useState(false);
@@ -93,6 +96,37 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const disconnectSocket = () => {
     socketService.disconnect();
+  };
+
+  const loadTeamUsers = async () => {
+    // Superadmin and users without tenant don't have team users
+    if (!tenantId || user?.role === 'superadmin') {
+      setTeamUsers([]);
+      return;
+    }
+    try {
+      const result = await chatApi.getTenantUsers(tenantId);
+      // Convert users to conversation format for the UI
+      const usersAsConversations: Conversation[] = result
+        .filter((u: TenantUser) => u.id !== user?.id) // Exclude current user
+        .map((u: TenantUser) => ({
+          id: u.id,
+          name: u.name || u.email,
+          email: u.email,
+          role: u.role,
+          scope: 'INTERNAL' as const,
+          targetUserId: u.id,
+          targetUserName: u.name || u.email,
+          targetUserRole: u.role,
+          targetUserAvatar: u.avatarUrl,
+          lastMessage: undefined,
+          lastMessageAt: undefined,
+          unreadCount: 0,
+        }));
+      setTeamUsers(usersAsConversations);
+    } catch (error) {
+      console.error('Error loading team users:', error);
+    }
   };
 
   const loadConversations = async () => {
@@ -174,6 +208,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
   const value: ChatContextType = {
     conversations,
+    teamUsers,
     messages,
     unreadCount,
     isConnected,
@@ -181,6 +216,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     currentScope,
     currentTargetUserId,
     loadConversations,
+    loadTeamUsers,
     loadMessages,
     sendMessage,
     markAsRead,

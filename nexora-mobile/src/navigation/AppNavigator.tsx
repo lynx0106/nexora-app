@@ -59,7 +59,7 @@ export type RootStackParamList = {
   Cart: undefined;
   Checkout: undefined;
   ChatList: undefined;
-  ChatRoom: { targetUserId: string; targetUserName?: string };
+  ChatRoom: { targetUserId: string; targetUserName?: string; isInternalChat?: boolean };
   Appointments: undefined;
   BookAppointment: { serviceId?: string };
   Dashboard: undefined;

@@ -21,11 +21,19 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'ChatList'>;
 export default function ChatListScreen() {
   const navigation = useNavigation<NavigationProp>();
   const { user } = useAuth();
-  const { conversations, isLoading, loadConversations, unreadCount } = useChat();
+  const { conversations, teamUsers, isLoading, loadConversations, loadTeamUsers, unreadCount } = useChat();
   const [refreshing, setRefreshing] = useState(false);
+  const [showInternalChat, setShowInternalChat] = useState(false);
+
+  // Check if user is admin/staff (can see team members)
+  const isStaff = user?.role === 'admin' || user?.role === 'employee' || user?.role === 'superadmin';
 
   useEffect(() => {
     loadConversations();
+    // Load team users for staff/admin
+    if (isStaff) {
+      loadTeamUsers();
+    }
   }, []);
 
   // Agregar botón de nueva conversación en el header
@@ -45,13 +53,21 @@ export default function ChatListScreen() {
   const onRefresh = async () => {
     setRefreshing(true);
     await loadConversations();
+    if (isStaff) {
+      await loadTeamUsers();
+    }
     setRefreshing(false);
   };
 
   const handleConversationPress = (conversation: Conversation) => {
+    // Use targetUserName if available (for internal chat), otherwise use name
+    const userName = conversation.targetUserName || conversation.name;
+    // Check if this is an internal team chat
+    const isInternal = conversation.scope === 'INTERNAL' || !!conversation.targetUserId;
     navigation.navigate('ChatRoom', { 
-      targetUserId: conversation.id,
-      targetUserName: conversation.name,
+      targetUserId: conversation.targetUserId || conversation.id,
+      targetUserName: userName,
+      isInternalChat: isInternal,
     });
   };
 
@@ -128,15 +144,20 @@ export default function ChatListScreen() {
       <Text style={styles.emptyIcon}>💬</Text>
       <Text style={styles.emptyTitle}>Sin conversaciones</Text>
       <Text style={styles.emptyText}>
-        {user?.role === 'user' || user?.role === 'customer'
-          ? 'Inicia una conversación con el equipo de soporte'
-          : 'Las conversaciones con clientes aparecerán aquí'}
+        {showInternalChat 
+          ? 'No hay miembros del equipo disponibles'
+          : user?.role === 'user' || user?.role === 'customer'
+            ? 'Inicia una conversación con el equipo de soporte'
+            : 'Las conversaciones con clientes aparecerán aquí'
+        }
       </Text>
       <TouchableOpacity
         style={styles.emptyButton}
         onPress={handleNewConversation}
       >
-        <Text style={styles.emptyButtonText}>Iniciar Conversación</Text>
+        <Text style={styles.emptyButtonText}>
+          {showInternalChat ? 'Actualizar' : 'Iniciar Conversación'}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -161,22 +182,46 @@ export default function ChatListScreen() {
     </TouchableOpacity>
   );
 
+  // Determine which data to show based on toggle
+  const displayData = showInternalChat ? teamUsers : conversations;
+
   return (
     <View style={styles.container}>
-      {unreadCount > 0 && (
+      {unreadCount > 0 && !showInternalChat && (
         <View style={styles.unreadBanner}>
           <Text style={styles.unreadBannerText}>
             {unreadCount} mensaje{unreadCount !== 1 ? 's' : ''} sin leer
           </Text>
         </View>
       )}
+      {/* Toggle between customer conversations and team members for staff */}
+      {isStaff && (
+        <View style={styles.tabContainer}>
+          <TouchableOpacity
+            style={[styles.tab, !showInternalChat && styles.tabActive]}
+            onPress={() => setShowInternalChat(false)}
+          >
+            <Text style={[styles.tabText, !showInternalChat && styles.tabTextActive]}>
+              Clientes ({conversations.length})
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tab, showInternalChat && styles.tabActive]}
+            onPress={() => setShowInternalChat(true)}
+          >
+            <Text style={[styles.tabText, showInternalChat && styles.tabTextActive]}>
+              Equipo ({teamUsers.length})
+            </Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <FlatList
-        data={conversations}
+        data={displayData}
         keyExtractor={(item) => item.id}
         renderItem={renderConversation}
         contentContainerStyle={[
           styles.list,
-          conversations.length === 0 && styles.emptyList,
+          displayData.length === 0 && styles.emptyList,
         ]}
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={renderListFooter}
@@ -225,6 +270,32 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     textAlign: 'center',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  tabActive: {
+    backgroundColor: '#fff',
+    borderBottomWidth: 2,
+    borderBottomColor: '#6366f1',
+  },
+  tabText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  tabTextActive: {
+    color: '#6366f1',
+    fontWeight: '600',
   },
   list: {
     padding: 16,

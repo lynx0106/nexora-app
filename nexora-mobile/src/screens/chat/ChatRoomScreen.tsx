@@ -20,7 +20,7 @@ import { Message } from '../../api/chat.api';
 type Props = NativeStackScreenProps<RootStackParamList, 'ChatRoom'>;
 
 export default function ChatRoomScreen({ route, navigation }: Props) {
-  const { targetUserId, targetUserName } = route.params;
+  const { targetUserId, targetUserName, isInternalChat } = route.params;
   const { user } = useAuth();
   const { 
     messages, 
@@ -32,6 +32,7 @@ export default function ChatRoomScreen({ route, navigation }: Props) {
   } = useChat();
   const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
+  const [currentScope, setCurrentScope] = useState<'INTERNAL' | 'SUPPORT' | 'CUSTOMER'>('CUSTOMER');
   const flatListRef = useRef<FlatList>(null);
 
   useEffect(() => {
@@ -39,8 +40,17 @@ export default function ChatRoomScreen({ route, navigation }: Props) {
       title: targetUserName || 'Chat',
     });
     
-    // Load messages for this conversation
-    const scope = user?.role === 'user' ? 'CUSTOMER' : 'CUSTOMER';
+    // Determine scope: INTERNAL for team chat, CUSTOMER for customer chat
+    let scope: 'INTERNAL' | 'SUPPORT' | 'CUSTOMER';
+    if (isInternalChat) {
+      scope = 'INTERNAL';
+    } else if (user?.role === 'user' || user?.role === 'customer') {
+      scope = 'CUSTOMER';
+    } else {
+      // Admin/staff chatting with customers
+      scope = 'CUSTOMER';
+    }
+    setCurrentScope(scope);
     loadMessages(scope, targetUserId);
     
     // Mark as read when entering the conversation
@@ -64,6 +74,7 @@ export default function ChatRoomScreen({ route, navigation }: Props) {
     setSending(true);
 
     try {
+      // Use currentScope for internal team chat
       await sendMessage(messageContent);
     } catch (error) {
       Alert.alert('Error', 'No se pudo enviar el mensaje');
