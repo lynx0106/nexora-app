@@ -50,32 +50,19 @@ export class AppController {
   }
 
   // ===========================================
-  // AUTOMATION ENDPOINTS (for external cron services)
+  // AUTOMATION ENDPOINTS (superadmin only)
   // ===========================================
-
-  private isValidCronKey(apiKey: string): boolean {
-    // Use a different env var name to avoid Railway secret detection
-    const cronKey = process.env.INTERNAL_CRON_KEY;
-    // If INTERNAL_CRON_KEY is not set, reject all requests (more secure)
-    if (!cronKey) {
-      return false;
-    }
-    return apiKey === cronKey;
-  }
 
   /**
    * Run all scheduled tasks manually
-   * Use: External cron service calls this endpoint
-   * Auth: Use header X-CRON-KEY with your API key
+   * Use: Only superadmin users can trigger this endpoint
+   * Auth: JWT token required (superadmin role)
    */
   @Post('cron/run-all')
-  @ApiOperation({ summary: 'Run all scheduled tasks (appointment reminders, cleanup)' })
-  async runAllCronTasks(@Req() req: Request) {
-    const apiKey = req.headers['x-cron-key'] as string;
-    
-    if (!this.isValidCronKey(apiKey)) {
-      return { success: false, message: 'Invalid API key' };
-    }
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Run all scheduled tasks (appointment reminders, cleanup) - Superadmin only' })
+  async runAllCronTasks() {
     
     const results: any = {};
     
@@ -111,41 +98,33 @@ export class AppController {
   }
 
   /**
-   * Run only appointment reminders
+   * Run only appointment reminders (superadmin only)
    */
   @Post('cron/appointments')
-  @ApiOperation({ summary: 'Send appointment reminders (24h and 2h before)' })
-  async runAppointmentReminders(@Req() req: Request) {
-    const apiKey = req.headers['x-cron-key'] as string;
-    
-    if (!this.isValidCronKey(apiKey)) {
-      return { success: false, message: 'Invalid API key' };
-    }
-    
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Send appointment reminders (24h and 2h before) - Superadmin only' })
+  async runAppointmentReminders() {
     await this.appointmentsService.sendReminders();
     return { success: true, message: 'Appointment reminders sent', timestamp: new Date().toISOString() };
   }
 
   /**
-   * Run cleanup tasks
+   * Run cleanup tasks (superadmin only)
    */
   @Post('cron/cleanup')
-  @ApiOperation({ summary: 'Cleanup expired invitations and tokens' })
-  async runCleanup(@Req() req: Request) {
-    const apiKey = req.headers['x-cron-key'] as string;
-    
-    if (!this.isValidCronKey(apiKey)) {
-      return { success: false, message: 'Invalid API key' };
-    }
-    
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Cleanup expired invitations and tokens - Superadmin only' })
+  async runCleanup() {
     const invitationsCount = await this.invitationsService.markExpiredInvitations();
     const tokensCount = await this.authService.cleanupExpiredTokens();
-    
-    return { 
-      success: true, 
+
+    return {
+      success: true,
       expiredInvitations: invitationsCount,
       expiredTokens: tokensCount,
-      timestamp: new Date().toISOString() 
+      timestamp: new Date().toISOString()
     };
   }
 }
