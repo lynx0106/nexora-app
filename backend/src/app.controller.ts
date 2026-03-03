@@ -55,7 +55,12 @@ export class AppController {
 
   private isValidCronKey(apiKey: string): boolean {
     const cronKey = process.env.CRON_API_KEY;
-    return cronKey !== undefined && apiKey === cronKey;
+    // If CRON_API_KEY is not set, reject all requests (more secure)
+    // If it is set, validate against it
+    if (!cronKey) {
+      return false;
+    }
+    return apiKey === cronKey;
   }
 
   /**
