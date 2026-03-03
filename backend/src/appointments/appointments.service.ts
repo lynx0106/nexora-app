@@ -287,4 +287,60 @@ export class AppointmentsService {
   async removeAllByTenant(tenantId: string) {
     return this.appointmentsRepository.delete({ tenantId });
   }
+
+  /**
+   * Send appointment reminders (for cron job)
+   * Sends 24h and 2h reminders
+   */
+  async sendReminders() {
+    const now = new Date();
+    
+    // Send 24h reminders
+    const start24h = new Date(now.getTime() + 23 * 60 * 60 * 1000);
+    const end24h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
+    
+    const appointments24h = await this.appointmentsRepository.find({
+      where: {
+        dateTime: Between(start24h, end24h),
+        reminderSent24h: false,
+        status: 'confirmed',
+      },
+      relations: ['client', 'doctor', 'service', 'tenant'],
+    });
+
+    for (const appt of appointments24h) {
+      try {
+        await this.mailService.sendAppointmentReminder(appt, appt.tenant, '24h');
+        appt.reminderSent24h = true;
+        await this.appointmentsRepository.save(appt);
+      } catch (error) {
+        this.logger.error(`Failed to send 24h reminder: ${appt.id}`, error);
+      }
+    }
+
+    // Send 2h reminders
+    const start2h = new Date(now.getTime() + 1 * 60 * 60 * 1000);
+    const end2h = new Date(now.getTime() + 2.5 * 60 * 60 * 1000);
+    
+    const appointments2h = await this.appointmentsRepository.find({
+      where: {
+        dateTime: Between(start2h, end2h),
+        reminderSent2h: false,
+        status: 'confirmed',
+      },
+      relations: ['client', 'doctor', 'service', 'tenant'],
+    });
+
+    for (const appt of appointments2h) {
+      try {
+        await this.mailService.sendAppointmentReminder(appt, appt.tenant, '2h');
+        appt.reminderSent2h = true;
+        await this.appointmentsRepository.save(appt);
+      } catch (error) {
+        this.logger.error(`Failed to send 2h reminder: ${appt.id}`, error);
+      }
+    }
+
+    return { sent24h: appointments24h.length, sent2h: appointments2h.length };
+  }
 }
