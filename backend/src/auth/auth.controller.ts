@@ -41,9 +41,18 @@ export class AuthController {
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
     @Ip() ip: string,
+    @Req() req: Request,
   ) {
     try {
       const result = await this.authService.login(dto);
+      
+      // Create refresh token and store in database
+      const deviceInfo = req.headers['user-agent'] || 'Unknown';
+      const refreshToken = await this.authService.createRefreshToken(
+        result.user.id,
+        deviceInfo,
+        ip,
+      );
       
       // Set HTTP-only cookie with JWT (for same-domain deployments)
       res.cookie('access_token', result.accessToken, {
@@ -51,6 +60,15 @@ export class AuthController {
         secure: true,
         sameSite: 'none',
         maxAge: 24 * 60 * 60 * 1000,
+        path: '/',
+      });
+
+      // Set HTTP-only refresh token cookie
+      res.cookie('refresh_token', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
         path: '/',
       });
 
@@ -81,8 +99,29 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'User logout' })
-  @ApiResponse({ status: 200, description: 'Logout successful - cookies cleared' })
-  async logout(@Res({ passthrough: true }) res: Response) {
+  @ApiResponse({ status: 200, description: 'Logout successful - cookies cleared and tokens revoked' })
+  async logout(
+    @Res({ passthrough: true }) res: Response,
+    @Req() req: Request,
+  ) {
+    // Get refresh token from cookie and revoke it in database
+    const refreshToken = req.cookies?.refresh_token;
+    
+    if (refreshToken) {
+      try {
+        await this.authService.revokeRefreshToken(refreshToken);
+        this.logger.log('Refresh token revoked successfully');
+      } catch (error) {
+        this.logger.error('Error revoking refresh token:', error);
+      }
+    }
+
+    // Get user from request and revoke all their tokens
+    const user = (req as any).user;
+    if (user?.userId) {
+      await this.authService.revokeAllUserRefreshTokens(user.userId);
+    }
+
     // Clear cookies with same options used when setting them
     const clearOptions = {
       path: '/',
@@ -93,7 +132,7 @@ export class AuthController {
     res.clearCookie('is_authenticated', clearOptions);
     res.clearCookie('refresh_token', clearOptions);
 
-    this.logger.log('User logged out');
+    this.logger.log('User logged out - all tokens invalidated');
     return { message: 'Logout successful' };
   }
 

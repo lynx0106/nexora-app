@@ -1,11 +1,14 @@
 import { Injectable, UnauthorizedException, BadRequestException, forwardRef, Inject, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { TenantsService } from '../tenants/tenants.service';
 import { MailService } from '../mail/mail.service';
 import { InvitationsService } from '../invitations/invitations.service';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
@@ -14,6 +17,7 @@ import { ConfirmPasswordResetDto } from './dto/confirm-password-reset.dto';
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
+  private readonly REFRESH_TOKEN_TTL_DAYS = 7;
 
   constructor(
     private readonly usersService: UsersService,
@@ -22,6 +26,8 @@ export class AuthService {
     private readonly mailService: MailService,
     @Inject(forwardRef(() => InvitationsService))
     private readonly invitationsService: InvitationsService,
+    @InjectRepository(RefreshToken)
+    private readonly refreshTokenRepository: Repository<RefreshToken>,
   ) {}
 
   async register(data: RegisterDto) {
@@ -200,5 +206,110 @@ export class AuthService {
 
   private hashToken(token: string) {
     return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  /**
+   * Create a new refresh token for a user
+   */
+  async createRefreshToken(
+    userId: string,
+    deviceInfo?: string,
+    ipAddress?: string,
+  ): Promise<string> {
+    // Generate a random token
+    const token = crypto.randomBytes(64).toString('hex');
+    const tokenHash = this.hashToken(token);
+    
+    // Calculate expiration (default 7 days)
+    const expiresAt = new Date(
+      Date.now() + this.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
+    );
+
+    // Save hashed token to database
+    const refreshToken = this.refreshTokenRepository.create({
+      userId,
+      token: tokenHash,
+      expiresAt,
+      deviceInfo,
+      ipAddress,
+      isRevoked: false,
+    });
+
+    await this.refreshTokenRepository.save(refreshToken);
+    
+    this.logger.log(`Created refresh token for user: ${userId}`);
+    
+    // Return the plain token (to be sent to client)
+    return token;
+  }
+
+  /**
+   * Validate a refresh token
+   */
+  async validateRefreshToken(token: string): Promise<RefreshToken | null> {
+    const tokenHash = this.hashToken(token);
+    
+    const refreshToken = await this.refreshTokenRepository.findOne({
+      where: { token: tokenHash, isRevoked: false },
+      relations: ['user'],
+    });
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    // Check if token is expired
+    if (refreshToken.expiresAt.getTime() < Date.now()) {
+      this.logger.warn(`Expired refresh token used for user: ${refreshToken.userId}`);
+      return null;
+    }
+
+    return refreshToken;
+  }
+
+  /**
+   * Revoke a refresh token (for logout)
+   */
+  async revokeRefreshToken(token: string): Promise<boolean> {
+    const tokenHash = this.hashToken(token);
+    
+    const result = await this.refreshTokenRepository.update(
+      { token: tokenHash },
+      { isRevoked: true },
+    );
+
+    if (result.affected && result.affected > 0) {
+      this.logger.log(`Revoked refresh token`);
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Revoke all refresh tokens for a user (for logout all devices)
+   */
+  async revokeAllUserRefreshTokens(userId: string): Promise<number> {
+    const result = await this.refreshTokenRepository.update(
+      { userId, isRevoked: false },
+      { isRevoked: true },
+    );
+
+    this.logger.log(`Revoked ${result.affected} refresh tokens for user: ${userId}`);
+    return result.affected || 0;
+  }
+
+  /**
+   * Clean up expired tokens (should be called periodically)
+   */
+  async cleanupExpiredTokens(): Promise<number> {
+    const result = await this.refreshTokenRepository
+      .createQueryBuilder()
+      .delete()
+      .where('expiresAt < :now', { now: new Date() })
+      .execute();
+
+    this.logger.log(`Cleaned up ${result.affected} expired refresh tokens`);
+    return result.affected || 0;
   }
 }

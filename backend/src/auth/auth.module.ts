@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from '../users/users.module';
 import { TenantsModule } from '../tenants/tenants.module';
 import { AuthService } from './auth.service';
@@ -8,9 +9,11 @@ import { JwtStrategy } from './jwt.strategy';
 import { getJwtSecret } from '../config/runtime.config';
 import { MailModule } from '../mail/mail.module';
 import { InvitationsModule } from '../invitations/invitations.module';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([RefreshToken]),
     UsersModule,
     TenantsModule,
     MailModule,
