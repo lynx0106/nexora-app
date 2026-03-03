@@ -53,30 +53,36 @@ export class AppController {
   // AUTOMATION ENDPOINTS (for external cron services)
   // ===========================================
 
+  private isValidCronKey(apiKey: string): boolean {
+    const cronKey = process.env.CRON_API_KEY;
+    return cronKey !== undefined && apiKey === cronKey;
+  }
+
   /**
    * Run all scheduled tasks manually
    * Use: External cron service calls this endpoint
+   * Auth: Use header X-CRON-KEY with your API key
    */
   @Post('cron/run-all')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Run all scheduled tasks (appointment reminders, cleanup)' })
-  @ApiResponse({ status: 200, description: 'All tasks executed successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async runAllCronTasks() {
+  async runAllCronTasks(@Req() req: Request) {
+    const apiKey = req.headers['x-cron-key'] as string;
+    
+    if (!this.isValidCronKey(apiKey)) {
+      return { success: false, message: 'Invalid API key' };
+    }
+    
     const results: any = {};
     
     try {
-      // Run appointment reminders (call service directly)
-      // Note: Full implementation requires scheduler to be accessible
-      results.appointments = 'skipped - use /cron/appointments';
+      await this.appointmentsService.sendReminders();
+      results.appointments = 'completed';
     } catch (error) {
       this.logger.error('Appointment reminders failed:', error);
       results.appointments = 'failed';
     }
 
     try {
-      // Cleanup expired invitations
       await this.invitationsService.markExpiredInvitations();
       results.invitations = 'completed';
     } catch (error) {
@@ -85,7 +91,6 @@ export class AppController {
     }
 
     try {
-      // Cleanup expired refresh tokens
       await this.authService.cleanupExpiredTokens();
       results.tokens = 'completed';
     } catch (error) {
@@ -104,10 +109,14 @@ export class AppController {
    * Run only appointment reminders
    */
   @Post('cron/appointments')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Send appointment reminders (24h and 2h before)' })
-  async runAppointmentReminders() {
+  async runAppointmentReminders(@Req() req: Request) {
+    const apiKey = req.headers['x-cron-key'] as string;
+    
+    if (!this.isValidCronKey(apiKey)) {
+      return { success: false, message: 'Invalid API key' };
+    }
+    
     await this.appointmentsService.sendReminders();
     return { success: true, message: 'Appointment reminders sent', timestamp: new Date().toISOString() };
   }
@@ -116,10 +125,14 @@ export class AppController {
    * Run cleanup tasks
    */
   @Post('cron/cleanup')
-  @UseGuards(AuthGuard('jwt'))
-  @ApiBearerAuth()
   @ApiOperation({ summary: 'Cleanup expired invitations and tokens' })
-  async runCleanup() {
+  async runCleanup(@Req() req: Request) {
+    const apiKey = req.headers['x-cron-key'] as string;
+    
+    if (!this.isValidCronKey(apiKey)) {
+      return { success: false, message: 'Invalid API key' };
+    }
+    
     const invitationsCount = await this.invitationsService.markExpiredInvitations();
     const tokensCount = await this.authService.cleanupExpiredTokens();
     
