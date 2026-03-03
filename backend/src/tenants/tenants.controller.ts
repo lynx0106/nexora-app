@@ -11,6 +11,8 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Request } from 'express';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { TenantsService } from './tenants.service';
 import { CreateTenantWithAdminDto } from './dto/create-tenant-with-admin.dto';
 import { RegisterTenantDto } from './dto/register-tenant.dto';
@@ -19,7 +21,6 @@ import { Role, hasRole } from '../common/constants/roles';
 import { Permission } from '../common/constants/permissions';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
-
 
 interface AuthRequest extends Request {
   user?: {
@@ -30,11 +31,24 @@ interface AuthRequest extends Request {
   };
 }
 
+@ApiTags('Tenants')
 @Controller('tenants')
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @Post('register')
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 3, ttl: 3600000 } }) // 3 registros por hora por IP
+  @ApiOperation({ summary: 'Register a new tenant with admin user (public)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Tenant and admin created successfully',
+  })
+  @ApiResponse({ status: 400, description: 'Bad request - validation error' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests - rate limit exceeded',
+  })
   async register(@Body() body: RegisterTenantDto) {
     // Generate a unique tenantId from the name
     const tenantId = await this.tenantsService.generateAvailableTenantId(
