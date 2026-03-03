@@ -14,8 +14,9 @@ function HomeContent() {
   const searchParams = useSearchParams();
   const [mounted, setMounted] = useState(false);
 
-  // Parse invite params
-  const inviteTenantId = searchParams.get('tenantId');
+  // Parse invite params - support multiple formats for compatibility
+  const inviteId = searchParams.get('id') || searchParams.get('invitationId');
+  const inviteTenantId = searchParams.get('tenant') || searchParams.get('tenantId');
   const inviteRole = searchParams.get('role') as ProfileType | null;
 
   const [isLogin, setIsLogin] = useState(true);
@@ -131,23 +132,32 @@ function HomeContent() {
             setIsLogin(true);
         } 
         // Case 2: Invited User (Client/Employee) -> Register into existing tenant
-        else if (inviteTenantId) {
+        else if (inviteTenantId || inviteId) {
             // We need an endpoint for this. `auth/register`?
             // If not implemented, we show error.
             // Assuming `auth/register` exists for users.
             const registerEndpoint = `${API_URL}/auth/register`;
             
-            const res = await fetch(registerEndpoint, {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                tenantId: inviteTenantId,
-                role: activeProfile, // 'client' or 'employee'
+            // Build request body with either invitationId or tenantId
+            const body: Record<string, string> = {
                 firstName,
                 lastName,
                 email,
                 password
-              }),
+            };
+            
+            // Use invitationId if available (preferred), otherwise fall back to tenantId
+            if (inviteId) {
+                body.invitationId = inviteId;
+            } else if (inviteTenantId) {
+                body.tenantId = inviteTenantId;
+                body.role = activeProfile; // 'client' or 'employee'
+            }
+            
+            const res = await fetch(registerEndpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(body),
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || t('auth.generic_error'));
