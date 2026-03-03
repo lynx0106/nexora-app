@@ -37,6 +37,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
   const [password, setPassword] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [userRole, setUserRole] = useState<string>("user");
   
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -50,6 +51,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
     setPassword("");
     setPhone("");
     setAddress("");
+    setUserRole("user");
     setFormError(null);
     setFormSuccess(null);
   };
@@ -173,7 +175,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
         email,
         phone,
         address,
-        role: 'user', // Always user for Clients section
+        role: userRole,
       };
 
       if (password) payload.password = password;
@@ -210,6 +212,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
     setEmail(user.email);
     setPhone(user.phone || "");
     setAddress(user.address || "");
+    setUserRole(user.role || "user");
     setShowCreateForm(true);
   };
 
@@ -285,6 +288,18 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
             <div className="flex flex-col gap-1">
               <label className="text-sm font-semibold text-zinc-900">{t('clients.form_password')} {editingUserId && <span className="font-normal text-xs">{t('clients.form_optional')}</span>}</label>
               <input type="password" value={password} onChange={e => setPassword(e.target.value)} required={!editingUserId} className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold text-zinc-900">Rol del usuario</label>
+              <select
+                value={userRole}
+                onChange={e => setUserRole(e.target.value)}
+                className="h-9 rounded-md border border-zinc-400 px-2 text-sm"
+              >
+                <option value="user">Cliente (Usuario del sistema)</option>
+                <option value="client">Cliente Externo</option>
+                <option value="employee">Empleado</option>
+              </select>
             </div>
 
             <div className="md:col-span-2 flex items-center justify-end gap-3">
