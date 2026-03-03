@@ -25,6 +25,7 @@ import { ReportsModule } from './reports/reports.module';
 import { InvitationsModule } from './invitations/invitations.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { PushModule } from './push/push.module';
+import { TasksModule } from './tasks/tasks.module';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -84,6 +85,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     InvitationsModule,
     InventoryModule,
     PushModule,
+    TasksModule,
   ],
   controllers: [AppController],
   providers: [
