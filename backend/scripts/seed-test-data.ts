@@ -2,6 +2,9 @@
  * Script para crear datos de prueba completos para testing de App Móvil Nexora
  * Uso: npx ts-node scripts/seed-test-data.ts
  * 
+ * Variables de entorno:
+ * - SEED_testPassword: Contraseña para usuarios de prueba (default: Admin123!)
+ *
  * Crea:
  * - 1 Superadmin
  * - 4 Empresas (Tenants) con datos completos
@@ -19,6 +22,15 @@ import { OrdersService } from '../src/orders/orders.service';
 import { AppointmentsService } from '../src/appointments/appointments.service';
 import { DataSource } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+
+// Use environment variable for password - NO FALLBACKS for security
+const testPassword = process.env.SEED_testPassword;
+
+// Validate required environment variables
+if (!testPassword) {
+  console.error('❌ Error: Se requiere la variable de entorno SEED_testPassword');
+  process.exit(1);
+}
 
 interface TestTenant {
   id: string;
@@ -45,8 +57,6 @@ interface TestTenant {
   isServiceBased: boolean; // true = citas, false = pedidos
 }
 
-const TEST_PASSWORD = 'Admin123!';
-
 const TEST_TENANTS: TestTenant[] = [
   {
     id: 'restaurante-sabor',
@@ -55,11 +65,11 @@ const TEST_TENANTS: TestTenant[] = [
     country: 'Colombia',
     currency: 'COP',
     adminEmail: 'admin@sabor.com',
-    adminPassword: TEST_PASSWORD,
+    adminPassword: testPassword,
     staff: [
-      { email: 'mesero1@sabor.com', firstName: 'Carlos', lastName: 'Mesero', role: 'user', password: TEST_PASSWORD },
-      { email: 'cocina@sabor.com', firstName: 'Maria', lastName: 'Cocina', role: 'user', password: TEST_PASSWORD },
-      { email: 'caja@sabor.com', firstName: 'Juan', lastName: 'Caja', role: 'user', password: TEST_PASSWORD },
+      { email: 'mesero1@sabor.com', firstName: 'Carlos', lastName: 'Mesero', role: 'user', password: testPassword },
+      { email: 'cocina@sabor.com', firstName: 'Maria', lastName: 'Cocina', role: 'user', password: testPassword },
+      { email: 'caja@sabor.com', firstName: 'Juan', lastName: 'Caja', role: 'user', password: testPassword },
     ],
     products: [
       { name: 'Bandeja Paisa', description: 'Arroz, frijoles, carne molida, chicharrón, huevo, aguacate y arepa', price: 25000, stock: 50 },
@@ -87,11 +97,11 @@ const TEST_TENANTS: TestTenant[] = [
     country: 'Colombia',
     currency: 'COP',
     adminEmail: 'admin@sonrisa.com',
-    adminPassword: TEST_PASSWORD,
+    adminPassword: testPassword,
     staff: [
-      { email: 'doctor@sonrisa.com', firstName: 'Dr. Fernando', lastName: 'Gómez', role: 'user', password: TEST_PASSWORD },
-      { email: 'recepcion@sonrisa.com', firstName: 'Ana', lastName: 'Recepción', role: 'user', password: TEST_PASSWORD },
-      { email: 'asistente@sonrisa.com', firstName: 'Laura', lastName: 'Asistente', role: 'user', password: TEST_PASSWORD },
+      { email: 'doctor@sonrisa.com', firstName: 'Dr. Fernando', lastName: 'Gómez', role: 'user', password: testPassword },
+      { email: 'recepcion@sonrisa.com', firstName: 'Ana', lastName: 'Recepción', role: 'user', password: testPassword },
+      { email: 'asistente@sonrisa.com', firstName: 'Laura', lastName: 'Asistente', role: 'user', password: testPassword },
     ],
     products: [
       { name: 'Limpieza Dental Profunda', description: 'Eliminación de placa y sarro, pulido dental', price: 80000, duration: 60 },
@@ -116,11 +126,11 @@ const TEST_TENANTS: TestTenant[] = [
     country: 'Colombia',
     currency: 'COP',
     adminEmail: 'admin@fashion.com',
-    adminPassword: TEST_PASSWORD,
+    adminPassword: testPassword,
     staff: [
-      { email: 'vendedor@fashion.com', firstName: 'Pedro', lastName: 'Vendedor', role: 'user', password: TEST_PASSWORD },
-      { email: 'cajera@fashion.com', firstName: 'Sofia', lastName: 'Cajera', role: 'user', password: TEST_PASSWORD },
-      { email: 'bodega@fashion.com', firstName: 'Diego', lastName: 'Bodega', role: 'user', password: TEST_PASSWORD },
+      { email: 'vendedor@fashion.com', firstName: 'Pedro', lastName: 'Vendedor', role: 'user', password: testPassword },
+      { email: 'cajera@fashion.com', firstName: 'Sofia', lastName: 'Cajera', role: 'user', password: testPassword },
+      { email: 'bodega@fashion.com', firstName: 'Diego', lastName: 'Bodega', role: 'user', password: testPassword },
     ],
     products: [
       { name: 'Camiseta Básica Blanca', description: 'Camiseta 100% algodón', price: 45000, stock: 100 },
@@ -148,11 +158,11 @@ const TEST_TENANTS: TestTenant[] = [
     country: 'Colombia',
     currency: 'COP',
     adminEmail: 'admin@estilo.com',
-    adminPassword: TEST_PASSWORD,
+    adminPassword: testPassword,
     staff: [
-      { email: 'barbero1@estilo.com', firstName: 'Luis', lastName: 'Barbero', role: 'user', password: TEST_PASSWORD },
-      { email: 'barbero2@estilo.com', firstName: 'Andrés', lastName: 'Estilista', role: 'user', password: TEST_PASSWORD },
-      { email: 'recepcion@estilo.com', firstName: 'Camila', lastName: 'Recepción', role: 'user', password: TEST_PASSWORD },
+      { email: 'barbero1@estilo.com', firstName: 'Luis', lastName: 'Barbero', role: 'user', password: testPassword },
+      { email: 'barbero2@estilo.com', firstName: 'Andrés', lastName: 'Estilista', role: 'user', password: testPassword },
+      { email: 'recepcion@estilo.com', firstName: 'Camila', lastName: 'Recepción', role: 'user', password: testPassword },
     ],
     products: [
       { name: 'Corte Clásico', description: 'Corte de cabello tradicional con tijera', price: 25000, duration: 45 },

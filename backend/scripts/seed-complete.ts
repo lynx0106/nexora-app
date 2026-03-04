@@ -1,11 +1,28 @@
 /**
  * Script para crear datos de prueba completos
  * Uso: npx ts-node scripts/seed-complete.ts
+ * 
+ * Variables de entorno requeridas:
+ * - SEED_superAdminPassword: Contraseña del superadmin (default: SuperAdmin2024!)
+ * - SEED_demoPassword: Contraseña para usuarios demo (default: Demo123!)
  */
 
 import axios from 'axios';
 
-const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3199.up.railway.app';
+const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3104.up.railway.app';
+
+// Use environment variables for passwords - NO FALLBACKS for security
+// Using non-null assertion (!) after validation since we exit if undefined
+const superAdminPassword = process.env.SEED_superAdminPassword!;
+const demoPassword = process.env.SEED_demoPassword!;
+
+// Validate required environment variables
+if (!superAdminPassword || !demoPassword) {
+  console.error('❌ Error: Se requieren las siguientes variables de entorno:');
+  console.error('   - SEED_superAdminPassword');
+  console.error('   - SEED_demoPassword');
+  process.exit(1);
+}
 
 const API = axios.create({
   baseURL: API_URL,
@@ -18,7 +35,7 @@ async function login() {
   console.log('🔐 Iniciando sesión...');
   const res = await API.post('/auth/login', {
     email: 'superadmin@saas.com',
-    password: 'Super123!',
+    password: superAdminPassword,
   });
   authToken = res.data.access_token;
   API.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
@@ -29,7 +46,7 @@ async function createUser(tenantId: string, email: string, firstName: string, la
   try {
     const res = await API.post('/users', {
       email,
-      password: 'Demo123!',
+      password: demoPassword,
       firstName,
       lastName,
       role,

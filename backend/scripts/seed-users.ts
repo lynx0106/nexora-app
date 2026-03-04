@@ -4,6 +4,27 @@ import { UsersService } from '../src/users/users.service';
 import { TenantsService } from '../src/tenants/tenants.service';
 import * as bcrypt from 'bcrypt';
 
+/**
+ * Script para crear usuarios de prueba
+ * Uso: npx ts-node scripts/seed-users.ts
+ * 
+ * Variables de entorno:
+ * - SEED_SUPERADMIN_PASSWORD: Contraseña del superadmin
+ * - SEED_CLIENT_PASSWORD: Contraseña del cliente de prueba
+ */
+
+// Use environment variables for passwords
+const SUPERADMIN_PASSWORD = process.env.SEED_SUPERADMIN_PASSWORD!;
+const CLIENT_PASSWORD = process.env.SEED_CLIENT_PASSWORD!;
+
+// Validate required environment variables
+if (!process.env.SEED_SUPERADMIN_PASSWORD || !process.env.SEED_CLIENT_PASSWORD) {
+  console.error('❌ Error: Se requieren las siguientes variables de entorno:');
+  console.error('   - SEED_SUPERADMIN_PASSWORD');
+  console.error('   - SEED_CLIENT_PASSWORD');
+  process.exit(1);
+}
+
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
   const usersService = app.get(UsersService);
@@ -33,7 +54,7 @@ async function bootstrap() {
 
   // 2. Create Superadmin
   const superEmail = 'superadmin@saas.com';
-  const superPass = 'Super123!';
+  const superPass = SUPERADMIN_PASSWORD;
 
   const superUser = await usersService.findByEmail(superEmail);
   if (!superUser) {
@@ -67,7 +88,7 @@ async function bootstrap() {
 
   // 3. Create Client (User) for Abastos
   const clientEmail = 'cliente@abastos.com';
-  const clientPass = 'Client123!';
+  const clientPass = CLIENT_PASSWORD;
   const tenantId = 'abastos-la-frescura';
 
   const clientUser = await usersService.findByEmail(clientEmail);

@@ -80,7 +80,7 @@ Este documento contiene las credenciales de todos los usuarios generados para la
 
     // 1. Superadmin (Ensure exists)
     console.log('1. Ensuring Superadmin...');
-    const superPass = 'Super123!';
+    const superPass = 'SuperAdmin2024!';
     const superHash = await bcrypt.hash(superPass, 10);
     
     // Check if system tenant exists

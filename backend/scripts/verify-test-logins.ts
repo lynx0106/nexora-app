@@ -1,16 +1,37 @@
 /**
  * Script para verificar que los usuarios de prueba pueden hacer login
  * Uso: npx ts-node scripts/verify-test-logins.ts
+ * 
+ * Variables de entorno:
+ * - SEED_SUPERADMIN_PASSWORD: Contraseña del superadmin
+ * - SEED_ADMIN_PASSWORD: Contraseña para admins
  */
 
 import axios from 'axios';
 
-const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3199.up.railway.app';
+const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3104.up.railway.app';
 
 const API = axios.create({
   baseURL: API_URL,
   timeout: 30000,
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Origin': API_URL,
+    'Referer': API_URL + '/',
+  },
 });
+
+// Use environment variables for passwords - NO FALLBACKS for security
+const SUPERADMIN_PASSWORD = process.env.SEED_SUPERADMIN_PASSWORD;
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD;
+
+// Validate required environment variables
+if (!SUPERADMIN_PASSWORD || !ADMIN_PASSWORD) {
+  console.error('❌ Error: Se requieren las siguientes variables de entorno:');
+  console.error('   - SEED_SUPERADMIN_PASSWORD');
+  console.error('   - SEED_ADMIN_PASSWORD');
+  process.exit(1);
+}
 
 interface TestUser {
   email: string;
@@ -20,11 +41,11 @@ interface TestUser {
 }
 
 const TEST_USERS: TestUser[] = [
-  { email: 'superadmin@saas.com', password: 'Super123!', role: 'superadmin', tenant: 'system' },
-  { email: 'admin@sabor.com', password: 'Admin123!', role: 'admin', tenant: 'restaurante-sabor' },
-  { email: 'admin@sonrisa.com', password: 'Admin123!', role: 'admin', tenant: 'clinica-sonrisa' },
-  { email: 'admin@fashion.com', password: 'Admin123!', role: 'admin', tenant: 'fashion-store' },
-  { email: 'admin@estilo.com', password: 'Admin123!', role: 'admin', tenant: 'barberia-estilo' },
+  { email: 'superadmin@saas.com', password: SUPERADMIN_PASSWORD, role: 'superadmin', tenant: 'system' },
+  { email: 'admin@sabor.com', password: ADMIN_PASSWORD, role: 'admin', tenant: 'restaurante-sabor' },
+  { email: 'admin@sonrisa.com', password: ADMIN_PASSWORD, role: 'admin', tenant: 'clinica-sonrisa' },
+  { email: 'admin@fashion.com', password: ADMIN_PASSWORD, role: 'admin', tenant: 'fashion-store' },
+  { email: 'admin@estilo.com', password: ADMIN_PASSWORD, role: 'admin', tenant: 'barberia-estilo' },
 ];
 
 async function testLogin(user: TestUser): Promise<boolean> {

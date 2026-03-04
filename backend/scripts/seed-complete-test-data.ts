@@ -2,27 +2,42 @@
  * Script para crear datos de prueba completos para testing de App Móvil Nexora
  * Crea 3 empresas con usuarios, productos, pedidos, citas y conversaciones de chat
  * Uso: npx ts-node scripts/seed-complete-test-data.ts
+ * 
+ * Variables de entorno:
+ * - SEED_adminPassword: Contraseña para admins (default: Admin123!)
+ * - SEED_empleadoPassword: Contraseña para empleados (default: Empleado123!)
+ * - SEED_clientePassword: Contraseña para clientes (default: Cliente123!)
  */
 
 import axios from 'axios';
 
-const API_URL = 'https://nexora-app-production-3199.up.railway.app';
+const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3104.up.railway.app';
 
 const API = axios.create({
   baseURL: API_URL,
   timeout: 30000,
 });
 
-// Credenciales especificadas
-const ADMIN_PASSWORD = 'Admin123!';
-const EMPLEADO_PASSWORD = 'Empleado123!';
-const CLIENTE_PASSWORD = 'Cliente123!';
+// Use environment variables for passwords - NO FALLBACKS for security
+// Using non-null assertion (!) after validation since we exit if undefined
+const adminPassword = process.env.SEED_adminPassword!;
+const empleadoPassword = process.env.SEED_empleadoPassword!;
+const clientePassword = process.env.SEED_clientePassword!;
+
+// Validate required environment variables
+if (!adminPassword || !empleadoPassword || !clientePassword) {
+  console.error('❌ Error: Se requieren las siguientes variables de entorno:');
+  console.error('   - SEED_adminPassword');
+  console.error('   - SEED_empleadoPassword');
+  console.error('   - SEED_clientePassword');
+  process.exit(1);
+}
 
 // Admin credentials que ya existen
 const ADMINS = [
-  { email: 'admin@sabor.com', password: ADMIN_PASSWORD, tenantSlug: 'restaurante-el-sabor' },
-  { email: 'admin@sonrisa.com', password: ADMIN_PASSWORD, tenantSlug: 'clinica-sonrisa' },
-  { email: 'admin@estilo.com', password: ADMIN_PASSWORD, tenantSlug: 'barberia-estilo' },
+  { email: 'admin@sabor.com', password: adminPassword, tenantSlug: 'restaurante-el-sabor' },
+  { email: 'admin@sonrisa.com', password: adminPassword, tenantSlug: 'clinica-sonrisa' },
+  { email: 'admin@estilo.com', password: adminPassword, tenantSlug: 'barberia-estilo' },
 ];
 
 // Datos a crear (ya con los tenant IDs correctos)
@@ -33,10 +48,10 @@ const TENANTS_CONFIG = [
     name: 'El Sabor Latino',
     adminEmail: 'admin@sabor.com',
     users: [
-      { email: 'mesero1@sabor.com', firstName: 'Carlos', lastName: 'Rodríguez', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'cocina@sabor.com', firstName: 'María', lastName: 'García', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'cliente1@sabor.com', firstName: 'Juan', lastName: 'Pérez', role: 'user', password: CLIENTE_PASSWORD },
-      { email: 'cliente2@sabor.com', firstName: 'Ana', lastName: 'López', role: 'user', password: CLIENTE_PASSWORD },
+      { email: 'mesero1@sabor.com', firstName: 'Carlos', lastName: 'Rodríguez', role: 'staff', password: empleadoPassword },
+      { email: 'cocina@sabor.com', firstName: 'María', lastName: 'García', role: 'staff', password: empleadoPassword },
+      { email: 'cliente1@sabor.com', firstName: 'Juan', lastName: 'Pérez', role: 'user', password: clientePassword },
+      { email: 'cliente2@sabor.com', firstName: 'Ana', lastName: 'López', role: 'user', password: clientePassword },
     ],
     products: [
       { name: 'Bandeja Paisa', description: 'Arroz, frijoles, carne molida, chicharrón, huevo, aguacate y arepa', price: 25000, stock: 50 },
@@ -60,10 +75,10 @@ const TENANTS_CONFIG = [
     name: 'Sonrisa Perfecta',
     adminEmail: 'admin@sonrisa.com',
     users: [
-      { email: 'dentista@sonrisa.com', firstName: 'Dr. Fernando', lastName: 'Gómez', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'recepcion@sonrisa.com', firstName: 'Ana', lastName: 'Recepción', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'paciente1@sonrisa.com', firstName: 'Pedro', lastName: 'Martínez', role: 'user', password: CLIENTE_PASSWORD },
-      { email: 'paciente2@sonrisa.com', firstName: 'Laura', lastName: 'Fernández', role: 'user', password: CLIENTE_PASSWORD },
+      { email: 'dentista@sonrisa.com', firstName: 'Dr. Fernando', lastName: 'Gómez', role: 'staff', password: empleadoPassword },
+      { email: 'recepcion@sonrisa.com', firstName: 'Ana', lastName: 'Recepción', role: 'staff', password: empleadoPassword },
+      { email: 'paciente1@sonrisa.com', firstName: 'Pedro', lastName: 'Martínez', role: 'user', password: clientePassword },
+      { email: 'paciente2@sonrisa.com', firstName: 'Laura', lastName: 'Fernández', role: 'user', password: clientePassword },
     ],
     services: [
       { name: 'Limpieza Dental Profunda', description: 'Eliminación de placa y sarro, pulido dental', price: 80000, duration: 60 },
@@ -83,10 +98,10 @@ const TENANTS_CONFIG = [
     name: 'Estilo Urbano',
     adminEmail: 'admin@estilo.com',
     users: [
-      { email: 'barbero1@estilo.com', firstName: 'Luis', lastName: 'Barbero', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'barbero2@estilo.com', firstName: 'Andrés', lastName: 'Estilista', role: 'staff', password: EMPLEADO_PASSWORD },
-      { email: 'cliente1@estilo.com', firstName: 'Miguel', lastName: 'Torres', role: 'user', password: CLIENTE_PASSWORD },
-      { email: 'cliente2@estilo.com', firstName: 'Sofia', lastName: 'Ruiz', role: 'user', password: CLIENTE_PASSWORD },
+      { email: 'barbero1@estilo.com', firstName: 'Luis', lastName: 'Barbero', role: 'staff', password: empleadoPassword },
+      { email: 'barbero2@estilo.com', firstName: 'Andrés', lastName: 'Estilista', role: 'staff', password: empleadoPassword },
+      { email: 'cliente1@estilo.com', firstName: 'Miguel', lastName: 'Torres', role: 'user', password: clientePassword },
+      { email: 'cliente2@estilo.com', firstName: 'Sofia', lastName: 'Ruiz', role: 'user', password: clientePassword },
     ],
     services: [
       { name: 'Corte Clásico', description: 'Corte de cabello tradicional con tijera', price: 25000, duration: 45 },
@@ -231,7 +246,7 @@ async function main() {
 
     // Login como admin del tenant
     console.log(`\n🔐 Haciendo login como admin...`);
-    const loggedIn = await login(tenant.adminEmail, ADMIN_PASSWORD);
+    const loggedIn = await login(tenant.adminEmail, adminPassword);
     if (!loggedIn) {
       console.log(`❌ No se pudo login como admin, saltando tenant...`);
       continue;
@@ -352,7 +367,7 @@ async function main() {
 
   for (const tenant of createdData.tenants) {
     console.log(`🏢 ${tenant.name.toUpperCase()} (${tenant.slug})`);
-    console.log(`   Admin: admin@${tenant.slug.split('-')[0]}.com / ${ADMIN_PASSWORD}`);
+    console.log(`   Admin: admin@${tenant.slug.split('-')[0]}.com / ${adminPassword}`);
     
     for (const user of tenant.createdUsers) {
       const roleLabel = user.role === 'staff' ? 'Staff' : 'Cliente';

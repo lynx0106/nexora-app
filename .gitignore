@@ -53,3 +53,6 @@ RESUMEN_SESION*.md
 # Temp files (logs ya están cubiertos arriba)
 *.tmp
 *.temp
+
+# Cookies and session files
+cookies.txt

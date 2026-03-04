@@ -2,8 +2,9 @@
  * Script para ejecutar seed de datos de prueba via API
  * Uso: npx ts-node scripts/seed-via-api.ts
  * 
- * Requiere variable de entorno: BACKEND_URL
- * Ejemplo: BACKEND_URL=https://tu-backend.railway.app npx ts-node scripts/seed-via-api.ts
+ * Variables de entorno:
+ * - BACKEND_URL: URL del backend
+ * - SEED_SUPERADMIN_PASSWORD: Contraseña del superadmin
  */
 
 import axios from 'axios';
@@ -15,9 +16,15 @@ const API = axios.create({
   timeout: 30000,
 });
 
-// Credenciales del superadmin (debe existir primero)
+// Use environment variable for password - NO FALLBACKS for security
 const SUPERADMIN_EMAIL = 'superadmin@saas.com';
-const SUPERADMIN_PASSWORD = 'Super123!';
+const SUPERADMIN_PASSWORD = process.env.SEED_SUPERADMIN_PASSWORD;
+
+// Validate required environment variables
+if (!SUPERADMIN_PASSWORD) {
+  console.error('❌ Error: Se requiere la variable de entorno SEED_SUPERADMIN_PASSWORD');
+  process.exit(1);
+}
 
 let authToken = '';
 
@@ -218,7 +225,7 @@ async function main() {
     console.log('');
     console.log('👑 SUPERADMIN:');
     console.log('   Email: superadmin@saas.com');
-    console.log('   Password: Super123!');
+    console.log('   Password: ' + SUPERADMIN_PASSWORD);
     console.log('');
     console.log('👨‍💼 ADMIN (cada tenant):');
     console.log('   Email: admin@[tenant].com');

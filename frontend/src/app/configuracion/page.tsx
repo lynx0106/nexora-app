@@ -1,10 +1,31 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
+function getUserFromStorage() {
+  if (typeof window === "undefined") return null;
+  const userJson = window.localStorage.getItem("user");
+  if (userJson) {
+    try {
+      return JSON.parse(userJson);
+    } catch {
+      return null;
+    }
+  }
+  return null;
+}
+
 export default function ConfiguracionPage() {
   const { t } = useTranslation();
+  const [user, setUser] = useState<{ role?: string } | null>(null);
+
+  useEffect(() => {
+    setUser(getUserFromStorage());
+  }, []);
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superadmin';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
@@ -71,6 +92,28 @@ export default function ConfiguracionPage() {
               {t('config.in_development')}
             </div>
           </section>
+
+          {/* Sección: Automatizaciones - Solo para admins */}
+          {isAdmin && (
+            <section className="col-span-full rounded-xl bg-slate-900/70 p-6 shadow-sm ring-1 ring-slate-800">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-900/40 text-emerald-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                </div>
+                <h2 className="text-base font-semibold text-slate-100">Automatizaciones</h2>
+              </div>
+              <p className="mb-6 text-sm leading-relaxed text-slate-400">
+                Configura recordatorios automáticos, mensajes masivos y tareas de mantenimiento
+              </p>
+              <Link
+                href="/configuracion/automatizaciones"
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-emerald-500"
+              >
+                <span>Gestionar Automatizaciones</span>
+                <span>→</span>
+              </Link>
+            </section>
+          )}
 
           {/* Sección: Información del Sistema */}
           <section className="col-span-full rounded-xl bg-slate-900/70 p-6 shadow-sm ring-1 ring-slate-800">

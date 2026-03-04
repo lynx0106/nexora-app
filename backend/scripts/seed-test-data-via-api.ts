@@ -3,6 +3,10 @@
  * Usa la API REST del backend (no requiere acceso directo a DB)
  * Uso: npx ts-node scripts/seed-test-data-via-api.ts
  * 
+ * Variables de entorno requeridas:
+ * - SEED_SUPERADMIN_PASSWORD: Contraseña del superadmin
+ * - SEED_TEST_PASSWORD: Contraseña para usuarios de prueba
+ *
  * Crea:
  * - 1 Superadmin
  * - 4 Empresas (Tenants) con datos completos
@@ -13,14 +17,28 @@
 
 import axios from 'axios';
 
-const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3199.up.railway.app';
+const API_URL = process.env.BACKEND_URL || 'https://nexora-app-production-3104.up.railway.app';
 
 const API = axios.create({
   baseURL: API_URL,
   timeout: 30000,
 });
 
-const TEST_PASSWORD = 'Admin123!';
+// Use environment variables for passwords - NO FALLBACKS for security
+const SUPERADMIN_PASSWORD = process.env.SEED_SUPERADMIN_PASSWORD;
+const TEST_PASSWORD = process.env.SEED_TEST_PASSWORD;
+
+// Validate required environment variables and assert they are non-null
+if (!SUPERADMIN_PASSWORD || !TEST_PASSWORD) {
+  console.error('❌ Error: Se requieren las siguientes variables de entorno:');
+  console.error('   - SEED_SUPERADMIN_PASSWORD');
+  console.error('   - SEED_TEST_PASSWORD');
+  process.exit(1);
+}
+
+// Using non-null assertion (!) after validation since we exit if undefined
+const superAdminPassword = process.env.SEED_SUPERADMIN_PASSWORD!;
+const testPassword = process.env.SEED_TEST_PASSWORD!;
 
 interface TestTenant {
   id: string;
@@ -163,7 +181,7 @@ async function loginSuperadmin() {
   try {
     const res = await API.post('/auth/login', {
       email: 'superadmin@saas.com',
-      password: 'Super123!',
+      password: superAdminPassword,
     });
     authToken = res.data.access_token;
     API.defaults.headers.common['Authorization'] = `Bearer ${authToken}`;
@@ -187,7 +205,7 @@ async function createTenant(tenantId: string, name: string, sector: string, admi
       adminEmail: adminEmail,
       adminFirstName: 'Admin',
       adminLastName: name.split(' ').slice(-1)[0] || 'Admin',
-      adminPassword: TEST_PASSWORD,
+      adminPassword: testPassword,
     });
     console.log(`✅ Tenant creado: ${tenantId}`);
     return res.data;
@@ -205,7 +223,7 @@ async function createUser(tenantId: string, email: string, firstName: string, la
   try {
     const res = await API.post('/users', {
       email,
-      password: TEST_PASSWORD,
+      password: testPassword,
       firstName,
       lastName,
       role,
@@ -291,7 +309,7 @@ async function main() {
   if (!loggedIn) {
     console.log('\n⚠️ No se pudo iniciar sesión. Asegúrate de que:');
     console.log('   1. El backend esté corriendo');
-    console.log('   2. El superadmin superadmin@saas.com exista con password Super123!');
+    console.log('   2. El superadmin superadmin@saas.com exista con password ' + superAdminPassword);
     console.log('   3. La URL del backend sea correcta');
     process.exit(1);
   }
@@ -299,7 +317,7 @@ async function main() {
   const createdUsers: Array<{ email: string; password: string; role: string; tenant: string }> = [];
 
   // Agregar superadmin a la lista
-  createdUsers.push({ email: 'superadmin@saas.com', password: 'Super123!', role: 'superadmin', tenant: 'system' });
+  createdUsers.push({ email: 'superadmin@saas.com', password: superAdminPassword, role: 'superadmin', tenant: 'system' });
 
   // 2. Crear tenants y sus datos
   for (const tenantData of TEST_TENANTS) {
@@ -311,12 +329,12 @@ async function main() {
       console.log(`❌ Error creando tenant ${tenantData.id}, saltando...`);
       continue;
     }
-    createdUsers.push({ email: tenantData.adminEmail, password: TEST_PASSWORD, role: 'admin', tenant: tenantData.id });
+    createdUsers.push({ email: tenantData.adminEmail, password: testPassword, role: 'admin', tenant: tenantData.id });
 
     // 2.2 Crear usuarios staff
     for (const staff of tenantData.staff) {
       await createUser(tenantData.id, staff.email, staff.firstName, staff.lastName, staff.role);
-      createdUsers.push({ email: staff.email, password: TEST_PASSWORD, role: staff.role, tenant: tenantData.id });
+      createdUsers.push({ email: staff.email, password: testPassword, role: staff.role, tenant: tenantData.id });
     }
 
     // 2.3 Crear productos/servicios
@@ -362,7 +380,7 @@ async function main() {
 
   console.log('👑 SUPERADMIN:');
   console.log(`   Email:    superadmin@saas.com`);
-  console.log(`   Password: Super123!`);
+  console.log(`   Password: ${superAdminPassword}`);
   console.log(`   Rol:      superadmin`);
   console.log('');
 
@@ -386,7 +404,7 @@ async function main() {
   console.log('===========================================');
   console.log('📝 NOTAS:');
   console.log('   - Todos los usuarios usan la contraseña: Admin123!');
-  console.log('   - El superadmin usa: Super123!');
+  console.log(`   - El superadmin usa: ${superAdminPassword}`);
   console.log('   - Los usuarios pueden hacer login desde la app móvil');
   console.log('   - Datos creados para testing, se pueden limpiar después');
   console.log('===========================================');
