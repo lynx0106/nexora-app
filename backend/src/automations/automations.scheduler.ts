@@ -38,7 +38,7 @@ export class AutomationsScheduler {
           const run = this.automationRunsRepository.create({
             automationId: automation.id,
             status: AutomationRunStatus.PENDING,
-            executedBy: 'system',
+            executedById: 'system',
           });
 
           try {
