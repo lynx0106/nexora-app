@@ -41,21 +41,22 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
   const [activeTab, setActiveTab] = useState<'INTERNAL' | 'SUPPORT' | 'CUSTOMER'>('INTERNAL');
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const socketRef = useRef<Socket | null>(null);
   
-  // Superadmin Tenant Selection
-  const [selectedTenantId, setSelectedTenantId] = useState<string>(tenantId);
+  // Superadmin Tenant Selection - ensure valid default
+  const [selectedTenantId, setSelectedTenantId] = useState<string>(tenantId || '');
 
   // Initialize selectedTenantId if superadmin and not set or invalid
   useEffect(() => {
-    if (role === 'superadmin' && tenants.length > 0) {
+    if (role === 'superadmin' && tenants && tenants.length > 0) {
         const isValid = tenants.find(t => t.id === selectedTenantId);
-        if (!isValid) {
-            setSelectedTenantId(tenants[0].id);
+        if (!isValid || !selectedTenantId) {
+            setSelectedTenantId(tenants[0]?.id || '');
         }
-    } else if (role !== 'superadmin') {
-        setSelectedTenantId(tenantId);
+    } else if (!role || role !== 'superadmin') {
+        setSelectedTenantId(tenantId || '');
     }
   }, [role, tenants, tenantId]);
 
@@ -79,60 +80,82 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
   // Initialize Socket
   useEffect(() => {
     const token = localStorage.getItem('token');
-    if (!token) return;
+    if (!token) {
+      setError('No token found');
+      return;
+    }
 
-    const newSocket = io(API_URL, {
-      auth: { token: `Bearer ${token}` },
-    });
-
-    newSocket.on('connect', () => {
-      console.log('[ChatSection] Socket connected');
-      // If superadmin, join the selected tenant's rooms explicitly
-      if (role === 'superadmin' && selectedTenantId) {
-          console.log(`[ChatSection] Joining rooms for tenant ${selectedTenantId}`);
-          newSocket.emit('switchTenant', { tenantId: selectedTenantId });
-      }
-    });
-
-    newSocket.on('newMessage', (message: Message) => {
-      setMessages((prev) => {
-        // Avoid duplicates
-        if (prev.find(m => m.id === message.id)) return prev;
-        
-        // Filter: Only add if it belongs to current view AND current selected tenant
-        if (role === 'superadmin' && message.tenantId !== selectedTenantId) {
-            return prev; // Ignore messages from other tenants while viewing one
-        }
-
-        // 1. If Internal/Support, just add
-        if (activeTab === 'INTERNAL' && message.scope === 'INTERNAL') return [...prev, message];
-        if (activeTab === 'SUPPORT' && message.scope === 'SUPPORT') return [...prev, message];
-        
-        // 2. If Customer, only add if belongs to selected customer
-        if (activeTab === 'CUSTOMER' && message.scope === 'CUSTOMER') {
-            // If we are viewing this customer, add it
-            if (message.senderId === selectedCustomerId || message.targetUserId === selectedCustomerId) {
-                return [...prev, message];
-            }
-            // If not, we should update the conversations list (unread indicator - todo)
-            // For now, let's just refresh the conversations list to ensure order/existence
-            fetchConversations(); 
-            return prev;
-        }
-        
-        return prev;
+    try {
+      const newSocket = io(API_URL, {
+        auth: { token: `Bearer ${token}` },
       });
-    });
-    
-    newSocket.on('aiStatusChanged', (payload: { userId: string, isAiActive: boolean }) => {
-        if (selectedCustomerId === payload.userId) {
-            setIsAiActive(payload.isAiActive);
-        }
-        // Also update list if needed
-        setConversations(prev => prev.map(c => c.id === payload.userId ? { ...c, isAiChatActive: payload.isAiActive } : c));
-    });
 
-    socketRef.current = newSocket;
+      newSocket.on('connect', () => {
+        console.log('[ChatSection] Socket connected');
+        setError(null);
+        // If superadmin, join the selected tenant's rooms explicitly
+        if (role === 'superadmin' && selectedTenantId) {
+            console.log(`[ChatSection] Joining rooms for tenant ${selectedTenantId}`);
+            newSocket.emit('switchTenant', { tenantId: selectedTenantId });
+        }
+      });
+
+      newSocket.on('connect_error', (err) => {
+        console.error('[ChatSection] Socket connection error:', err);
+        setError('Connection error');
+      });
+
+      newSocket.on('newMessage', (message: Message) => {
+        try {
+          setMessages((prev) => {
+            // Avoid duplicates
+            if (prev.find(m => m.id === message.id)) return prev;
+            
+            // Filter: Only add if it belongs to current view AND current selected tenant
+            if (role === 'superadmin' && message.tenantId !== selectedTenantId) {
+                return prev; // Ignore messages from other tenants while viewing one
+            }
+
+            // 1. If Internal/Support, just add
+            if (activeTab === 'INTERNAL' && message.scope === 'INTERNAL') return [...prev, message];
+            if (activeTab === 'SUPPORT' && message.scope === 'SUPPORT') return [...prev, message];
+            
+            // 2. If Customer, only add if belongs to selected customer
+            if (activeTab === 'CUSTOMER' && message.scope === 'CUSTOMER') {
+                // If we are viewing this customer, add it
+                if (message.senderId === selectedCustomerId || message.targetUserId === selectedCustomerId) {
+                    return [...prev, message];
+                }
+                // If not, we should update the conversations list (unread indicator - todo)
+                // For now, let's just refresh the conversations list to ensure order/existence
+                fetchConversations(); 
+                return prev;
+            }
+            
+            return prev;
+          });
+        } catch (err) {
+          console.error('[ChatSection] Error handling message:', err);
+        }
+      });
+      
+      newSocket.on('aiStatusChanged', (payload: { userId: string, isAiActive: boolean }) => {
+          try {
+              if (selectedCustomerId === payload.userId) {
+                  setIsAiActive(payload.isAiActive);
+              }
+              // Also update list if needed
+              setConversations(prev => prev.map(c => c.id === payload.userId ? { ...c, isAiChatActive: payload.isAiActive } : c));
+          } catch (err) {
+              console.error('[ChatSection] Error handling aiStatusChanged:', err);
+          }
+      });
+
+      socketRef.current = newSocket;
+    } catch (err) {
+      console.error('[ChatSection] Error initializing socket:', err);
+      setError('Failed to connect');
+    }
 
     return () => {
       if (socketRef.current) {
@@ -249,23 +272,30 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
 
   return (
     <div className="flex h-[calc(100vh-140px)] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+      {/* Error Banner */}
+      {error && (
+        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-sm text-red-700">
+          {error}
+        </div>
+      )}
       {/* Sidebar */}
-      <div className="w-1/4 bg-gray-50 border-r border-gray-200 flex flex-col">
+      <div className="w-1/4 bg-gray-100 border-r border-gray-200 flex flex-col">
         
         {/* Tenant Selector for Superadmin */}
             {role === 'superadmin' && (
-            <div className="p-4 border-b border-gray-200 bg-zinc-100">
-                <label className="block text-xs font-medium text-gray-500 mb-1">{t('chat.tenant_label')}</label>
+            <div className="p-4 border-b border-gray-200 bg-zinc-200">
+                <label className="block text-xs font-medium text-gray-700 mb-1">{t('chat.tenant_label')}</label>
                 <select 
-                    value={selectedTenantId}
+                    value={selectedTenantId || ''}
                     onChange={(e) => setSelectedTenantId(e.target.value)}
-                    className="w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    className="w-full text-sm border-gray-400 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900"
+                    title="Seleccionar empresa"
                 >
-                    {tenants.length === 0 ? (
+                    {(!tenants || tenants.length === 0) ? (
                         <option value="">{t('chat.loading_tenants')}</option>
                     ) : (
                         tenants.map(t => (
-                            <option key={t.id} value={t.id}>{t.name}</option>
+                            <option key={t.id} value={t.id}>{t.name || t.id}</option>
                         ))
                     )}
                 </select>
@@ -273,54 +303,54 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         )}
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex border-b border-gray-200 bg-gray-200">
             <button 
                 onClick={() => setActiveTab('INTERNAL')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'INTERNAL' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'INTERNAL' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
             >
                 {t('chat.tab_team')}
             </button>
             <button 
                 onClick={() => setActiveTab('CUSTOMER')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'CUSTOMER' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'CUSTOMER' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
             >
                 {t('chat.tab_clients')}
             </button>
             <button 
                 onClick={() => setActiveTab('SUPPORT')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'SUPPORT' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-500 hover:text-gray-700'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'SUPPORT' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
             >
                 {t('chat.tab_support')}
             </button>
         </div>
         
         {/* List */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-gray-100">
             {activeTab === 'INTERNAL' && (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-200">
                     {loadingConversations && (
                         <div className="p-4 space-y-3">
                             <Skeleton className="h-4 w-3/4" />
                             <Skeleton className="h-4 w-2/3" />
                         </div>
                     )}
-                    {!loadingConversations && internalUsers.length === 0 && (
-                        <div className="p-4">
+                    {!loadingConversations && (!internalUsers || internalUsers.length === 0) && (
+                        <div className="p-4 text-gray-600">
                             <EmptyState
                                 titulo={t('chat.no_team_members')}
                                 descripcion={t('chat.no_team_members_desc')}
                             />
                         </div>
                     )}
-                    {internalUsers.map(user => (
+                    {internalUsers && internalUsers.map(user => (
                         <div 
                             key={user.id}
                             onClick={() => setSelectedCustomerId(user.id)}
-                            className={`p-4 cursor-pointer hover:bg-gray-100 transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''}`}
+                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-100 border-l-4 border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
                         >
                             <h4 className="font-medium text-sm text-gray-900">{user.firstName} {user.lastName}</h4>
                             <p className="text-xs text-gray-500">{user.email}</p>
-                            <span className="inline-block mt-1 text-[10px] bg-gray-100 text-gray-600 px-1.5 py-0.5 rounded">
+                            <span className="inline-block mt-1 text-[10px] bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded">
                                 {(user.role || 'user').toUpperCase()}
                             </span>
                         </div>
@@ -329,8 +359,8 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
             )}
             
             {activeTab === 'SUPPORT' && (
-                <div className="p-4">
-                    <div className="p-3 bg-amber-50 border border-amber-100 rounded-lg cursor-pointer">
+                <div className="p-4 bg-gray-100">
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100">
                         <h4 className="font-semibold text-amber-900">{t('chat.support_chat_title')}</h4>
                         <p className="text-xs text-amber-700">{t('chat.support_chat_desc')}</p>
                     </div>
@@ -338,7 +368,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
             )}
 
             {activeTab === 'CUSTOMER' && (
-                <div className="divide-y divide-gray-100">
+                <div className="divide-y divide-gray-200 bg-gray-100">
                                         {loadingConversations && (
                                             <div className="p-4 space-y-3">
                                                 <Skeleton className="h-4 w-3/4" />
@@ -346,23 +376,23 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                                                 <Skeleton className="h-4 w-4/5" />
                                             </div>
                                         )}
-                                        {!loadingConversations && conversations.length === 0 && (
-                                            <div className="p-4">
+                                        {!loadingConversations && (!conversations || conversations.length === 0) && (
+                                            <div className="p-4 text-gray-600">
                                                 <EmptyState
                                                     titulo={t('chat.no_messages')}
                                                     descripcion={t('chat.select_chat')}
                                                 />
                                             </div>
                                         )}
-                    {conversations.map(user => (
+                    {conversations && conversations.map(user => (
                         <div 
                             key={user.id}
                             onClick={() => setSelectedCustomerId(user.id)}
-                            className={`p-4 cursor-pointer hover:bg-gray-100 transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-50 border-l-4 border-indigo-600' : ''}`}
+                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-100 border-l-4 border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
                         >
                             <div className="flex justify-between items-start">
                                 <h4 className="font-medium text-sm text-gray-900">{user.firstName} {user.lastName}</h4>
-                                {user.isAiChatActive && <span className="text-[10px] bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">IA</span>}
+                                {user.isAiChatActive && <span className="text-[10px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded">IA</span>}
                             </div>
                             <p className="text-xs text-gray-500 truncate">{user.email}</p>
                         </div>
@@ -405,8 +435,8 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         </div>
 
         {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
-                         {messages.length === 0 && (
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100 min-h-[200px]">
+                         {(!messages || messages.length === 0) && (
                                 <div className="flex h-full items-center justify-center">
                                     <EmptyState
                                         titulo={t('chat.no_messages')}
