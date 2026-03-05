@@ -137,14 +137,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       dbTargetUserId = user.sub;
     }
 
-    this.logger.debug(`Message from user ${user.sub}, scope: ${scope}, tenant: ${user.tenantId}`);
+    // For superadmin, use currentTenantId if set, otherwise use JWT tenantId
+    const effectiveTenantId = client.data.currentTenantId || user.tenantId;
+    
+    if (!effectiveTenantId) {
+      this.logger.warn(`Message rejected: no tenantId for user ${user.sub}`);
+      return { success: false, message: 'No tenant selected' };
+    }
+
+    this.logger.debug(`Message from user ${user.sub}, scope: ${scope}, tenant: ${effectiveTenantId}`);
 
     try {
       // Save User Message
       const message = await this.chatService.createMessage(
         payload.content,
         user.sub, // userId from JWT
-        user.tenantId,
+        effectiveTenantId,
         scope,
         dbTargetUserId,
         false,
@@ -154,7 +162,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Helper to Broadcast
       const broadcastMessage = (msg: any) => {
-        const tenantId = user.tenantId;
+        const tenantId = effectiveTenantId;
         this.logger.debug(`Broadcasting message ${msg.id} to scope ${scope}`);
         if (scope === 'INTERNAL') {
           this.server.to(`tenant-${tenantId}-INTERNAL`).emit('newMessage', msg);
@@ -195,13 +203,13 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       // Trigger AI response if applicable
-      this.logger.debug(`Triggering AI for tenant ${user.tenantId}`);
+      this.logger.debug(`Triggering AI for tenant ${effectiveTenantId}`);
 
       // Fetch context (previous messages)
       let context: any[] = [];
       try {
         const history = await this.chatService.getMessages(
-          user.tenantId,
+          effectiveTenantId,
           scope,
           dbTargetUserId,
           10,
@@ -221,7 +229,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const aiResult = await this.aiService.generateReply(
         scope,
         payload.content,
-        user.tenantId,
+        effectiveTenantId,
         context,
       );
 
@@ -233,7 +241,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         // Notify admins via socket? The message content already says "Pausaré..."
         // We could emit a specific event "aiPaused" to update UI immediately
         this.server
-          .to(`tenant-${user.tenantId}-customers-all`)
+          .to(`tenant-${effectiveTenantId}-customers-all`)
           .emit('aiStatusChanged', {
             userId: dbTargetUserId,
             isAiActive: false,
@@ -244,7 +252,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         const aiMessage = await this.chatService.createMessage(
           aiResult.content,
           null, // Sender is NULL (AI)
-          user.tenantId,
+          effectiveTenantId,
           scope,
           dbTargetUserId,
           true, // isAi = true
@@ -271,13 +279,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return; // Only staff can toggle AI
     }
 
+    // For superadmin, use currentTenantId if set
+    const effectiveTenantId = client.data.currentTenantId || user.tenantId;
+    
+    if (!effectiveTenantId) {
+      this.logger.warn(`ToggleAI rejected: no tenantId for user ${user.sub}`);
+      return { success: false, message: 'No tenant selected' };
+    }
+
     await this.usersService.update(payload.userId, {
       isAiChatActive: payload.isActive,
     });
 
     // Notify relevant rooms
     this.server
-      .to(`tenant-${user.tenantId}-customers-all`)
+      .to(`tenant-${effectiveTenantId}-customers-all`)
       .emit('aiStatusChanged', {
         userId: payload.userId,
         isAiActive: payload.isActive,
@@ -292,17 +308,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     const message = await this.chatService.createMessage(
       systemMsg,
       null,
-      user.tenantId,
+      effectiveTenantId,
       'CUSTOMER',
       payload.userId,
       true, // marked as AI/System
     );
 
     this.server
-      .to(`tenant-${user.tenantId}-customer-${payload.userId}`)
+      .to(`tenant-${effectiveTenantId}-customer-${payload.userId}`)
       .emit('newMessage', message);
     this.server
-      .to(`tenant-${user.tenantId}-customers-all`)
+      .to(`tenant-${effectiveTenantId}-customers-all`)
       .emit('newMessage', message);
   }
 
@@ -312,5 +328,46 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() room: string,
   ) {
     client.join(room);
+  }
+
+  /**
+   * Allows superadmin to switch between tenants in real-time
+   * When superadmin selects a different tenant, they join that tenant's rooms
+   */
+  @SubscribeMessage('switchTenant')
+  async handleSwitchTenant(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: { tenantId: string },
+  ) {
+    const user = client.data.user;
+    
+    // Only allow superadmin to switch tenants
+    if (!user || user.role !== 'superadmin') {
+      this.logger.warn('Non-superadmin attempted to switch tenant');
+      return { success: false, message: 'Unauthorized' };
+    }
+
+    const { tenantId } = payload;
+    this.logger.log(`Superadmin ${user.sub} switching to tenant ${tenantId}`);
+
+    // Leave all current tenant rooms (to avoid flooding)
+    const currentRooms = Array.from(client.rooms);
+    currentRooms.forEach(room => {
+      if (room.startsWith('tenant-') && room !== `tenant-${tenantId}-INTERNAL`) {
+        client.leave(room);
+      }
+    });
+
+    // Join new tenant rooms
+    client.join(`tenant-${tenantId}-INTERNAL`);
+    client.join(`tenant-${tenantId}-SUPPORT`);
+    client.join(`tenant-${tenantId}-customers-all`);
+    client.join(`tenant-${tenantId}-customer-${user.sub}`);
+
+    // Store the current tenant in socket data
+    client.data.currentTenantId = tenantId;
+
+    this.logger.log(`Superadmin joined tenant ${tenantId} rooms successfully`);
+    return { success: true, tenantId };
   }
 }

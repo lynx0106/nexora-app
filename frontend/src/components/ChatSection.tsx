@@ -59,6 +59,14 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
     }
   }, [role, tenants, tenantId]);
 
+  // Handle tenant switch for superadmin - emit switchTenant event
+  useEffect(() => {
+    if (role === 'superadmin' && selectedTenantId && socketRef.current?.connected) {
+      console.log(`[ChatSection] Switching to tenant: ${selectedTenantId}`);
+      socketRef.current.emit('switchTenant', { tenantId: selectedTenantId });
+    }
+  }, [selectedTenantId, role]);
+
   // Customer Chat State
   const [conversations, setConversations] = useState<User[]>([]);
   const [internalUsers, setInternalUsers] = useState<User[]>([]); // Users in the tenant for internal chat
@@ -82,8 +90,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       // If superadmin, join the selected tenant's rooms explicitly
       if (role === 'superadmin' && selectedTenantId) {
           console.log(`[ChatSection] Joining rooms for tenant ${selectedTenantId}`);
-          newSocket.emit('joinRoom', `tenant-${selectedTenantId}-INTERNAL`);
-          newSocket.emit('joinRoom', `tenant-${selectedTenantId}-customers-all`);
+          newSocket.emit('switchTenant', { tenantId: selectedTenantId });
       }
     });
 
@@ -215,6 +222,11 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         content: newMessage,
         scope: activeTab,
     };
+    
+    // Include tenantId for superadmin
+    if (role === 'superadmin' && selectedTenantId) {
+        payload.tenantId = selectedTenantId;
+    }
     
     if (activeTab === 'CUSTOMER') {
         if (!selectedCustomerId) return;

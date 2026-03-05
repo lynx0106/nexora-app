@@ -23,6 +23,11 @@ export class ChatController {
       effectiveTenantId = tenantId;
     }
 
+    // For superadmin without tenant selection, return empty or message
+    if (!effectiveTenantId) {
+      return [];
+    }
+
     const userIds = await this.chatService.getConversations(effectiveTenantId);
     if (!userIds.length) return [];
 
@@ -44,6 +49,11 @@ export class ChatController {
     let effectiveTenantId = user.tenantId;
     if (user.role === 'superadmin' && tenantId) {
       effectiveTenantId = tenantId;
+    }
+
+    // For superadmin without tenant selection, return empty or message
+    if (!effectiveTenantId) {
+      return [];
     }
 
     // Return all active users in the tenant
@@ -82,6 +92,11 @@ export class ChatController {
       effectiveTenantId = tenantId;
     }
 
+    // For superadmin without tenant selection, return empty
+    if (!effectiveTenantId) {
+      return [];
+    }
+
     return this.chatService.getMessages(
       effectiveTenantId,
       scope,
@@ -95,10 +110,23 @@ export class ChatController {
     @Req() req,
     @Query('scope') scope: string,
     @Query('targetUserId') targetUserId?: string,
+    @Query('tenantId') tenantId?: string,
   ) {
     const user = req.user;
+    
+    // For superadmin, allow tenantId override
+    let effectiveTenantId = user.tenantId;
+    if (user.role === 'superadmin' && tenantId) {
+      effectiveTenantId = tenantId;
+    }
+
+    // For superadmin without tenant selection, return error
+    if (!effectiveTenantId) {
+      return { success: false, message: 'No tenant selected' };
+    }
+
     await this.chatService.markAsRead(
-      user.tenantId,
+      effectiveTenantId,
       scope,
       user.userId,
       targetUserId,
@@ -107,11 +135,24 @@ export class ChatController {
   }
 
   @Get('unread')
-  async getUnread(@Req() req) {
+  async getUnread(@Req() req, @Query('tenantId') tenantId?: string) {
+    const user = req.user;
+    
+    // For superadmin, allow tenantId override
+    let effectiveTenantId = user.tenantId;
+    if (user.role === 'superadmin' && tenantId) {
+      effectiveTenantId = tenantId;
+    }
+
+    // For superadmin without tenant selection, return 0
+    if (!effectiveTenantId) {
+      return { count: 0 };
+    }
+
     const count = await this.chatService.getUnreadCount(
-      req.user.tenantId,
-      req.user.userId,
-      req.user.role,
+      effectiveTenantId,
+      user.userId,
+      user.role,
     );
     return { count };
   }
@@ -119,10 +160,19 @@ export class ChatController {
   @Post('message')
   async sendMessage(@Req() req, @Body() body: SendMessageDto) {
     const user = req.user;
+    
+    // For superadmin, allow tenantId override
+    let effectiveTenantId = body.tenantId || user.tenantId;
+    
+    // If superadmin without tenant selection, return error
+    if (!effectiveTenantId) {
+      return { success: false, message: 'No tenant selected' };
+    }
+    
     const message = await this.chatService.createMessage(
       body.content,
       user.userId,
-      body.tenantId || user.tenantId, // Allow overriding tenantId if needed (e.g. superadmin) but usually user.tenantId
+      effectiveTenantId,
       body.scope || 'INTERNAL',
       body.targetUserId,
       false, // isAi
