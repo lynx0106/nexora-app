@@ -14,6 +14,8 @@ interface Message {
   targetUserId?: string;
   createdAt: string;
   isAi?: boolean;
+  mediaUrl?: string;
+  type?: string; // text, image, file
   sender?: {
     firstName: string;
     lastName: string;
@@ -76,6 +78,10 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
 
   // AI State
   const [isAiActive, setIsAiActive] = useState(true);
+  
+  // File Upload State
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Initialize Socket
   useEffect(() => {
@@ -268,6 +274,63 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       // Optimistic update
       setIsAiActive(newState);
       setConversations(prev => prev.map(c => c.id === selectedCustomerId ? { ...c, isAiChatActive: newState } : c));
+  };
+  
+  // Handle file upload
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      const socket = socketRef.current;
+      if (!file || !socket) return;
+      
+      // Determine effective tenant ID
+      const effectiveTenantId = role === 'superadmin' ? selectedTenantId : tenantId;
+      if (!effectiveTenantId) return;
+      
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      try {
+          const res = await fetch(`${API_URL}/uploads/chat`, {
+              method: 'POST',
+              headers: {
+                  'x-tenant-id': effectiveTenantId,
+              },
+              body: formData,
+              credentials: 'include',
+          });
+          
+          if (!res.ok) throw new Error('Upload failed');
+          
+          const data = await res.json();
+          const mediaUrl = data.url;
+          const type = file.type.startsWith('image/') ? 'image' : 'file';
+          
+          // Send message with media
+          const payload: any = {
+              content: type === 'image' ? '📷 Imagen' : '📎 Archivo',
+              scope: activeTab,
+              mediaUrl,
+              type,
+          };
+          
+          if (role === 'superadmin' && selectedTenantId) {
+              payload.tenantId = selectedTenantId;
+          }
+          
+          if (activeTab === 'CUSTOMER' && selectedCustomerId) {
+              payload.targetUserId = selectedCustomerId;
+          }
+          
+          socket.emit('sendMessage', payload);
+          
+      } catch (error) {
+          console.error('Error uploading file:', error);
+          setError('Error al subir archivo');
+      } finally {
+          setIsUploading(false);
+          if (fileInputRef.current) fileInputRef.current.value = '';
+      }
   };
 
   return (
@@ -467,6 +530,28 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                       </div>
                     )}
                     <p>{msg.content}</p>
+                    {/* Display attached image */}
+                    {msg.type === 'image' && msg.mediaUrl && (
+                        <img 
+                            src={msg.mediaUrl} 
+                            alt="attachment" 
+                            className="mt-2 rounded-md max-w-full h-auto max-h-48 object-cover" 
+                        />
+                    )}
+                    {/* Display file attachment */}
+                    {msg.type === 'file' && msg.mediaUrl && (
+                        <a 
+                            href={msg.mediaUrl} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="flex items-center gap-2 mt-2 text-indigo-300 hover:text-indigo-200 underline text-xs"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            {t('chat.download_file') || 'Descargar archivo'}
+                        </a>
+                    )}
                     <div className={`text-[10px] mt-1 ${isMe ? 'text-indigo-200' : 'text-gray-400'} text-right`}>
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
@@ -479,6 +564,32 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         {/* Input */}
         <div className="p-4 border-t border-gray-200 bg-white">
             <form onSubmit={handleSendMessage} className="flex gap-2">
+                {/* File Upload Button */}
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept="image/*,application/pdf"
+                />
+                <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="p-2 text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-colors"
+                    title="Subir archivo"
+                >
+                    {isUploading ? (
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    ) : (
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                        </svg>
+                    )}
+                </button>
                 <input 
                     type="text" 
                     value={newMessage}
