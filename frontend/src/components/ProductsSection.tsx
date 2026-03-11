@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchAPIWithAuth, API_URL, uploadFile } from "../lib/api";
@@ -593,7 +594,9 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   <tr key={product.id}>
                     <td className="px-3 py-2">
                       {product.imageUrl ? (
-                        <img src={product.imageUrl.startsWith('http') ? product.imageUrl : `${API_URL}${product.imageUrl}`} alt={product.name} className="h-10 w-10 rounded-md object-cover bg-zinc-50" />
+                        <div className="relative h-10 w-10 rounded-md overflow-hidden bg-zinc-50">
+                          <Image src={product.imageUrl.startsWith('http') ? product.imageUrl : `${API_URL}${product.imageUrl}`} alt={product.name} fill className="object-cover" sizes="40px" />
+                        </div>
                       ) : (
                         <div className="h-10 w-10 rounded-md bg-zinc-100 flex items-center justify-center text-zinc-400">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>

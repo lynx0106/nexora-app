@@ -114,7 +114,7 @@ Write-Host ""
 
 # 6. Verificar credenciales hardcodeadas
 Write-Host "🔒 Verificando seguridad básica..." -ForegroundColor Yellow
-$passwordPatterns = Select-String -Path "backend/src/**/*.ts" -Pattern "password\s*=\s*[\"'][^\"']+[\"']" -ErrorAction SilentlyContinue | Where-Object { $_ -notmatch "process\.env" } | Select-Object -First 3
+$passwordPatterns = Select-String -Path "backend/src/**/*.ts" -Pattern 'password\s*=\s*["''][^"'']+["'']' -ErrorAction SilentlyContinue | Where-Object { $_.Line -notmatch "process\.env" } | Select-Object -First 3
 if ($passwordPatterns) {
     Write-Host "⚠️  WARNING: Posibles contraseñas hardcodeadas encontradas:" -ForegroundColor Yellow
     $passwordPatterns | ForEach-Object { Write-Host "   - $($_.FileName):$($_.LineNumber)" -ForegroundColor Gray }

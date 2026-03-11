@@ -1,3 +1,7 @@
+import { Logger } from '@nestjs/common';
+
+const logger = new Logger('DatabaseConfig');
+
 /**
  * Database configuration that supports:
  * 1. Supabase (production)
@@ -28,13 +32,10 @@ export function getDatabaseConfig(): DatabaseConfig {
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
   
   if (supabaseUrl?.includes('supabase')) {
-    console.log('🔗 Using Supabase database');
-    
-    // Check if using pooler (pgbouncer)
+    logger.log('Using Supabase database');
     const isPooler = supabaseUrl?.includes('pooler');
-    
     if (isPooler) {
-      console.log('   Using connection pooler (pgbouncer)');
+      logger.log('Using connection pooler (pgbouncer)');
       // For pooler, we need specific settings to avoid prepared statement issues
       return {
         type: 'postgres',
@@ -57,9 +58,8 @@ export function getDatabaseConfig(): DatabaseConfig {
     };
   }
   
-  // Railway PostgreSQL or other cloud provider
   if (process.env.DATABASE_URL) {
-    console.log('🔗 Using DATABASE_URL (Railway/Cloud)');
+    logger.log('Using DATABASE_URL (Railway/Cloud)');
     return {
       type: 'postgres',
       url: process.env.DATABASE_URL,
@@ -67,8 +67,7 @@ export function getDatabaseConfig(): DatabaseConfig {
     };
   }
   
-  // Local development with individual params
-  console.log('🔧 Using local PostgreSQL configuration');
+  logger.log('Using local PostgreSQL configuration');
   return {
     type: 'postgres',
     host: process.env.POSTGRES_HOST || 'localhost',
@@ -87,8 +86,8 @@ export function logDatabaseConfig(): void {
   const config = getDatabaseConfig();
   if (config.url) {
     const maskedUrl = config.url.replace(/:\/\/[^:]+:[^@]+@/, '://***:***@');
-    console.log(`📦 Database: ${maskedUrl}`);
+    logger.log(`Database: ${maskedUrl}`);
   } else {
-    console.log(`📦 Database: ${config.host}:${config.port}/${config.database}`);
+    logger.log(`Database: ${config.host}:${config.port}/${config.database}`);
   }
 }

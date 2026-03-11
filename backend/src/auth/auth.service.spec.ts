@@ -1,8 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
+import { TenantsService } from '../tenants/tenants.service';
 import { MailService } from '../mail/mail.service';
 import { JwtService } from '@nestjs/jwt';
+import { InvitationsService } from '../invitations/invitations.service';
+import { RefreshToken } from './entities/refresh-token.entity';
 import { UnauthorizedException } from '@nestjs/common';
 
 // Mock bcrypt module
@@ -56,12 +60,24 @@ describe('AuthService', () => {
       sendPasswordReset: jest.fn(),
     };
 
+    const mockTenantsService = { findById: jest.fn() };
+    const mockInvitationsService = { findById: jest.fn() };
+    const mockRefreshTokenRepo = {
+      create: jest.fn(),
+      save: jest.fn(),
+      findOne: jest.fn(),
+      delete: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         { provide: UsersService, useValue: mockUsersService },
+        { provide: TenantsService, useValue: mockTenantsService },
         { provide: JwtService, useValue: mockJwtService },
         { provide: MailService, useValue: mockMailService },
+        { provide: InvitationsService, useValue: mockInvitationsService },
+        { provide: getRepositoryToken(RefreshToken), useValue: mockRefreshTokenRepo },
       ],
     }).compile();
 

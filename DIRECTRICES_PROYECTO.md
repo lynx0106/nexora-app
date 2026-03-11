@@ -133,7 +133,7 @@ git push origin main
 
 | Servicio | URL | Estado |
 |----------|-----|--------|
-| Backend API | https://nexora-app-production-3199.up.railway.app | Verificar |
+| Backend API | https://nexora-app-production-3104.up.railway.app | Verificar |
 | Frontend Web | https://nexora-app.online | Verificar |
 | GitHub | https://github.com/lynx0106/nexora-app | Verificar |
 | Expo | https://expo.dev/accounts/lynx0106/projects/nexora-mobile | Verificar |

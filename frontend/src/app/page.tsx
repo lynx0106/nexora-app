@@ -2,6 +2,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { User, Briefcase, Store, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
@@ -224,9 +225,11 @@ function HomeContent() {
         
         {/* Header Logo */}
         <div className="flex flex-col items-center">
-           <img 
+           <Image 
              src="/logo-fondo.png" 
              alt="Logo Agencia" 
+             width={96}
+             height={96}
              className="mb-2 h-24 w-auto object-contain"
            />
            <h2 className="text-center text-3xl font-semibold tracking-tight ds-text">

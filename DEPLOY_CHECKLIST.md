@@ -165,6 +165,17 @@ curl -X POST https://nexora-app-production-3104.up.railway.app/auth/login \
 
 ---
 
+## 📋 Variables Detalladas
+
+Para lista completa de variables Backend/Frontend, ver **DEPLOY_ENVIRONMENT_VARIABLES.md**.
+
+**Variables críticas en Railway:**
+- `TYPEORM_SYNCHRONIZE=false` (obligatorio en producción)
+- `NODE_ENV=production`
+- `CORS_ORIGINS` sin `*` (usar orígenes específicos)
+
+---
+
 ## ⚠️ Notas Importantes
 
 ### Para Cambiar la URL del Backend

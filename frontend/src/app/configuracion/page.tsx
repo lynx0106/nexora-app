@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
@@ -33,9 +34,11 @@ export default function ConfiguracionPage() {
         {/* Header con navegación */}
         <header className="mb-12 flex items-center justify-between border-b border-slate-800 pb-6">
           <div className="flex items-center gap-4">
-            <img
+            <Image
               src="/logo-fondo.png"
               alt="Logo NEXORA"
+              width={48}
+              height={48}
               className="h-12 w-auto object-contain"
             />
             <div>

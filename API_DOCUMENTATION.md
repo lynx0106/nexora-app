@@ -1,8 +1,8 @@
 # 📚 Documentación API - Nexora App
 
 **Versión:** 1.0  
-**Base URL:** `https://nexora-app-production-3199.up.railway.app`  
-**Docs Interactivos:** `https://nexora-app-production-3199.up.railway.app/api/docs`
+**Base URL:** `https://nexora-app-production-3104.up.railway.app`  
+**Docs Interactivos:** `https://nexora-app-production-3104.up.railway.app/api/docs`
 
 ---
 
@@ -33,7 +33,7 @@ Obtén el token mediante el endpoint de login.
 
 **Login:**
 ```bash
-curl -X POST https://nexora-app-production-3199.up.railway.app/auth/login \
+curl -X POST https://nexora-app-production-3104.up.railway.app/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "superadmin@saas.com",

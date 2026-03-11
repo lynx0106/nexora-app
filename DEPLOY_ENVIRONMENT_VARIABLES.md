@@ -19,13 +19,14 @@
 
 | Variable | Descripción | Requerida |
 |----------|-------------|-----------|
-| `DATABASE_URL` | URL de conexión a PostgreSQL | ✅ SÍ |
+| `DATABASE_URL` o `SUPABASE_DATABASE_URL` | URL de conexión a PostgreSQL | ✅ SÍ |
 | `JWT_SECRET` | Secreto para firmar JWT (mínimo 32 caracteres) | ✅ SÍ |
+| `TYPEORM_SYNCHRONIZE` | Debe ser `false` en producción | ✅ SÍ |
 | `FRONTEND_URL` | URL del frontend (https://nexora-app.online) | ✅ SÍ |
 | `CORS_ORIGINS` | Orígenes permitidos para CORS | ✅ SÍ |
 | `RATE_LIMIT_TTL` | Tiempo de ventana para rate limiting (60) | ⚠️ Opcional |
 | `RATE_LIMIT_LIMIT` | Límite de requests por ventana (100) | ⚠️ Opcional |
-| `MP_ACCESS_TOKEN` | Token de MercadoPago | ✅ SÍ |
+| `MERCADOPAGO_ACCESS_TOKEN` o `MP_ACCESS_TOKEN` | Token de MercadoPago | ⚠️ Si usa pagos |
 | `OPENAI_API_KEY` | API Key de OpenAI | ⚠️ Opcional |
 | `SENTRY_DSN` | DSN para Sentry error tracking | ⚠️ Opcional |
 
@@ -73,7 +74,7 @@ CORS_ORIGINS=https://nexora-app.online,https://www.nexora-app.online
 4. **Agregar/Actualizar:**
 
 ```bash
-NEXT_PUBLIC_API_URL=https://nexora-app-production-3199.up.railway.app
+NEXT_PUBLIC_API_URL=https://nexora-app-production-3104.up.railway.app
 ```
 
 ---

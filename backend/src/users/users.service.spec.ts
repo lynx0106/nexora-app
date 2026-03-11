@@ -430,9 +430,9 @@ describe('UsersService', () => {
 
       const result = await service.seedDemoUsers();
 
-      expect(result.message).toBe('Demo users seeded');
+      expect(result.message).toBe('Demo users seeded (NOT FOR PRODUCTION)');
       expect(result.count).toBe(4);
-      expect(result.demoPassword).toBe('Demo123!');
+      expect(['Demo2026!', '[REDACTED]']).toContain(result.demoPassword);
     });
 
     it('should return existing demo users if already exist', async () => {

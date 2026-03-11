@@ -13,13 +13,17 @@ export function getJwtSecret(): string {
  * Priority: CORS_ORIGINS env var > FRONTEND_URL env var > Production defaults > Localhost
  */
 export function getCorsOrigins(): string[] {
-  // If explicit CORS_ORIGINS is set, use it
   const raw = process.env.CORS_ORIGINS;
   if (raw) {
-    return raw
-      .split(',')
-      .map((origin) => origin.trim())
-      .filter((origin) => origin.length > 0);
+    // En producción, no usar CORS_ORIGINS=* por seguridad; usar orígenes por defecto
+    if (raw.trim() === '*' && process.env.NODE_ENV === 'production') {
+      // Fall through to use production origins below
+    } else if (raw.trim() !== '*') {
+      return raw
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter((origin) => origin.length > 0);
+    }
   }
 
   // Production domains (always included)

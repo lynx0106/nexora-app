@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchAPIWithAuth, logout } from "../../lib/api";
@@ -10,16 +12,24 @@ import { ProductsSection } from "../../components/ProductsSection";
 import { TeamSection } from "../../components/TeamSection";
 import { ClientsSection } from "../../components/ClientsSection";
 import { TenantsSection } from "../../components/TenantsSection";
-import { SettingsSection } from "../../components/SettingsSection";
 import { StatsSection } from "../../components/StatsSection";
-import { ChatWidget } from "../../components/ChatWidget";
-import { ChatSection } from "../../components/ChatSection";
-import { AuditSection } from "../../components/AuditSection";
 import { InviteManager } from "../../components/InviteManager";
 import { GlobalUserRow } from "../../components/GlobalUserRow";
 import NotificationsDropdown from "../../components/NotificationsDropdown";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+
+const SettingsSection = dynamic(() => import("../../components/SettingsSection").then((m) => ({ default: m.SettingsSection })), {
+  loading: () => <div className="animate-pulse h-32 rounded-lg bg-slate-800/50" />,
+});
+const ChatWidget = dynamic(() => import("../../components/ChatWidget").then((m) => ({ default: m.ChatWidget })), { ssr: false });
+const ChatSection = dynamic(() => import("../../components/ChatSection").then((m) => ({ default: m.ChatSection })), {
+  ssr: false,
+  loading: () => <div className="animate-pulse h-64 rounded-lg bg-slate-800/50" />,
+});
+const AuditSection = dynamic(() => import("../../components/AuditSection").then((m) => ({ default: m.AuditSection })), {
+  loading: () => <div className="animate-pulse h-32 rounded-lg bg-slate-800/50" />,
+});
 
 /**
  * Get user info from localStorage (stored during login)
@@ -315,9 +325,11 @@ export default function DashboardPage() {
       <div className="flex min-h-screen">
         <aside className="hidden w-64 flex-col border-r border-slate-800 bg-slate-950/70 px-4 py-6 md:flex">
           <div className="mb-8 flex flex-col items-center">
-              <img 
+              <Image 
                 src="/logo-fondo.png" 
                 alt="Logo Agencia" 
+                width={80}
+                height={80}
                 className="mb-3 h-20 w-auto object-contain"
               />
             <div className="text-center text-sm font-semibold text-slate-100">

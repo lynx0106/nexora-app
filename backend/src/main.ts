@@ -34,8 +34,6 @@ async function bootstrap() {
     const corsOrigins = getCorsOrigins();
     logger.log(`CORS v2 - Origins: ${corsOrigins.join(', ')}`);
     
-    // Debug CORS
-    console.log('[CORS DEBUG] Allowed origins:', corsOrigins);
 
     // Enable cookie parsing
     app.use(cookieParser());
