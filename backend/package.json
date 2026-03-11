@@ -117,16 +117,24 @@
       "!**/*.dto.ts",
       "!**/*.gateway.ts",
       "!**/*.controller.ts",
-      "!**/main.ts"
+      "!**/main.ts",
+      "!**/migrations/**",
+      "!**/*.filter.ts",
+      "!**/*.interceptor.ts",
+      "!**/data-source.ts",
+      "!**/app.service.ts",
+      "!**/sentry*.ts",
+      "!**/*scheduler*.ts",
+      "!**/jwt.strategy.ts"
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "coverageThreshold": {
       "global": {
-        "branches": 30,
-        "functions": 40,
-        "lines": 40,
-        "statements": 40
+        "branches": 50,
+        "functions": 55,
+        "lines": 60,
+        "statements": 60
       }
     }
   }

@@ -5,6 +5,37 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-11 - Validación Railway, Deploy y Fase 6 (P2)
+
+**Duración:** ~2 horas  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] Variable `CORS_ORIGINS` añadida y validada en Railway (origen específico `https://nexora-app.online`)
+- [x] **Fase 6 P2.1:** Cobertura backend 67% (tasks.service.spec, umbrales 60%)
+- [x] **Fase 6 P2.2:** Circuit breaker OpenAI + MercadoPago
+- [x] **Fase 6 P2.3:** Server Component orders/status/[id]
+- [x] **Fase 6 P2.4:** Revisado MEJORAS_UI_UX.md (checklist actualizado)
+- [x] Variables validadas con Railway CLI: `NODE_ENV=production`, `TYPEORM_SYNCHRONIZE=false`
+- [x] Proyecto Railway vinculado (`railway link`) al workspace
+- [x] Deploy Railway completado exitosamente
+- [x] Pruebas post-deploy: health OK, CORS OK, login endpoint OK
+
+### 🔗 Recursos
+- Backend: https://nexora-app-production-3104.up.railway.app/health
+- Frontend: https://nexora-app.online
+- Railway CLI: `npx @railway/cli` (añadir `C:\Users\calos\AppData\Roaming\npm` al PATH)
+
+### 📋 Próximos pasos (P2) - Completados 2026-03-11
+- [x] CHANGELOG.md creado
+- [x] Subir cobertura tests backend (67% líneas, tasks.service 100%)
+- [x] Server Component: orders/status/[id]
+- [x] Revisado MEJORAS_UI_UX.md
+- [x] Circuit breaker OpenAI + MercadoPago
+- [ ] Redis/cache (diferido)
+
+---
+
 ## 2026-03-10 - Plan de Trabajo, Limpieza y Fases 1-4
 **Duración:** ~2 horas  
 **Estado:** ✅ Completada

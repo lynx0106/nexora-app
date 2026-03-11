@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import OpenAI from 'openai';
 import { TenantsService } from '../tenants/tenants.service';
 import { AiUsage } from './entities/ai-usage.entity';
+import { getCircuitBreaker } from '../common/circuit-breaker';
 
 @Injectable()
 export class AiService {
@@ -63,19 +64,25 @@ export class AiService {
 
     const client = await this.getOpenAIClient(tenantId);
 
-    // If API Key exists (Tenant or System), use OpenAI
+    // If API Key exists (Tenant or System), use OpenAI with circuit breaker
     if (client) {
+      const breaker = getCircuitBreaker('openai', {
+        failureThreshold: 5,
+        resetTimeout: 60000,
+      });
       try {
-        return await this.generateOpenAIReply(
-          client,
-          scope,
-          message,
-          tenantId,
-          context,
+        return await breaker.execute(() =>
+          this.generateOpenAIReply(
+            client,
+            scope,
+            message,
+            tenantId,
+            context,
+          ),
         );
       } catch (error) {
-        this.logger.error('OpenAI API Error:', error);
-        // Fallback to mock if API fails
+        this.logger.warn('OpenAI unavailable (circuit or API error):', error);
+        // Fallback to mock when circuit OPEN or API fails
         return this.generateMockReply(scope, message, tenantId);
       }
     }

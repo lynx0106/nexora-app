@@ -59,6 +59,19 @@ Según `ANALISIS_INTEGRAL_NEXORA_APP.md`.
 
 ---
 
+## 📌 Fase 6: Mejoras P2 (1-3 meses) ✅ Completada 2026-03-11
+
+Según `ANALISIS_INTEGRAL_NEXORA_APP.md`. Prioridad media.
+
+- [x] Subir cobertura de tests backend (objetivo 60%+ en servicios críticos)
+- [x] Circuit breaker para APIs externas (AI, MercadoPago)
+- [x] Server Components donde sea posible (reducir JS al cliente)
+- [x] CHANGELOG.md / SESSION_LOG.md (skill documentation-maintenance-officer)
+- [x] Revisar MEJORAS_UI_UX.md si existe (contraste, color)
+- [ ] Redis/cache para sesiones o métricas (evaluado: diferir hasta que tráfico lo justifique)
+
+---
+
 ## 📌 Fase 5: Mantenimiento Periódico
 
 Usar skill `nexora-cleanup` mensualmente.

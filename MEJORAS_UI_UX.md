@@ -244,18 +244,19 @@ letter-spacing: -0.02em → letter-spacing: -0.01em
 ## 9. PRIORIDADES DE IMPLEMENTACIÓN
 
 ### Fase 1 (Visual - rápido)
-- [ ] Mejorar colores y contraste
-- [ ] Agregar hover states
-- [ ] Mejorar tipografía
+- [x] Mejorar colores y contraste (globals.css actualizado)
+- [x] Agregar hover states (ds-card, ds-button)
+- [x] Mejorar tipografía (font-display, line-height)
 
 ### Fase 2 (UX - mediano)
-- [ ] Animaciones suaves
-- [ ] Mejores skeleton loaders
-- [ ] Feedback de acciones
+- [x] Animaciones suaves (ds-fade-up, transiciones)
+- [x] Mejores skeleton loaders (ds-skeleton con shimmer)
+- [ ] Feedback de acciones (toasts ya implementados)
 
 ### Fase 3 (Accesibilidad - importante)
-- [ ] Soporte keyboard
-- [ ] Focus states
+- [ ] Soporte keyboard (mejorar navegación por teclado)
+- [x] Focus states (*:focus-visible en globals.css)
+- [x] prefers-reduced-motion (globals.css)
 - [ ] Screen reader support
 
 ---
@@ -287,3 +288,4 @@ letter-spacing: -0.02em → letter-spacing: -0.01em
 ---
 
 *Propuesta generada el 16 de febrero de 2026*
+*Revisión 11 de marzo de 2026: Fases 1-3 parcialmente aplicadas en globals.css*

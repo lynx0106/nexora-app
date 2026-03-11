@@ -2,6 +2,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -9,6 +10,7 @@ import { MercadoPagoConfig, Preference, Payment } from 'mercadopago';
 import { Order } from '../orders/entities/order.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import { MailService } from '../mail/mail.service';
+import { getCircuitBreaker } from '../common/circuit-breaker';
 
 @Injectable()
 export class PaymentsService {
@@ -49,43 +51,55 @@ export class PaymentsService {
   }
 
   async createPreference(order: Order, tenant: Tenant) {
+    const breaker = getCircuitBreaker('mercadopago', {
+      failureThreshold: 5,
+      resetTimeout: 60000,
+    });
     try {
-      const client = this.getClient(tenant);
-      const preference = new Preference(client);
+      return await breaker.execute(async () => {
+        const client = this.getClient(tenant);
+        const preference = new Preference(client);
 
-      const items = order.items.map((item) => ({
-        id: item.productId,
-        title: 'Product ' + item.productId, // Ideally, fetch product name properly
-        quantity: item.quantity,
-        unit_price: Number(item.price),
-        currency_id: tenant.currency || 'COP',
-      }));
+        const items = order.items.map((item) => ({
+          id: item.productId,
+          title: 'Product ' + item.productId, // Ideally, fetch product name properly
+          quantity: item.quantity,
+          unit_price: Number(item.price),
+          currency_id: tenant.currency || 'COP',
+        }));
 
-      // Add "envío" or shipping logic if needed, but for now we trust items total matches logic
-
-      const result = await preference.create({
-        body: {
-          items,
-          payer: {
-            email: order.customerEmail || 'test_user_123456@testuser.com', // Use a valid email or placeholder
+        const result = await preference.create({
+          body: {
+            items,
+            payer: {
+              email: order.customerEmail || 'test_user_123456@testuser.com',
+            },
+            back_urls: {
+              success: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=success`,
+              failure: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=failure`,
+              pending: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=pending`,
+            },
+            auto_return: 'approved',
+            external_reference: order.id,
+            notification_url: `${this.getBackendUrl()}/payments/webhook?tenantId=${tenant.id}`,
           },
-          back_urls: {
-            success: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=success`,
-            failure: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=failure`,
-            pending: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=pending`,
-          },
-          auto_return: 'approved',
-          external_reference: order.id, // CRITICAL: This links the payment to our Order ID
-          notification_url: `${this.getBackendUrl()}/payments/webhook?tenantId=${tenant.id}`,
-        },
+        });
+
+        return {
+          preferenceId: result.id,
+          initPoint: result.init_point,
+          sandboxInitPoint: result.sandbox_init_point,
+        };
       });
-
-      return {
-        preferenceId: result.id,
-        initPoint: result.init_point, // URL to redirect user
-        sandboxInitPoint: result.sandbox_init_point,
-      };
-    } catch (error) {
+    } catch (error: any) {
+      if (
+        error?.message?.includes?.('Circuit breaker') ||
+        error instanceof ServiceUnavailableException
+      ) {
+        throw new ServiceUnavailableException(
+          'Payment service temporarily unavailable. Please try again later.',
+        );
+      }
       this.logger.error('Error creating MercadoPago preference:', error);
       throw new InternalServerErrorException(
         'Failed to create payment preference',
@@ -116,12 +130,9 @@ export class PaymentsService {
       let paymentData;
       if (paymentId.startsWith('sim_')) {
         this.logger.log(`[SIMULATION] Processing simulated payment ${paymentId}`);
-        // Extract orderId from the simulation ID if possible, or rely on a lookup
-        // Format: sim_ORDERID_STATUS
         const parts = paymentId.split('_');
-        const simulatedOrderId = parts[1]; // e.g. "sim_uuid-of-order_approved"
+        const simulatedOrderId = parts[1];
         const simulatedStatus = parts[2] || 'approved';
-        
         paymentData = {
           id: parseInt(parts[3] || '123456789'),
           status: simulatedStatus,
@@ -131,7 +142,13 @@ export class PaymentsService {
           transaction_amount: 100,
         };
       } else {
-        paymentData = await payment.get({ id: paymentId });
+        const breaker = getCircuitBreaker('mercadopago', {
+          failureThreshold: 5,
+          resetTimeout: 60000,
+        });
+        paymentData = await breaker.execute(() =>
+          payment.get({ id: paymentId }),
+        );
       }
 
       if (!paymentData) {
