@@ -11,11 +11,12 @@ import {
   Req,
   ForbiddenException,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 import { Role, hasRole } from '../common/constants/roles';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { OrdersService } from './orders.service';
 
 @Controller('orders')
 @UseGuards(AuthGuard('jwt'))
@@ -23,19 +24,24 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() body: CreateOrderDto, @Req() req: any) {
-    const user = req.user;
-    if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== body.tenantId) {
+  create(@Body() body: CreateOrderDto, @Req() req: Request) {
+    const user = req.user!;
+    if (
+      !hasRole(user.role, [Role.Superadmin]) &&
+      user.tenantId !== body.tenantId
+    ) {
       throw new ForbiddenException('No puedes crear pedidos para otro tenant');
     }
     return this.ordersService.create(body);
   }
 
   @Get('all')
-  findAllGlobal(@Req() req: any) {
-    const user = req.user;
+  findAllGlobal(@Req() req: Request) {
+    const user = req.user!;
     if (!hasRole(user.role, [Role.Superadmin])) {
-      throw new ForbiddenException('Solo el superadmin puede ver todos los pedidos');
+      throw new ForbiddenException(
+        'Solo el superadmin puede ver todos los pedidos',
+      );
     }
     return this.ordersService.findAllGlobal();
   }
@@ -43,10 +49,10 @@ export class OrdersController {
   @Get('tenant/:tenantId')
   findAll(
     @Param('tenantId') tenantId: string,
-    @Req() req: any,
+    @Req() req: Request,
     @Query('userId') userId?: string,
   ) {
-    const user = req.user;
+    const user = req.user!;
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
       throw new ForbiddenException(
         'No tienes permiso para ver pedidos de otro tenant',
@@ -54,7 +60,7 @@ export class OrdersController {
     }
 
     if (hasRole(user.role, [Role.User])) {
-      return this.ordersService.findAllByTenantAndUser(tenantId, user.id);
+      return this.ordersService.findAllByTenantAndUser(tenantId, user.userId);
     }
 
     if (userId) {
@@ -102,14 +108,18 @@ export class OrdersController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() body: UpdateOrderDto, @Req() req: any) {
-    const user = req.user;
+  async update(
+    @Param('id') id: string,
+    @Body() body: UpdateOrderDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user!;
 
     if (hasRole(user.role, [Role.User])) {
       const order = await this.ordersService.findOne(id);
       if (!order) return null;
 
-      if (order.userId !== user.id) {
+      if (order.userId !== user.userId) {
         throw new ForbiddenException(
           'No puedes modificar un pedido que no es tuyo',
         );
@@ -137,14 +147,14 @@ export class OrdersController {
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: any) {
-    const user = req.user;
+  async remove(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user!;
 
     if (hasRole(user.role, [Role.User])) {
       const order = await this.ordersService.findOne(id);
       if (!order) return { deleted: false };
 
-      if (order.userId !== user.id) {
+      if (order.userId !== user.userId) {
         throw new ForbiddenException(
           'No puedes eliminar un pedido que no es tuyo',
         );

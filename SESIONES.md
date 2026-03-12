@@ -5,10 +5,69 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-12 - Unificación Dark Mode y Recomendaciones UI/UX
+
+**Duración:** ~1.5 horas  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **Fase 2 — Unificación paleta dark mode** en todos los componentes del dashboard
+- [x] **TeamSection:** bg-slate-900/70, inputs slate-800, tabla con hover, badges emerald/slate
+- [x] **ProductsSection:** contenedor, formulario, tabla e imagen placeholder en dark mode
+- [x] **OrdersSection:** sección principal, lista, modal detalle, badges de estado (emerald/amber/red)
+- [x] **AgendaSection:** formulario, tabla, modal nuevo cliente, badges de estado
+- [x] **SettingsSection:** perfiles, tenant, config AI/MP en dark mode
+- [x] **StatsSection:** cards, gráfico, actividad reciente, top products
+- [x] **CreateOrderModal:** fondo, formularios y modal nuevo cliente
+- [x] **ChatSection:** contenedor, sidebar, tabs, lista usuarios, burbujas de mensaje
+- [x] **ChatWidget:** tabs interno
+- [x] **AuditSection:** tabla y badges de acción
+- [x] **NotificationsDropdown:** dropdown en dark mode
+- [x] **Dashboard página usuarios:** sección usuarios globales con tabla dark
+- [x] Patrón aplicado: `bg-white`→`bg-slate-900/70`, `text-zinc-900`→`text-slate-100`, badges `bg-*-900/40 text-*-300`
+- [x] Build frontend OK
+
+### 📋 Para próxima sesión
+- [ ] Fase 3 refinamiento: transiciones suaves entre secciones (opcional)
+- [ ] Revisar estado activo sidebar con borde izquierdo más visible (opcional)
+
+### 🔗 Referencias
+- docs/RECOMENDACIONES_UI_UX_INTERFAZ.md
+- INFORME_SEGURIDAD_CALIDAD_UX.md
+
+---
+
+## 2026-03-10 - ESLint Backend/Frontend y tipado
+
+**Duración:** ~1 hora  
+**Estado:** ✅ Completada — Sesión cerrada
+
+### ✅ Avances
+- [x] **Backend:** Tipado de controllers (reports, inventory, public, auth-throttle, ai, audit, appointments, automations)
+- [x] **Backend:** `req: any` → `Request` en public.controller, auth-throttle.guard
+- [x] **Backend:** ai.controller `getRawMany<T>()`, ai.service (parámetros no usados), tasks.service `Record<string, string>`
+- [x] **Backend:** reports: `user.userId` (sin sub/id), auth-throttle: headers `string | string[]`
+- [x] **Backend:** automations: chequear tenantId/userId antes de llamar al servicio
+- [x] **Frontend:** book/[tenantId] `useCallback` + tipado completedOrder; automatizaciones `Record<string, unknown>`
+- [x] **Frontend:** AgendaSection hook condicional corregido (useEffect antes del early return)
+- [x] **Frontend:** ChatSection, ChatWidget, ClientsSection, CreateOrderModal, page.test — any, imports, exhaustive-deps
+- [x] Build backend y frontend OK
+
+### 📋 Para próxima sesión
+- [ ] Continuar correcciones ESLint en AgendaSection (muchos `any` restantes)
+- [ ] Tests spec backend (ai.service.spec, appointments.service.spec) — unbound-method, unsafe-argument
+- [ ] Revisar CI workflow en GitHub Actions
+
+### 🔗 Recursos
+- Backend: https://nexora-app-production-3104.up.railway.app
+- Frontend: https://nexora-app.online
+
+---
+
 ## 2026-03-11 - Validación Railway, Deploy y Fase 6 (P2)
 
-**Duración:** ~2 horas  
-**Estado:** ✅ Completada
+**Duración:** ~3 horas  
+**Estado:** ✅ Completada — Sesión cerrada
 
 ### ✅ Avances
 - [x] Variable `CORS_ORIGINS` añadida y validada en Railway (origen específico `https://nexora-app.online`)
@@ -20,6 +79,13 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - [x] Proyecto Railway vinculado (`railway link`) al workspace
 - [x] Deploy Railway completado exitosamente
 - [x] Pruebas post-deploy: health OK, CORS OK, login endpoint OK
+- [x] Workflow CI (`.github/workflows/ci.yml`), SESSION_LOG.md, CHANGELOG.md
+- [x] Commit 1259d73 y push a `main`
+
+### 📋 Para próxima sesión
+- [ ] Revisar resultado del workflow CI en GitHub Actions
+- [ ] Redis/cache cuando el tráfico lo justifique
+- [ ] E2E tests (P3 opcional)
 
 ### 🔗 Recursos
 - Backend: https://nexora-app-production-3104.up.railway.app/health

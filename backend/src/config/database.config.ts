@@ -29,8 +29,9 @@ export interface DatabaseConfig {
  */
 export function getDatabaseConfig(): DatabaseConfig {
   // Check if using Supabase (explicit URL or Railway integration)
-  const supabaseUrl = process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
-  
+  const supabaseUrl =
+    process.env.SUPABASE_DATABASE_URL || process.env.DATABASE_URL;
+
   if (supabaseUrl?.includes('supabase')) {
     logger.log('Using Supabase database');
     const isPooler = supabaseUrl?.includes('pooler');
@@ -50,14 +51,14 @@ export function getDatabaseConfig(): DatabaseConfig {
         },
       } as any;
     }
-    
+
     return {
       type: 'postgres',
       url: supabaseUrl,
       ssl: { rejectUnauthorized: false },
     };
   }
-  
+
   if (process.env.DATABASE_URL) {
     logger.log('Using DATABASE_URL (Railway/Cloud)');
     return {
@@ -66,7 +67,7 @@ export function getDatabaseConfig(): DatabaseConfig {
       ssl: { rejectUnauthorized: false },
     };
   }
-  
+
   logger.log('Using local PostgreSQL configuration');
   return {
     type: 'postgres',

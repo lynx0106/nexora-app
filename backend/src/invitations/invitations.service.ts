@@ -7,7 +7,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
-import { InvitationCode, InvitationStatus } from './entities/invitation-code.entity';
+import {
+  InvitationCode,
+  InvitationStatus,
+} from './entities/invitation-code.entity';
 import { GenerateInvitationDto } from './dto/generate-invitation.dto';
 import { TenantsService } from '../tenants/tenants.service';
 import { ConfigService } from '@nestjs/config';
@@ -40,7 +43,8 @@ export class InvitationsService {
     private tenantsService: TenantsService,
     private configService: ConfigService,
   ) {
-    this.baseUrl = this.configService.get<string>('BASE_URL') || 'https://nexora-app.online';
+    this.baseUrl =
+      this.configService.get<string>('BASE_URL') || 'https://nexora-app.online';
   }
 
   /**
@@ -54,14 +58,16 @@ export class InvitationsService {
   ): Promise<InvitationResponse> {
     // Determinar el tenant objetivo
     let targetTenantId = userTenantId;
-    
+
     // Superadmin puede especificar tenant
     if (userRole === 'superadmin' && dto.tenantId) {
       targetTenantId = dto.tenantId;
     }
 
     if (!targetTenantId) {
-      throw new ForbiddenException('No tienes permiso para generar invitaciones');
+      throw new ForbiddenException(
+        'No tienes permiso para generar invitaciones',
+      );
     }
 
     // Verificar que el tenant existe

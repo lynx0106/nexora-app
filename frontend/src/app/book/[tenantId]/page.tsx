@@ -2,9 +2,12 @@
 
 import { useTranslation } from 'react-i18next';
 import '@/i18n/config';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 import { fetchAPI, API_URL } from '@/lib/api';
+import { showToast } from '@/lib/toast';
+import { isValidEmail } from '@/lib/validation';
 
 interface Tenant {
   id: string;
@@ -67,14 +70,9 @@ export default function BookingPage() {
   // Store State
   const [cart, setCart] = useState<CartItem[]>([]);
   const [storeStep, setStoreStep] = useState(1); // 1: List, 2: Checkout, 3: Success
-  const [completedOrder, setCompletedOrder] = useState<any>(null);
+  const [completedOrder, setCompletedOrder] = useState<{ id?: string; paymentLink?: string } | null>(null);
 
-  useEffect(() => {
-    if (!tenantId) return;
-    loadData();
-  }, [tenantId]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [tenantData, servicesData, productsData] = await Promise.all([
@@ -83,14 +81,19 @@ export default function BookingPage() {
         fetchAPI(`/public/products/${tenantId}`).catch(() => [])
       ]);
       setTenant(tenantData);
-      setServices(servicesData.filter((s: any) => s.isActive !== false));
-      setProducts(productsData.filter((p: any) => p.stock > 0));
-    } catch (err: any) {
-      setError(err.message || 'Error al cargar datos del negocio');
+      setServices(servicesData.filter((s: Service & { isActive?: boolean }) => s.isActive !== false));
+      setProducts(productsData.filter((p: Product & { stock?: number }) => (p.stock ?? 0) > 0));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al cargar datos del negocio');
     } finally {
       setLoading(false);
     }
-  }
+  }, [tenantId]);
+
+  useEffect(() => {
+    if (!tenantId) return;
+    loadData();
+  }, [tenantId, loadData]);
 
   async function loadAvailability(date: string) {
     if (!tenantId) return;
@@ -112,6 +115,19 @@ export default function BookingPage() {
   const handleBookingSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedService || !selectedDate || !selectedTime) return;
+
+    if (!clientInfo.firstName?.trim() || !clientInfo.lastName?.trim()) {
+      showToast(t('public.validation_name_required'), 'error');
+      return;
+    }
+    if (!clientInfo.email?.trim()) {
+      showToast(t('public.validation_email_required'), 'error');
+      return;
+    }
+    if (!isValidEmail(clientInfo.email.trim())) {
+      showToast(t('public.validation_email_invalid'), 'error');
+      return;
+    }
     
     try {
         setLoading(true);
@@ -125,8 +141,8 @@ export default function BookingPage() {
         });
         
         setStep(5);
-    } catch (err: any) {
-        alert('Error al reservar: ' + err.message);
+    } catch (err: unknown) {
+        showToast('Error al reservar: ' + (err instanceof Error ? err.message : 'Error desconocido'), 'error');
     } finally {
         setLoading(false);
     }
@@ -181,6 +197,19 @@ export default function BookingPage() {
     e.preventDefault();
     if (cart.length === 0) return;
 
+    if (!clientInfo.firstName?.trim() || !clientInfo.lastName?.trim()) {
+      showToast(t('public.validation_name_required'), 'error');
+      return;
+    }
+    if (!clientInfo.email?.trim()) {
+      showToast(t('public.validation_email_required'), 'error');
+      return;
+    }
+    if (!isValidEmail(clientInfo.email.trim())) {
+      showToast(t('public.validation_email_invalid'), 'error');
+      return;
+    }
+
     try {
       setLoading(true);
       const order = await fetchAPI(`/public/order/${tenantId}`, {
@@ -197,8 +226,8 @@ export default function BookingPage() {
       setCompletedOrder(order);
       setStoreStep(3);
       setCart([]);
-    } catch (err: any) {
-      alert('Error al crear pedido: ' + err.message);
+    } catch (err: unknown) {
+      showToast('Error al crear pedido: ' + (err instanceof Error ? err.message : 'Error desconocido'), 'error');
     } finally {
       setLoading(false);
     }
@@ -215,9 +244,11 @@ export default function BookingPage() {
         <div className="max-w-3xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
             {tenant.logoUrl ? (
-               <img 
+               <Image 
                  src={tenant.logoUrl.startsWith('http') ? tenant.logoUrl : `${API_URL}${tenant.logoUrl}`} 
                  alt={tenant.name} 
+                 width={48}
+                 height={48}
                  className="h-12 w-12 rounded-full object-cover border border-slate-700" 
                />
             ) : (
@@ -450,11 +481,15 @@ export default function BookingPage() {
                    {products.map(product => (
                      <div key={product.id} className="rounded-lg border border-slate-800 bg-slate-900/70 overflow-hidden flex flex-col">
                        {product.imageUrl && (
-                         <img 
-                           src={product.imageUrl.startsWith('http') ? product.imageUrl : `${API_URL}${product.imageUrl}`} 
-                           alt={product.name} 
-                           className="h-48 w-full object-cover" 
-                         />
+                         <div className="relative h-48 w-full">
+                           <Image 
+                             src={product.imageUrl.startsWith('http') ? product.imageUrl : `${API_URL}${product.imageUrl}`} 
+                             alt={product.name} 
+                             fill
+                             className="object-cover" 
+                             sizes="(max-width: 640px) 100vw, 50vw"
+                           />
+                         </div>
                        )}
                        <div className="p-4 flex-1 flex flex-col">
                          <h3 className="font-medium text-slate-100">{product.name}</h3>
@@ -506,7 +541,15 @@ export default function BookingPage() {
                  <div className="rounded-lg border border-slate-800 bg-slate-900/70 divide-y divide-slate-800">
                     {cart.map(item => (
                       <div key={item.id} className="p-4 flex items-center gap-4">
-                        {item.imageUrl && <img src={item.imageUrl} className="h-12 w-12 rounded object-cover" />}
+                        {item.imageUrl && (
+                          <Image
+                            src={item.imageUrl.startsWith('http') ? item.imageUrl : `${API_URL}${item.imageUrl}`}
+                            alt={item.name}
+                            width={48}
+                            height={48}
+                            className="h-12 w-12 rounded object-cover"
+                          />
+                        )}
                         <div className="flex-1">
                           <h4 className="font-medium text-slate-100">{item.name}</h4>
                           <p className="text-sm text-slate-400">{formatPrice(item.price)} x {item.quantity}</p>

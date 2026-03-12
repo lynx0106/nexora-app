@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { io, Socket } from 'socket.io-client';
 import { fetchAPIWithAuth, API_URL } from '../lib/api';
@@ -210,7 +211,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
 
   // Load History
   useEffect(() => {
-    let scope = activeTab;
+    const scope = activeTab;
     let targetId = undefined;
 
     if (activeTab === 'CUSTOMER') {
@@ -224,7 +225,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
     const tenantQuery = role === 'superadmin' ? `&tenantId=${selectedTenantId}` : '';
     fetchAPIWithAuth(`/chat/history?limit=50&scope=${scope}${targetId ? `&targetUserId=${targetId}` : ''}${tenantQuery}`)
       .then((data) => {
-          const sorted = Array.isArray(data) ? data.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
+          const sorted = Array.isArray(data) ? data.sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
           setMessages(sorted);
       })
       .catch(console.error);
@@ -247,7 +248,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
     const socket = socketRef.current;
     if (!newMessage.trim() || !socket) return;
 
-    const payload: any = { 
+    const payload: Record<string, string | undefined> = {
         content: newMessage,
         scope: activeTab,
     };
@@ -307,7 +308,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
           const type = file.type.startsWith('image/') ? 'image' : 'file';
           
           // Send message with media
-          const payload: any = {
+          const payload: Record<string, string | undefined> = {
               content: type === 'image' ? '📷 Imagen' : '📎 Archivo',
               scope: activeTab,
               mediaUrl,
@@ -334,7 +335,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
   };
 
   return (
-    <div className="flex h-[calc(100vh-140px)] bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden">
+    <div className="flex h-[calc(100vh-140px)] bg-slate-900/90 border border-slate-800 rounded-lg shadow-sm overflow-hidden">
       {/* Error Banner */}
       {error && (
         <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-sm text-red-700">
@@ -342,16 +343,16 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         </div>
       )}
       {/* Sidebar */}
-      <div className="w-1/4 bg-gray-100 border-r border-gray-200 flex flex-col">
+      <div className="w-1/4 bg-slate-800/80 border-r border-slate-700 flex flex-col">
         
         {/* Tenant Selector for Superadmin */}
             {role === 'superadmin' && (
-            <div className="p-4 border-b border-gray-200 bg-zinc-200">
-                <label className="block text-xs font-medium text-gray-700 mb-1">{t('chat.tenant_label')}</label>
+            <div className="p-4 border-b border-slate-700 bg-slate-800">
+                <label className="block text-xs font-medium text-slate-300 mb-1">{t('chat.tenant_label')}</label>
                 <select 
                     value={selectedTenantId || ''}
                     onChange={(e) => setSelectedTenantId(e.target.value)}
-                    className="w-full text-sm border-gray-400 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white text-gray-900"
+                    className="w-full text-sm border-slate-600 rounded-md shadow-sm focus:border-teal-500 focus:ring-teal-500 bg-slate-800 text-slate-100"
                     title="Seleccionar empresa"
                 >
                     {(!tenants || tenants.length === 0) ? (
@@ -366,29 +367,29 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         )}
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 bg-gray-200">
+        <div className="flex border-b border-slate-700 bg-slate-800">
             <button 
                 onClick={() => setActiveTab('INTERNAL')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'INTERNAL' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'INTERNAL' ? 'bg-slate-700 text-teal-300 border-b-2 border-teal-500' : 'text-slate-300 hover:text-slate-100 hover:bg-slate-800/50'}`}
             >
                 {t('chat.tab_team')}
             </button>
             <button 
                 onClick={() => setActiveTab('CUSTOMER')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'CUSTOMER' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'CUSTOMER' ? 'bg-slate-700 text-teal-300 border-b-2 border-teal-500' : 'text-slate-300 hover:text-slate-100 hover:bg-slate-800/50'}`}
             >
                 {t('chat.tab_clients')}
             </button>
             <button 
                 onClick={() => setActiveTab('SUPPORT')}
-                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'SUPPORT' ? 'bg-white text-indigo-600 border-b-2 border-indigo-600' : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'}`}
+                className={`flex-1 py-3 text-sm font-medium ${activeTab === 'SUPPORT' ? 'bg-slate-700 text-teal-300 border-b-2 border-teal-500' : 'text-slate-300 hover:text-slate-100 hover:bg-slate-800/50'}`}
             >
                 {t('chat.tab_support')}
             </button>
         </div>
         
         {/* List */}
-        <div className="flex-1 overflow-y-auto bg-gray-100">
+        <div className="flex-1 overflow-y-auto bg-slate-800/50">
             {activeTab === 'INTERNAL' && (
                 <div className="divide-y divide-gray-200">
                     {loadingConversations && (
@@ -409,11 +410,11 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                         <div 
                             key={user.id}
                             onClick={() => setSelectedCustomerId(user.id)}
-                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-100 border-l-4 border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-teal-900/40 border-l-4 border-teal-500' : 'bg-slate-800 hover:bg-slate-700'}`}
                         >
-                            <h4 className="font-medium text-sm text-gray-900">{user.firstName} {user.lastName}</h4>
-                            <p className="text-xs text-gray-500">{user.email}</p>
-                            <span className="inline-block mt-1 text-[10px] bg-gray-200 text-gray-700 px-1.5 py-0.5 rounded">
+                            <h4 className="font-medium text-sm text-slate-100">{user.firstName} {user.lastName}</h4>
+                            <p className="text-xs text-slate-400">{user.email}</p>
+                            <span className="inline-block mt-1 text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">
                                 {(user.role || 'user').toUpperCase()}
                             </span>
                         </div>
@@ -422,7 +423,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
             )}
             
             {activeTab === 'SUPPORT' && (
-                <div className="p-4 bg-gray-100">
+                <div className="p-4 bg-slate-800/50">
                     <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg cursor-pointer hover:bg-amber-100">
                         <h4 className="font-semibold text-amber-900">{t('chat.support_chat_title')}</h4>
                         <p className="text-xs text-amber-700">{t('chat.support_chat_desc')}</p>
@@ -431,7 +432,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
             )}
 
             {activeTab === 'CUSTOMER' && (
-                <div className="divide-y divide-gray-200 bg-gray-100">
+                <div className="divide-y divide-gray-200 bg-slate-800/50">
                                         {loadingConversations && (
                                             <div className="p-4 space-y-3">
                                                 <Skeleton className="h-4 w-3/4" />
@@ -451,13 +452,13 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                         <div 
                             key={user.id}
                             onClick={() => setSelectedCustomerId(user.id)}
-                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-indigo-100 border-l-4 border-indigo-600' : 'bg-white hover:bg-gray-50'}`}
+                            className={`p-4 cursor-pointer transition-colors ${selectedCustomerId === user.id ? 'bg-teal-900/40 border-l-4 border-teal-500' : 'bg-slate-800 hover:bg-slate-700'}`}
                         >
                             <div className="flex justify-between items-start">
-                                <h4 className="font-medium text-sm text-gray-900">{user.firstName} {user.lastName}</h4>
+                                <h4 className="font-medium text-sm text-slate-100">{user.firstName} {user.lastName}</h4>
                                 {user.isAiChatActive && <span className="text-[10px] bg-purple-200 text-purple-800 px-1.5 py-0.5 rounded">IA</span>}
                             </div>
-                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                            <p className="text-xs text-slate-400 truncate">{user.email}</p>
                         </div>
                     ))}
                 </div>
@@ -466,17 +467,17 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       </div>
 
       {/* Main Chat Area */}
-    <div className="w-3/4 flex flex-col bg-white">
+    <div className="w-3/4 flex flex-col bg-slate-900">
         {/* Header */}
         <div className="h-14 border-b border-gray-200 flex items-center justify-between px-6">
             <div>
-                <h3 className="font-semibold text-gray-800">
+                <h3 className="font-semibold text-slate-200">
                     {activeTab === 'INTERNAL' ? t('chat.internal_team') : 
                      activeTab === 'SUPPORT' ? t('chat.technical_support') : 
                      conversations.find(c => c.id === selectedCustomerId)?.firstName || t('chat.select_chat')}
                 </h3>
                 {activeTab === 'CUSTOMER' && selectedCustomerId && (
-                     <span className={`text-xs flex items-center gap-1 ${isAiActive ? 'text-purple-600' : 'text-gray-500'}`}>
+                     <span className={`text-xs flex items-center gap-1 ${isAiActive ? 'text-teal-400' : 'text-slate-400'}`}>
                         {isAiActive ? t('chat.ai_responding') : t('chat.manual_mode')}
                      </span>
                 )}
@@ -488,7 +489,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                     onClick={toggleAi}
                     className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
                         isAiActive 
-                        ? 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50' 
+                        ? 'bg-slate-800 border-slate-600 text-slate-200 hover:bg-slate-700' 
                         : 'bg-indigo-600 border-transparent text-white hover:bg-indigo-700'
                     }`}
                 >
@@ -498,7 +499,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         </div>
 
         {/* Messages */}
-                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100 min-h-[200px]">
+                <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-800/50 min-h-[200px]">
                          {(!messages || messages.length === 0) && (
                                 <div className="flex h-full items-center justify-center">
                                     <EmptyState
@@ -522,21 +523,26 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                       ? 'bg-indigo-600 text-white rounded-br-none' 
                       : isAi
                         ? 'bg-purple-100 border border-purple-200 text-purple-900 rounded-bl-none'
-                        : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
+                        : 'bg-slate-800 border border-slate-700 text-slate-100 rounded-bl-none'
                   }`}>
                     {!isMe && (
-                      <div className={`text-xs mb-1 font-bold ${isAi ? 'text-purple-700' : 'text-gray-500'}`}>
+                      <div className={`text-xs mb-1 font-bold ${isAi ? 'text-teal-400' : 'text-slate-400'}`}>
                         {isAi ? t('chat.virtual_assistant') : (msg.sender?.firstName || t('chat.user_label'))}
                       </div>
                     )}
                     <p>{msg.content}</p>
                     {/* Display attached image */}
                     {msg.type === 'image' && msg.mediaUrl && (
-                        <img 
+                        <div className="relative mt-2 w-full max-w-sm aspect-video">
+                          <Image 
                             src={msg.mediaUrl} 
-                            alt="attachment" 
-                            className="mt-2 rounded-md max-w-full h-auto max-h-48 object-cover" 
-                        />
+                            alt={t('chat.image_attachment') || 'Imagen adjunta'} 
+                            fill
+                            className="object-cover rounded-md"
+                            sizes="(max-width: 384px) 100vw, 384px"
+                            unoptimized={msg.mediaUrl.startsWith('blob:')}
+                          />
+                        </div>
                     )}
                     {/* Display file attachment */}
                     {msg.type === 'file' && msg.mediaUrl && (
@@ -544,7 +550,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                             href={msg.mediaUrl} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="flex items-center gap-2 mt-2 text-indigo-300 hover:text-indigo-200 underline text-xs"
+                            className="flex items-center gap-2 mt-2 text-teal-400 hover:text-teal-300 underline text-xs"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -552,7 +558,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                             {t('chat.download_file') || 'Descargar archivo'}
                         </a>
                     )}
-                    <div className={`text-[10px] mt-1 ${isMe ? 'text-indigo-200' : 'text-gray-400'} text-right`}>
+                    <div className={`text-[10px] mt-1 ${isMe ? 'text-teal-300' : 'text-slate-400'} text-right`}>
                       {new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </div>
                   </div>
@@ -562,7 +568,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="p-4 border-t border-slate-700 bg-slate-900">
             <form onSubmit={handleSendMessage} className="flex gap-2">
                 {/* File Upload Button */}
                 <input
@@ -576,7 +582,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="p-2 text-gray-500 hover:text-indigo-600 disabled:opacity-50 transition-colors"
+                    className="p-2 text-slate-400 hover:text-teal-400 disabled:opacity-50 transition-colors"
                     title="Subir archivo"
                 >
                     {isUploading ? (
@@ -595,7 +601,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                     value={newMessage}
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder={t('chat.input_placeholder')}
-                    className="flex-1 border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                    className="flex-1 border-slate-600 rounded-md focus:ring-teal-500 focus:border-teal-500"
                 />
                 <button 
                     type="submit"

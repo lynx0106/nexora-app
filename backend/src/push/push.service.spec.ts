@@ -45,7 +45,11 @@ describe('PushService', () => {
 
     it('should support multiple tokens per user', async () => {
       await service.registerToken('user-1', 'ExponentPushToken[xxx]', 'ios');
-      await service.registerToken('user-1', 'ExponentPushToken[yyy]', 'android');
+      await service.registerToken(
+        'user-1',
+        'ExponentPushToken[yyy]',
+        'android',
+      );
       const tokens = service.getTokensForUser('user-1');
       expect(tokens.length).toBe(2);
     });
@@ -75,7 +79,7 @@ describe('PushService', () => {
 
     it('should attempt to send notification if user has tokens', async () => {
       await service.registerToken('user-1', 'ExponentPushToken[test]', 'ios');
-      
+
       // Mock fetch for testing
       global.fetch = jest.fn().mockResolvedValue({
         json: () => Promise.resolve({ data: [{ status: 'ok', id: 'xxx' }] }),
@@ -89,7 +93,7 @@ describe('PushService', () => {
   describe('sendToTenantAdmins', () => {
     it('should send notifications to tenant admins', async () => {
       await service.registerToken('admin-1', 'ExponentPushToken[admin]', 'ios');
-      
+
       global.fetch = jest.fn().mockResolvedValue({
         json: () => Promise.resolve({ data: [{ status: 'ok' }] }),
       });
@@ -114,7 +118,12 @@ describe('PushService', () => {
 
     it('should send new appointment notification', async () => {
       await service.registerToken('admin-1', 'ExponentPushToken[admin]', 'ios');
-      await service.notifyNewAppointment('tenant-1', 'apt-1', 'Jane Doe', 'Haircut');
+      await service.notifyNewAppointment(
+        'tenant-1',
+        'apt-1',
+        'Jane Doe',
+        'Haircut',
+      );
       expect(mockUserRepository.find).toHaveBeenCalled();
     });
 

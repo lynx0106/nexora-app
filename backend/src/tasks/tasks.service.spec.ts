@@ -58,7 +58,9 @@ describe('TasksService', () => {
     });
 
     it('should report failed when appointments sendReminders fails', async () => {
-      appointmentsService.sendReminders.mockRejectedValue(new Error('SMTP Error'));
+      appointmentsService.sendReminders.mockRejectedValue(
+        new Error('SMTP Error'),
+      );
 
       const result = await service.runAllTasks();
 
@@ -80,7 +82,9 @@ describe('TasksService', () => {
     });
 
     it('should report failed when auth cleanupExpiredTokens fails', async () => {
-      authService.cleanupExpiredTokens.mockRejectedValue(new Error('Token Error'));
+      authService.cleanupExpiredTokens.mockRejectedValue(
+        new Error('Token Error'),
+      );
 
       const result = await service.runAllTasks();
 

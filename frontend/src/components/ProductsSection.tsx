@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchAPIWithAuth, API_URL, uploadFile } from "../lib/api";
+import { showToast } from "../lib/toast";
 
 interface Tenant {
   id: string;
@@ -104,13 +105,13 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         body: formData
       });
 
-      alert(res.message || t('products.import_success'));
+      showToast(res.message || t('products.import_success'), 'success');
       
       // Reload products
       queryClient.invalidateQueries({ queryKey: ['products', effectiveTenantId] });
 
-    } catch (err: any) {
-      alert(t('products.import_error') + err.message);
+    } catch (err: unknown) {
+      showToast(t('products.import_error') + (err instanceof Error ? err.message : ''), 'error');
     } finally {
       setImportingProducts(false);
       e.target.value = ''; // Reset input
@@ -193,7 +194,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
       );
       queryClient.invalidateQueries({ queryKey: ['products', effectiveTenantId] });
     } catch (err) {
-      alert('Error al eliminar producto');
+      showToast(t('products.delete_error'), 'error');
     }
   }
 
@@ -263,7 +264,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                old ? old.map(p => p.id === idToUpdate ? { ...p, stock: previousStock } : p) : []
              );
         }
-        alert(t('products.stock_update_error'));
+        showToast(t('products.stock_update_error'), 'error');
     }
   };
 
@@ -277,11 +278,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
 
   return (
     <div className="max-w-6xl">
-      <div className="mb-8 rounded-lg bg-white p-6 shadow">
+      <div className="mb-8 rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h2 className="text-xl font-semibold text-zinc-900">{sectionTitle}</h2>
-            <p className="mt-1 text-sm text-zinc-500">
+            <h2 className="text-xl font-semibold text-slate-100">{sectionTitle}</h2>
+            <p className="mt-1 text-sm text-slate-400">
               {isRestaurant ? t('products.subtitle_restaurant') : t('products.subtitle')}
             </p>
           </div>
@@ -303,11 +304,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   document.body.removeChild(link);
                 }
               }}
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+              className="rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/50"
             >
               {t('products.download_template')}
             </button>
-            <label className={`cursor-pointer rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50 ${importingProducts ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            <label className={`cursor-pointer rounded-md border border-slate-600 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-800/50 ${importingProducts ? 'opacity-50 cursor-not-allowed' : ''}`}>
                 {importingProducts ? t('products.importing') : t('products.import_csv')}
                 <input 
                   type="file" 
@@ -333,7 +334,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   setCreateProductSuccess(null);
                 }
               }}
-              className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+              className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
             >
               {showCreateProductForm ? t('common.cancel') : t('products.new_product')}
             </button>
@@ -343,14 +344,14 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         </div>
 
         {role === "superadmin" && (
-          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-zinc-50 p-3">
-            <span className="text-xs font-medium text-zinc-700">
+          <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-slate-800/50 p-3">
+            <span className="text-xs font-medium text-slate-300">
               {t('common.filter_by_tenant')}
             </span>
             <select
               value={selectedTenantId ?? ""}
               onChange={(e) => onTenantChange(e.target.value === "" ? "" : e.target.value)}
-              className="h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+              className="h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
             >
               <option value="">{t('common.all_tenants')}</option>
               {tenants.map((tenant) => (
@@ -365,32 +366,32 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         {showCreateProductForm && (
           <form
             onSubmit={handleCreateProduct}
-            className="mt-6 border-t border-zinc-100 pt-6"
+            className="mt-6 border-t border-slate-700 pt-6"
           >
             <div className="grid gap-6 md:grid-cols-2">
               <div className="flex flex-col gap-1 md:col-span-2">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {t('products.product_image')}
                 </label>
                 
                 <div className="mb-2 flex gap-4">
-                  <label className="flex items-center gap-2 text-sm text-zinc-700">
+                  <label className="flex items-center gap-2 text-sm text-slate-300">
                     <input 
                       type="radio" 
                       name="imageType" 
                       checked={productImageInputType === 'file'}
                       onChange={() => setProductImageInputType('file')}
-                      className="text-zinc-900 focus:ring-zinc-900"
+                      className="text-slate-100 focus:ring-teal-500"
                     />
                     {t('products.upload_file')}
                   </label>
-                  <label className="flex items-center gap-2 text-sm text-zinc-700">
+                  <label className="flex items-center gap-2 text-sm text-slate-300">
                     <input 
                       type="radio" 
                       name="imageType" 
                       checked={productImageInputType === 'url'}
                       onChange={() => setProductImageInputType('url')}
-                      className="text-zinc-900 focus:ring-zinc-900"
+                      className="text-slate-100 focus:ring-teal-500"
                     />
                     {t('products.image_link')}
                   </label>
@@ -406,7 +407,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                           setNewProductImageFile(e.target.files[0]);
                         }
                       }}
-                      className="text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-zinc-50 file:text-zinc-700 hover:file:bg-zinc-100"
+                      className="text-sm text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-800/50 file:text-slate-300 hover:file:bg-slate-700"
                     />
                     {newProductImageFile && (
                        <p className="text-xs text-green-600">{t('products.image_selected')}{newProductImageFile.name}</p>
@@ -418,13 +419,13 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                     value={newProductImageUrlInput}
                     onChange={(e) => setNewProductImageUrlInput(e.target.value)}
                     placeholder="https://ejemplo.com/imagen.jpg"
-                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                   />
                 )}
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {t('products.name')}
                 </label>
                 <input
@@ -433,11 +434,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   onChange={(e) => setNewProductName(e.target.value)}
                   required
                   placeholder={t('products.name_placeholder')}
-                  className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                  className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {t('products.price')}
                 </label>
                 <input
@@ -447,11 +448,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   onChange={(e) => setNewProductPrice(e.target.value)}
                   required
                   placeholder="0.00"
-                  className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                  className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {t('products.stock')}
                 </label>
                 <input
@@ -460,11 +461,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   onChange={(e) => setNewProductStock(e.target.value)}
                   required
                   placeholder="0"
-                  className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                  className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
               <div className="flex flex-col gap-1 md:col-span-2">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {descriptionLabel}
                 </label>
                 <textarea
@@ -472,11 +473,11 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   onChange={(e) => setNewProductDescription(e.target.value)}
                   rows={3}
                   placeholder={t('products.description_placeholder')}
-                  className="rounded-md border border-zinc-400 px-2 py-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                  className="rounded-md border border-slate-600 px-2 py-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
               </div>
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-zinc-900">
+                <label className="text-sm font-semibold text-slate-100">
                   {t('products.duration')}
                 </label>
                 <input
@@ -484,9 +485,9 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   value={newProductDuration}
                   onChange={(e) => setNewProductDuration(e.target.value)}
                   placeholder="Ej. 30"
-                  className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                  className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                 />
-                <span className="text-xs text-zinc-500">
+                <span className="text-xs text-slate-400">
                   {t('products.duration_hint')}
                 </span>
               </div>
@@ -504,14 +505,14 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                   setNewProductDuration("");
                   setNewProductStock("");
                 }}
-                className="h-9 rounded-md border border-zinc-300 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="h-9 rounded-md border border-slate-600 px-4 text-sm font-medium text-slate-300 hover:bg-slate-800/50"
               >
                 {t('common.cancel')}
               </button>
               <button
                 type="submit"
                 disabled={creatingProduct}
-                className="h-9 rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                className="h-9 rounded-md bg-teal-600 px-4 text-sm font-medium text-white hover:bg-teal-500 disabled:cursor-not-allowed disabled:bg-slate-500"
               >
                 {creatingProduct
                   ? t('products.saving')
@@ -536,33 +537,33 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         )}
 
         <div className="mt-6 overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-200 text-sm">
-            <thead className="bg-zinc-50">
+          <table className="min-w-full divide-y divide-slate-700 text-sm">
+            <thead className="bg-slate-800/50">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_image')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_name')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_description')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_price')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_stock')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('products.table_duration')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_image')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_name')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_description')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_price')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_stock')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('products.table_duration')}</th>
                 {role === "superadmin" && (
-                  <th className="px-3 py-2 text-left font-medium text-zinc-700">
+                  <th className="px-3 py-2 text-left font-medium text-slate-300">
                     {t('common.tenant')}
                   </th>
                 )}
                 {role !== 'user' && (
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">
+                <th className="px-3 py-2 text-left font-medium text-slate-300">
                   {t('common.actions')}
                 </th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200">
+            <tbody className="divide-y divide-slate-700">
               {loadingProducts && (
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-3 py-3 text-center text-zinc-700"
+                    className="px-3 py-3 text-center text-slate-300"
                   >
                     {t('common.loading')}
                   </td>
@@ -582,7 +583,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                 <tr>
                   <td
                     colSpan={6}
-                    className="px-3 py-3 text-center text-zinc-700"
+                    className="px-3 py-3 text-center text-slate-300"
                   >
                     {t('products.no_products')}
                   </td>
@@ -591,28 +592,28 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
               {!loadingProducts &&
                 !productsError &&
                 products.map((product) => (
-                  <tr key={product.id}>
+                  <tr key={product.id} className="hover:bg-slate-800/50">
                     <td className="px-3 py-2">
                       {product.imageUrl ? (
-                        <div className="relative h-10 w-10 rounded-md overflow-hidden bg-zinc-50">
+                        <div className="relative h-10 w-10 rounded-md overflow-hidden bg-slate-800/50">
                           <Image src={product.imageUrl.startsWith('http') ? product.imageUrl : `${API_URL}${product.imageUrl}`} alt={product.name} fill className="object-cover" sizes="40px" />
                         </div>
                       ) : (
-                        <div className="h-10 w-10 rounded-md bg-zinc-100 flex items-center justify-center text-zinc-400">
+                        <div className="h-10 w-10 rounded-md bg-slate-700 flex items-center justify-center text-slate-400">
                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-2 font-medium text-zinc-900">
+                    <td className="px-3 py-2 font-medium text-slate-100">
                       {product.name}
                     </td>
-                    <td className="px-3 py-2 text-zinc-700">
+                    <td className="px-3 py-2 text-slate-300">
                       {product.description || "-"}
                     </td>
-                    <td className="px-3 py-2 text-zinc-900 font-semibold">
+                    <td className="px-3 py-2 text-slate-100 font-semibold">
                       {formatPrice(product.price)}
                     </td>
-                    <td className="px-3 py-2 text-zinc-900">
+                    <td className="px-3 py-2 text-slate-100">
                       {editingStockId === product.id ? (
                         <input
                             type="number"
@@ -621,23 +622,23 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                             onBlur={handleStockBlur}
                             onKeyDown={handleStockKeyDown}
                             autoFocus
-                            className="w-20 rounded-md border border-zinc-400 px-2 py-1 text-sm outline-none focus:border-zinc-900"
+                            className="w-20 rounded-md border border-slate-600 px-2 py-1 text-sm outline-none focus:border-teal-500"
                         />
                       ) : (
                         <span 
                             onClick={() => role !== 'user' && handleStockClick(product)}
-                            className={role !== 'user' ? "cursor-pointer hover:bg-zinc-100 px-2 py-1 rounded" : ""}
+                            className={role !== 'user' ? "cursor-pointer hover:bg-slate-700 px-2 py-1 rounded" : ""}
                             title={role !== 'user' ? t('products.edit_stock_hint') : ""}
                         >
                             {product.stock}
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-2 text-zinc-700">
+                    <td className="px-3 py-2 text-slate-300">
                       {product.duration ? `${product.duration} min` : "-"}
                     </td>
                     {role === "superadmin" && (
-                      <td className="px-3 py-2 text-zinc-500 text-xs font-mono">
+                      <td className="px-3 py-2 text-slate-400 text-xs font-mono">
                         {product.tenantId}
                       </td>
                     )}
@@ -645,13 +646,13 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                     <td className="px-3 py-2 flex items-center gap-3">
                       <button
                         onClick={() => handleEditProductClick(product)}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="text-teal-400 hover:text-teal-300 text-sm font-medium"
                       >
                       {t('common.edit')}
                       </button>
                       <button
                         onClick={() => handleDeleteProduct(product.id)}
-                        className="text-red-600 hover:text-red-800 text-sm font-medium"
+                        className="text-red-400 hover:text-red-300 text-sm font-medium"
                       >
                       {t('common.delete')}
                       </button>

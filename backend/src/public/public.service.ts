@@ -148,11 +148,7 @@ export class PublicService {
     });
   }
 
-  async createOrder(
-    tenantId: string,
-    data: CreatePublicOrderDto,
-    ip?: string,
-  ) {
+  async createOrder(tenantId: string, data: CreatePublicOrderDto, ip?: string) {
     await this.ensureNotBot(data.website, data.captchaToken, ip);
 
     // 1. Find or create client
@@ -198,10 +194,15 @@ export class PublicService {
     if (!order) throw new NotFoundException('Pedido no encontrado');
 
     if (!order.publicTokenHash) {
-      throw new ForbiddenException('Pedido no disponible para consulta publica');
+      throw new ForbiddenException(
+        'Pedido no disponible para consulta publica',
+      );
     }
 
-    if (order.publicTokenExpiresAt && order.publicTokenExpiresAt.getTime() < Date.now()) {
+    if (
+      order.publicTokenExpiresAt &&
+      order.publicTokenExpiresAt.getTime() < Date.now()
+    ) {
       throw new ForbiddenException('Token expirado');
     }
 
@@ -283,7 +284,10 @@ export class PublicService {
   }
 
   private isTokenValid(token: string, tokenHash: string) {
-    const candidateHash = crypto.createHash('sha256').update(token).digest('hex');
+    const candidateHash = crypto
+      .createHash('sha256')
+      .update(token)
+      .digest('hex');
 
     if (candidateHash.length !== tokenHash.length) {
       return false;

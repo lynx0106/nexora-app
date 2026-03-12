@@ -5,7 +5,9 @@ import {
   Param,
   UseGuards,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
+import type { Request as ExpressRequest } from 'express';
 import { NotificationsService } from './notifications.service';
 import { AuthGuard } from '@nestjs/passport';
 
@@ -15,9 +17,12 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Get('unread')
-  async getUnread(@Request() req) {
-    const { tenantId, sub: userId } = req.user;
-    return this.notificationsService.findAllUnread(tenantId, userId);
+  async getUnread(@Request() req: ExpressRequest) {
+    const user = req.user;
+    if (!user?.tenantId || !user?.userId) {
+      return [];
+    }
+    return this.notificationsService.findAllUnread(user.tenantId, user.userId);
   }
 
   @Post(':id/read')
@@ -26,8 +31,11 @@ export class NotificationsController {
   }
 
   @Post('read-all')
-  async markAllAsRead(@Request() req) {
-    const { tenantId, sub: userId } = req.user;
-    return this.notificationsService.markAllAsRead(tenantId, userId);
+  async markAllAsRead(@Request() req: ExpressRequest) {
+    const user = req.user;
+    if (!user?.tenantId || !user?.userId) {
+      throw new UnauthorizedException('Usuario no autenticado');
+    }
+    return this.notificationsService.markAllAsRead(user.tenantId, user.userId);
   }
 }

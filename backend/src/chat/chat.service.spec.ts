@@ -163,7 +163,12 @@ describe('ChatService', () => {
     });
 
     it('should filter by targetUserId for CUSTOMER scope', async () => {
-      await service.markAsRead('tenant-123', 'CUSTOMER', 'user-123', 'user-456');
+      await service.markAsRead(
+        'tenant-123',
+        'CUSTOMER',
+        'user-123',
+        'user-456',
+      );
 
       expect(messageRepo.createQueryBuilder).toHaveBeenCalled();
     });

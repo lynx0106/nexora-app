@@ -18,8 +18,8 @@ export class TasksService {
    * Run all scheduled tasks manually
    * This can be called from the API endpoint
    */
-  async runAllTasks() {
-    const results: any = {};
+  async runAllTasks(): Promise<Record<string, string>> {
+    const results: Record<string, string> = {};
 
     try {
       await this.appointmentsService.sendReminders();

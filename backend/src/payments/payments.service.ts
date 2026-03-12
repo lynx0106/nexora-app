@@ -15,17 +15,25 @@ import { getCircuitBreaker } from '../common/circuit-breaker';
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
-  private readonly maxWebhookRetries = Number(process.env.MP_WEBHOOK_RETRY_MAX || 3);
+  private readonly maxWebhookRetries = Number(
+    process.env.MP_WEBHOOK_RETRY_MAX || 3,
+  );
   private readonly baseRetryDelayMs = Number(
     process.env.MP_WEBHOOK_RETRY_DELAY_MS || 2000,
   );
 
   private getFrontendUrl() {
-    return (process.env.FRONTEND_URL || 'http://localhost:3002').replace(/\/$/, '');
+    return (process.env.FRONTEND_URL || 'http://localhost:3002').replace(
+      /\/$/,
+      '',
+    );
   }
 
   private getBackendUrl() {
-    return (process.env.BACKEND_URL || 'http://localhost:4001').replace(/\/$/, '');
+    return (process.env.BACKEND_URL || 'http://localhost:4001').replace(
+      /\/$/,
+      '',
+    );
   }
 
   constructor(
@@ -107,7 +115,10 @@ export class PaymentsService {
     }
   }
 
-  async processPaymentNotificationWithRetry(paymentId: string, tenantId?: string) {
+  async processPaymentNotificationWithRetry(
+    paymentId: string,
+    tenantId?: string,
+  ) {
     await this.processPaymentNotificationOnce(paymentId, tenantId, 1);
   }
 
@@ -129,7 +140,9 @@ export class PaymentsService {
 
       let paymentData;
       if (paymentId.startsWith('sim_')) {
-        this.logger.log(`[SIMULATION] Processing simulated payment ${paymentId}`);
+        this.logger.log(
+          `[SIMULATION] Processing simulated payment ${paymentId}`,
+        );
         const parts = paymentId.split('_');
         const simulatedOrderId = parts[1];
         const simulatedStatus = parts[2] || 'approved';
@@ -170,11 +183,15 @@ export class PaymentsService {
         relations: ['tenant', 'items', 'items.product'],
       });
       if (!order) {
-        throw new Error(`Pedido ${orderId} no encontrado para pago ${paymentId}`);
+        throw new Error(
+          `Pedido ${orderId} no encontrado para pago ${paymentId}`,
+        );
       }
 
       const safeMetadata = this.buildPaymentMetadata(paymentData);
-      order.mpPaymentId = paymentData?.id ? String(paymentData.id) : order.mpPaymentId;
+      order.mpPaymentId = paymentData?.id
+        ? String(paymentData.id)
+        : order.mpPaymentId;
       order.mpPaymentStatus = status || order.mpPaymentStatus;
       order.mpMetadata = safeMetadata;
       await this.ordersRepository.save(order);
@@ -202,7 +219,7 @@ export class PaymentsService {
         const totalFormatted = formatter.format(Number(order.total));
 
         // Send Email Notifications
-        
+
         // 1. To Customer
         if (order.customerEmail) {
           await this.mailService.sendMail({
@@ -220,7 +237,9 @@ export class PaymentsService {
               tenantAddress: order.tenant.address || '',
             },
           });
-          this.logger.log(`Payment confirmation email sent to Customer: ${order.customerEmail}`);
+          this.logger.log(
+            `Payment confirmation email sent to Customer: ${order.customerEmail}`,
+          );
         }
 
         // 2. To Tenant (Business)
@@ -228,7 +247,7 @@ export class PaymentsService {
           await this.mailService.sendMail({
             to: order.tenant.email,
             subject: `Nuevo Pago Recibido - Pedido #${order.id.slice(0, 8)}`,
-            template: './order-confirmation', 
+            template: './order-confirmation',
             context: {
               orderId: order.id.slice(0, 8),
               total: totalFormatted,
@@ -241,9 +260,13 @@ export class PaymentsService {
               isAdminNotification: true,
             },
           });
-          this.logger.log(`Payment notification email sent to Tenant: ${order.tenant.email}`);
+          this.logger.log(
+            `Payment notification email sent to Tenant: ${order.tenant.email}`,
+          );
         } else {
-            this.logger.warn(`Tenant ${order.tenant.id} has no email configured for notifications.`);
+          this.logger.warn(
+            `Tenant ${order.tenant.id} has no email configured for notifications.`,
+          );
         }
       }
     } catch (error) {
@@ -253,7 +276,11 @@ export class PaymentsService {
           `Error procesando webhook ${paymentId}. Reintento ${attempt + 1} en ${delay}ms`,
         );
         setTimeout(() => {
-          void this.processPaymentNotificationOnce(paymentId, tenantId, attempt + 1);
+          void this.processPaymentNotificationOnce(
+            paymentId,
+            tenantId,
+            attempt + 1,
+          );
         }, delay);
         return;
       }

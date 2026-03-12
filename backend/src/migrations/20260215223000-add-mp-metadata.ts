@@ -16,8 +16,14 @@ export class AddMpMetadata20260215223000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('ALTER TABLE orders DROP COLUMN IF EXISTS "mpMetadata"');
-    await queryRunner.query('ALTER TABLE orders DROP COLUMN IF EXISTS "mpPaymentStatus"');
-    await queryRunner.query('ALTER TABLE orders DROP COLUMN IF EXISTS "mpPaymentId"');
+    await queryRunner.query(
+      'ALTER TABLE orders DROP COLUMN IF EXISTS "mpMetadata"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP COLUMN IF EXISTS "mpPaymentStatus"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP COLUMN IF EXISTS "mpPaymentId"',
+    );
   }
 }

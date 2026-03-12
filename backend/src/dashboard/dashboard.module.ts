@@ -11,7 +11,11 @@ import { Appointment } from '../appointments/entities/appointment.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
-  imports: [OrdersModule, AppointmentsModule, TypeOrmModule.forFeature([Tenant, Order, Product, Appointment, User])],
+  imports: [
+    OrdersModule,
+    AppointmentsModule,
+    TypeOrmModule.forFeature([Tenant, Order, Product, Appointment, User]),
+  ],
   controllers: [DashboardController],
   providers: [DashboardService],
 })

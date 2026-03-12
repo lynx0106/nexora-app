@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import Image from 'next/image';
 import { io, Socket } from 'socket.io-client';
-import { fetchAPIWithAuth, API_URL, uploadFile } from '../lib/api';
+import { fetchAPIWithAuth, API_URL } from '../lib/api';
+import { showToast } from '../lib/toast';
 import { useTranslation } from 'react-i18next';
 
 interface Message {
@@ -96,7 +98,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
   // Helper function to play sound
   const playNotificationSound = () => {
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const audioContext = new (window.AudioContext || (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
@@ -212,7 +214,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
 
       fetchAPIWithAuth(`/chat/history?limit=50&scope=${scope}`)
         .then((data) => {
-            const sorted = Array.isArray(data) ? data.sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
+            const sorted = Array.isArray(data) ? data.sort((a: Message, b: Message) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) : [];
             setMessages(sorted);
         })
         .catch(console.error);
@@ -278,7 +280,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
       setIsRecording(true);
     } catch (err) {
       console.error('Error accessing microphone:', err);
-      alert(t('chat.widget.mic_error'));
+      showToast(t('chat.widget.mic_error'), 'error');
     }
   };
 
@@ -319,7 +321,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
 
       } catch (error) {
           console.error('Error uploading voice note:', error);
-          alert(t('chat.widget.upload_error'));
+          showToast(t('chat.widget.upload_error'), 'error');
       } finally {
           setIsUploading(false);
       }
@@ -356,7 +358,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
 
       } catch (error) {
           console.error('Error uploading file:', error);
-          alert(t('chat.widget.upload_error'));
+          showToast(t('chat.widget.upload_error'), 'error');
       } finally {
           setIsUploading(false);
           if (fileInputRef.current) fileInputRef.current.value = '';
@@ -408,19 +410,19 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
                 <div className="flex space-x-2 text-xs">
                     <button 
                         onClick={() => setActiveTab('INTERNAL')}
-                        className={`px-2 py-1 rounded ${activeTab === 'INTERNAL' ? 'bg-white text-indigo-600 font-bold' : 'bg-indigo-700 text-indigo-200'}`}
+                        className={`px-2 py-1 rounded ${activeTab === 'INTERNAL' ? 'bg-slate-200 text-teal-700 font-bold' : 'bg-slate-700 text-slate-200'}`}
                     >
                         {t('chat.widget.tab_team')}
                     </button>
                     <button 
                         onClick={() => setActiveTab('CUSTOMER')}
-                        className={`px-2 py-1 rounded ${activeTab === 'CUSTOMER' ? 'bg-white text-indigo-600 font-bold' : 'bg-indigo-700 text-indigo-200'}`}
+                        className={`px-2 py-1 rounded ${activeTab === 'CUSTOMER' ? 'bg-slate-200 text-teal-700 font-bold' : 'bg-slate-700 text-slate-200'}`}
                     >
                         {t('chat.widget.tab_clients')}
                     </button>
                     <button 
                         onClick={() => setActiveTab('SUPPORT')}
-                        className={`px-2 py-1 rounded ${activeTab === 'SUPPORT' ? 'bg-white text-indigo-600 font-bold' : 'bg-indigo-700 text-indigo-200'}`}
+                        className={`px-2 py-1 rounded ${activeTab === 'SUPPORT' ? 'bg-slate-200 text-teal-700 font-bold' : 'bg-slate-700 text-slate-200'}`}
                     >
                         {t('chat.widget.tab_support')}
                     </button>
@@ -469,7 +471,16 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
                     )}
                     <p>{msg.content}</p>
                     {msg.type === 'image' && msg.mediaUrl && (
-                        <img src={msg.mediaUrl} alt="attachment" className="mt-2 rounded-md max-w-full h-auto" />
+                        <div className="relative mt-2 w-full max-w-[200px] aspect-video">
+                          <Image 
+                            src={msg.mediaUrl} 
+                            alt={t('chat.widget.image_attachment') || 'Imagen adjunta'} 
+                            fill
+                            className="object-cover rounded-md"
+                            sizes="200px"
+                            unoptimized={msg.mediaUrl.startsWith('blob:')}
+                          />
+                        </div>
                     )}
                     {msg.type === 'audio' && msg.mediaUrl && (
                         <audio controls src={msg.mediaUrl} className="mt-2 w-full max-w-[200px]" />

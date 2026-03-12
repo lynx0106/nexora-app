@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { fetchAPIWithAuth, uploadFile, API_URL } from "../lib/api";
 
@@ -236,14 +237,14 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
   return (
     <div className="max-w-4xl space-y-8">
         {/* User Profile Section */}
-        <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="text-lg font-medium text-zinc-900">{t('settings.profile_title')}</h3>
-            <p className="mt-2 text-sm text-zinc-800">
+        <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+            <h3 className="text-lg font-medium text-slate-100">{t('settings.profile_title')}</h3>
+            <p className="mt-2 text-sm text-slate-300">
             {t('settings.profile_subtitle')}
             </p>
 
             {profileLoading ? (
-            <div className="mt-6 text-sm text-zinc-700">{t('settings.loading_profile')}</div>
+            <div className="mt-6 text-sm text-slate-300">{t('settings.loading_profile')}</div>
             ) : (
             <form onSubmit={handleUpdateProfile} className="mt-6 space-y-6">
                 {profileMessage && (
@@ -254,18 +255,18 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                 
                 <div className="grid gap-6 md:grid-cols-2">
                 <div className="md:col-span-2">
-                    <label className="text-sm font-semibold text-zinc-900 block mb-2">{t('settings.profile_photo')}</label>
+                    <label className="text-sm font-semibold text-slate-100 block mb-2">{t('settings.profile_photo')}</label>
                     <div className="flex items-center gap-4">
                     {profileAvatarFile ? (
-                        <div className="relative h-16 w-16 rounded-full overflow-hidden border border-zinc-200">
-                            <img src={URL.createObjectURL(profileAvatarFile)} alt="Preview" className="h-full w-full object-cover" />
+                        <div className="relative h-16 w-16 rounded-full overflow-hidden border border-slate-700">
+                            <Image src={URL.createObjectURL(profileAvatarFile)} alt={t('settings.profile_preview') || 'Vista previa'} fill className="object-cover" unoptimized />
                         </div>
                     ) : profileAvatarUrl ? (
-                        <div className="relative h-16 w-16 rounded-full overflow-hidden border border-zinc-200">
-                            <img src={profileAvatarUrl.startsWith('http') ? profileAvatarUrl : `${API_URL}${profileAvatarUrl}`} alt="Avatar" className="h-full w-full object-cover" />
+                        <div className="relative h-16 w-16 rounded-full overflow-hidden border border-slate-700">
+                            <Image src={profileAvatarUrl.startsWith('http') ? profileAvatarUrl : `${API_URL}${profileAvatarUrl}`} alt={t('settings.profile_photo') || 'Avatar'} fill className="object-cover" sizes="64px" />
                         </div>
                     ) : (
-                        <div className="h-16 w-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+                        <div className="h-16 w-16 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
@@ -279,62 +280,62 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                             setProfileAvatarFile(e.target.files[0]);
                         }
                         }}
-                        className="text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-zinc-50 file:text-zinc-700 hover:file:bg-zinc-100"
+                        className="text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-800/50 file:text-slate-300 hover:file:bg-slate-700"
                     />
                     </div>
                 </div>
 
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.form_name')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.form_name')}</label>
                     <input
                     type="text"
                     value={profileFirstName}
                     onChange={(e) => setProfileFirstName(e.target.value)}
                     disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 ${role === 'user' ? 'bg-zinc-100 text-zinc-500' : ''}`}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.form_lastname')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.form_lastname')}</label>
                     <input
                     type="text"
                     value={profileLastName}
                     onChange={(e) => setProfileLastName(e.target.value)}
                     disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 ${role === 'user' ? 'bg-zinc-100 text-zinc-500' : ''}`}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.form_email')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.form_email')}</label>
                     <input
                     type="email"
                     value={profileEmail}
                     onChange={(e) => setProfileEmail(e.target.value)}
                     disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900 ${role === 'user' ? 'bg-zinc-100 text-zinc-500' : ''}`}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.form_phone')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.form_phone')}</label>
                     <input
                     type="tel"
                     value={profilePhone}
                     onChange={(e) => setProfilePhone(e.target.value)}
-                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                 </div>
                 <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.form_address')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.form_address')}</label>
                     <input
                     type="text"
                     value={profileAddress}
                     onChange={(e) => setProfileAddress(e.target.value)}
                     placeholder={t('settings.address_placeholder')}
-                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                 </div>
                 <div className="flex flex-col gap-1 md:col-span-2">
-                    <label className="text-sm font-semibold text-zinc-900">
+                    <label className="text-sm font-semibold text-slate-100">
                     {t('settings.form_password')}
                     </label>
                     <input
@@ -342,7 +343,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     value={profilePassword}
                     onChange={(e) => setProfilePassword(e.target.value)}
                     placeholder={t('settings.password_placeholder')}
-                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                 </div>
                 </div>
@@ -350,7 +351,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                 <div className="flex justify-end pt-4">
                 <button
                     type="submit"
-                    className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+                    className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
                 >
                     {t('settings.update_profile')}
                 </button>
@@ -361,14 +362,14 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
 
         {/* Tenant Profile Section (Admin/Superadmin only) */}
         {(role === 'admin' || role === 'superadmin') && (
-            <div className="rounded-lg bg-white p-6 shadow">
-            <h3 className="text-lg font-medium text-zinc-900">{t('settings.tenant_title')}</h3>
-            <p className="mt-2 text-sm text-zinc-800">
+            <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+            <h3 className="text-lg font-medium text-slate-100">{t('settings.tenant_title')}</h3>
+            <p className="mt-2 text-sm text-slate-300">
                 {t('settings.tenant_subtitle')}
             </p>
 
             {tenantProfileLoading ? (
-                <div className="mt-6 text-sm text-zinc-700">{t('settings.loading_tenant')}</div>
+                <div className="mt-6 text-sm text-slate-300">{t('settings.loading_tenant')}</div>
             ) : (
                 <form onSubmit={handleUpdateTenantProfile} className="mt-6 space-y-6">
                 {tenantProfileMessage && (
@@ -379,18 +380,18 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
 
                 <div className="grid gap-6 md:grid-cols-2">
                     <div className="md:col-span-2">
-                        <label className="text-sm font-semibold text-zinc-900 block mb-2">{t('settings.tenant_logo')}</label>
+                        <label className="text-sm font-semibold text-slate-100 block mb-2">{t('settings.tenant_logo')}</label>
                         <div className="flex items-center gap-4">
                         {tenantLogoFile ? (
-                            <div className="relative h-16 w-16 rounded-full overflow-hidden border border-zinc-200">
-                                <img src={URL.createObjectURL(tenantLogoFile)} alt="Preview" className="h-full w-full object-cover" />
+                            <div className="relative h-16 w-16 rounded-full overflow-hidden border border-slate-700">
+                                <Image src={URL.createObjectURL(tenantLogoFile)} alt={t('settings.logo_preview') || 'Vista previa del logo'} fill className="object-cover" unoptimized />
                             </div>
                         ) : tenantLogoUrl ? (
-                            <div className="relative h-16 w-16 rounded-full overflow-hidden border border-zinc-200">
-                                <img src={tenantLogoUrl.startsWith('http') ? tenantLogoUrl : `${API_URL}${tenantLogoUrl}`} alt="Logo" className="h-full w-full object-cover" />
+                            <div className="relative h-16 w-16 rounded-full overflow-hidden border border-slate-700">
+                                <Image src={tenantLogoUrl.startsWith('http') ? tenantLogoUrl : `${API_URL}${tenantLogoUrl}`} alt={t('settings.tenant_logo') || 'Logo del negocio'} fill className="object-cover" sizes="64px" />
                             </div>
                         ) : (
-                            <div className="h-16 w-16 rounded-full bg-zinc-100 flex items-center justify-center text-zinc-400">
+                            <div className="h-16 w-16 rounded-full bg-slate-700 flex items-center justify-center text-slate-400">
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
@@ -404,7 +405,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                                 setTenantLogoFile(e.target.files[0]);
                             }
                             }}
-                            className="text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-zinc-50 file:text-zinc-700 hover:file:bg-zinc-100"
+                            className="text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-slate-800/50 file:text-slate-300 hover:file:bg-slate-700"
                         />
                         </div>
                     </div>
@@ -412,43 +413,43 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     {(tenantSector || '').toLowerCase().includes('restaurante') && (
                         <>
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_tables')}</label>
+                            <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_tables')}</label>
                             <input
                                 type="number"
                                 min="0"
                                 value={tenantTablesCount}
                                 onChange={(e) => setTenantTablesCount(parseInt(e.target.value) || 0)}
-                                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
                         <div className="flex flex-col gap-1">
-                            <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_capacity')}</label>
+                            <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_capacity')}</label>
                             <input
                                 type="number"
                                 min="0"
                                 value={tenantCapacity}
                                 onChange={(e) => setTenantCapacity(parseInt(e.target.value) || 0)}
-                                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                             />
                         </div>
                         </>
                     )}
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_name')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_name')}</label>
                     <input
                         type="text"
                         value={tenantName}
                         onChange={(e) => setTenantName(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     {!(tenantSector || '').toLowerCase().includes('restaurante') && !(tenantSector || '').toLowerCase().includes('restaurant') && (
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_sector')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_sector')}</label>
                     <select
                         value={tenantSector}
                         onChange={(e) => setTenantSector(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     >
                         <option value="">{t('settings.select_placeholder')}</option>
                         <option value="salud">{t('settings.sector_health')}</option>
@@ -460,88 +461,88 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     </div>
                     )}
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_country')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_country')}</label>
                     <input
                         type="text"
                         value={tenantCountry}
                         onChange={(e) => setTenantCountry(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_city')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_city')}</label>
                     <input
                         type="text"
                         value={tenantCity}
                         onChange={(e) => setTenantCity(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_phone')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_phone')}</label>
                     <input
                         type="tel"
                         value={tenantPhone}
                         onChange={(e) => setTenantPhone(e.target.value)}
                         placeholder={t('settings.phone_placeholder')}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_email')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_email')}</label>
                     <input
                         type="email"
                         value={tenantEmail}
                         onChange={(e) => setTenantEmail(e.target.value)}
                         placeholder={t('settings.email_placeholder')}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     <p className="text-xs text-zinc-500">{t('settings.tenant_email_help')}</p>
                     </div>
                     <div className="md:col-span-2 flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.tenant_address')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.tenant_address')}</label>
                     <input
                         type="text"
                         value={tenantAddress}
                         onChange={(e) => setTenantAddress(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.opening_time')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.opening_time')}</label>
                     <input
                         type="time"
                         value={tenantOpeningTime}
                         onChange={(e) => setTenantOpeningTime(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.closing_time')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.closing_time')}</label>
                     <input
                         type="time"
                         value={tenantClosingTime}
                         onChange={(e) => setTenantClosingTime(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.appt_duration')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.appt_duration')}</label>
                     <input
                         type="number"
                         min="15"
                         step="15"
                         value={tenantAppointmentDuration}
                         onChange={(e) => setTenantAppointmentDuration(Number(e.target.value))}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     />
                     </div>
                     <div className="flex flex-col gap-1">
-                    <label className="text-sm font-semibold text-zinc-900">{t('settings.currency')}</label>
+                    <label className="text-sm font-semibold text-slate-100">{t('settings.currency')}</label>
                     <select
                         value={tenantCurrency}
                         onChange={(e) => setTenantCurrency(e.target.value)}
-                        className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                        className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                     >
                         <option value="USD">{t('settings.currency_usd')}</option>
                         <option value="COP">{t('settings.currency_cop')}</option>
@@ -550,54 +551,54 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     </select>
                     </div>
 
-                    <div className="md:col-span-2 border-t border-zinc-200 pt-6 mt-4">
-                        <h4 className="text-md font-medium text-zinc-900 mb-4">{t('settings.payment_config')}</h4>
-                        <div className="grid gap-6 md:grid-cols-2 mb-6 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+                    <div className="md:col-span-2 border-t border-slate-700 pt-6 mt-4">
+                        <h4 className="text-md font-medium text-slate-100 mb-4">{t('settings.payment_config')}</h4>
+                        <div className="grid gap-6 md:grid-cols-2 mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.mp_public_key')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.mp_public_key')}</label>
                                 <input
                                     type="text"
                                     value={mercadoPagoPublicKey}
                                     onChange={(e) => setMercadoPagoPublicKey(e.target.value)}
                                     placeholder="APP_USR-..."
-                                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.mp_access_token')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.mp_access_token')}</label>
                                 <input
                                     type="password"
                                     value={mercadoPagoAccessToken}
                                     onChange={(e) => setMercadoPagoAccessToken(e.target.value)}
                                     placeholder="APP_USR-..."
-                                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                             </div>
                         </div>
 
-                        <h4 className="text-md font-medium text-zinc-900 mb-4">{t('settings.ai_config_title')}</h4>
-                        <p className="text-sm text-zinc-600 mb-6">
+                        <h4 className="text-md font-medium text-slate-100 mb-4">{t('settings.ai_config_title')}</h4>
+                        <p className="text-sm text-slate-400 mb-6">
                             {t('settings.ai_config_desc')}
                         </p>
 
-                        <div className="grid gap-6 md:grid-cols-2 mb-6 p-4 bg-zinc-50 rounded-lg border border-zinc-200">
+                        <div className="grid gap-6 md:grid-cols-2 mb-6 p-4 bg-slate-800/50 rounded-lg border border-slate-700">
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.openai_key')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.openai_key')}</label>
                                 <input
                                     type="password"
                                     value={openaiApiKey}
                                     onChange={(e) => setOpenaiApiKey(e.target.value)}
                                     placeholder="sk-..."
-                                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                                 <p className="text-xs text-zinc-500">{t('settings.openai_key_help')}</p>
                             </div>
                             <div className="flex flex-col gap-1">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.ai_model')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.ai_model')}</label>
                                 <select
                                     value={aiModel}
                                     onChange={(e) => setAiModel(e.target.value)}
-                                    className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 >
                                     <option value="gpt-3.5-turbo">{t('settings.model_gpt35')}</option>
                                     <option value="gpt-4">{t('settings.model_gpt4')}</option>
@@ -609,35 +610,35 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                         
                         <div className="space-y-6">
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.bot_sales')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.bot_sales')}</label>
                                 <textarea
                                     value={aiPromptCustomer}
                                     onChange={(e) => setAiPromptCustomer(e.target.value)}
                                     placeholder={t('settings.bot_sales_placeholder')}
                                     rows={4}
-                                    className="rounded-md border border-zinc-400 p-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="rounded-md border border-slate-600 p-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                                 <p className="text-xs text-zinc-500">{t('settings.bot_sales_help')}</p>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.bot_support')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.bot_support')}</label>
                                 <textarea
                                     value={aiPromptSupport}
                                     onChange={(e) => setAiPromptSupport(e.target.value)}
                                     placeholder={t('settings.bot_support_placeholder')}
                                     rows={4}
-                                    className="rounded-md border border-zinc-400 p-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="rounded-md border border-slate-600 p-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                                 <p className="text-xs text-zinc-500">{t('settings.bot_support_help')}</p>
                             </div>
                             <div className="flex flex-col gap-2">
-                                <label className="text-sm font-semibold text-zinc-900">{t('settings.bot_internal')}</label>
+                                <label className="text-sm font-semibold text-slate-100">{t('settings.bot_internal')}</label>
                                 <textarea
                                     value={aiPromptInternal}
                                     onChange={(e) => setAiPromptInternal(e.target.value)}
                                     placeholder={t('settings.bot_internal_placeholder')}
                                     rows={4}
-                                    className="rounded-md border border-zinc-400 p-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                                    className="rounded-md border border-slate-600 p-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
                                 />
                                 <p className="text-xs text-zinc-500">{t('settings.bot_internal_help')}</p>
                             </div>
@@ -649,7 +650,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     <button
                     type="submit"
                     disabled={tenantProfileSaving}
-                    className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50"
+                    className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50"
                     >
                     {tenantProfileSaving ? t('common.loading') : t('settings.save_tenant')}
                     </button>

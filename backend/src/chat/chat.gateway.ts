@@ -39,17 +39,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     try {
       // Try to get token from multiple sources
       let token: string | undefined;
-      
+
       // 1. Try handshake.auth (for backward compatibility)
       if (client.handshake.auth.token) {
         token = client.handshake.auth.token;
       }
-      
+
       // 2. Try Authorization header
       if (!token && client.handshake.headers.authorization) {
         token = client.handshake.headers.authorization;
       }
-      
+
       // 3. Try cookies (new secure method)
       if (!token && client.handshake.headers.cookie) {
         const cookieString = client.handshake.headers.cookie;
@@ -58,7 +58,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           token = accessTokenMatch[1];
         }
       }
-      
+
       if (!token) {
         this.logger.warn('Connection rejected: No token provided');
         client.disconnect();
@@ -73,7 +73,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // Store user info in socket
       client.data.user = payload;
-      this.logger.debug(`Client ${client.id} connected, tenant: ${payload.tenantId}`);
+      this.logger.debug(
+        `Client ${client.id} connected, tenant: ${payload.tenantId}`,
+      );
 
       const { tenantId, role, sub: userId } = payload;
 
@@ -104,7 +106,6 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       if (role === 'admin' || role === 'superadmin') {
         client.join(`tenant-${tenantId}-customers-all`);
       }
-
     } catch (error) {
       this.logger.warn(`Connection unauthorized: ${error.message}`);
       client.disconnect();
@@ -131,10 +132,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!user) return;
 
     const scope = payload.scope || 'INTERNAL';
-    
+
     // DEBUG: Log the incoming message details
-    this.logger.debug(`[DEBUG] sendMessage received - user: ${user.sub}, role: ${user.role}, scope: ${scope}, targetUserId: ${payload.targetUserId}, currentTenantId: ${client.data.currentTenantId}, jwtTenantId: ${user.tenantId}`);
-    
+    this.logger.debug(
+      `[DEBUG] sendMessage received - user: ${user.sub}, role: ${user.role}, scope: ${scope}, targetUserId: ${payload.targetUserId}, currentTenantId: ${client.data.currentTenantId}, jwtTenantId: ${user.tenantId}`,
+    );
+
     // Fix: If I am a customer, I am the target of this conversation
     let dbTargetUserId = payload.targetUserId;
     if (scope === 'CUSTOMER' && !dbTargetUserId && user.role === 'user') {
@@ -143,15 +146,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // For superadmin, use currentTenantId if set, otherwise use JWT tenantId
     const effectiveTenantId = client.data.currentTenantId || user.tenantId;
-    
+
     this.logger.debug(`[DEBUG] Effective tenantId: ${effectiveTenantId}`);
-    
+
     if (!effectiveTenantId) {
       this.logger.warn(`Message rejected: no tenantId for user ${user.sub}`);
       return { success: false, message: 'No tenant selected' };
     }
 
-    this.logger.debug(`Message from user ${user.sub}, scope: ${scope}, tenant: ${effectiveTenantId}`);
+    this.logger.debug(
+      `Message from user ${user.sub}, scope: ${scope}, tenant: ${effectiveTenantId}`,
+    );
 
     try {
       // Save User Message
@@ -169,16 +174,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Helper to Broadcast
       const broadcastMessage = (msg: any) => {
         const tenantId = effectiveTenantId;
-        this.logger.debug(`[DEBUG] Broadcasting message ${msg.id} to scope ${scope}, tenantId: ${tenantId}`);
+        this.logger.debug(
+          `[DEBUG] Broadcasting message ${msg.id} to scope ${scope}, tenantId: ${tenantId}`,
+        );
         if (scope === 'INTERNAL') {
-          this.logger.debug(`[DEBUG] Broadcasting to room: tenant-${tenantId}-INTERNAL`);
+          this.logger.debug(
+            `[DEBUG] Broadcasting to room: tenant-${tenantId}-INTERNAL`,
+          );
           this.server.to(`tenant-${tenantId}-INTERNAL`).emit('newMessage', msg);
         } else if (scope === 'SUPPORT') {
-          this.logger.debug(`[DEBUG] Broadcasting to room: tenant-${tenantId}-SUPPORT`);
+          this.logger.debug(
+            `[DEBUG] Broadcasting to room: tenant-${tenantId}-SUPPORT`,
+          );
           this.server.to(`tenant-${tenantId}-SUPPORT`).emit('newMessage', msg);
         } else if (scope === 'CUSTOMER') {
           const effectiveTargetId = dbTargetUserId || user.sub;
-          this.logger.debug(`[DEBUG] Broadcasting CUSTOMER message to: tenant-${tenantId}-customer-${effectiveTargetId} AND tenant-${tenantId}-customers-all`);
+          this.logger.debug(
+            `[DEBUG] Broadcasting CUSTOMER message to: tenant-${tenantId}-customer-${effectiveTargetId} AND tenant-${tenantId}-customers-all`,
+          );
           this.server
             .to(`tenant-${tenantId}-customer-${effectiveTargetId}`)
             .emit('newMessage', msg);
@@ -289,7 +302,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // For superadmin, use currentTenantId if set
     const effectiveTenantId = client.data.currentTenantId || user.tenantId;
-    
+
     if (!effectiveTenantId) {
       this.logger.warn(`ToggleAI rejected: no tenantId for user ${user.sub}`);
       return { success: false, message: 'No tenant selected' };
@@ -348,7 +361,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() payload: { tenantId: string },
   ) {
     const user = client.data.user;
-    
+
     // Only allow superadmin to switch tenants
     if (!user || user.role !== 'superadmin') {
       this.logger.warn('Non-superadmin attempted to switch tenant');
@@ -356,14 +369,21 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
 
     const { tenantId } = payload;
-    this.logger.log(`[DEBUG] switchTenant called - Superadmin ${user.sub} switching to tenant ${tenantId}, previous currentTenantId: ${client.data.currentTenantId}`);
+    this.logger.log(
+      `[DEBUG] switchTenant called - Superadmin ${user.sub} switching to tenant ${tenantId}, previous currentTenantId: ${client.data.currentTenantId}`,
+    );
 
     // Leave all current tenant rooms (to avoid flooding)
     const currentRooms = Array.from(client.rooms);
-    this.logger.debug(`[DEBUG] Current rooms before switch: ${currentRooms.filter(r => r.startsWith('tenant-')).join(', ')}`);
-    
-    currentRooms.forEach(room => {
-      if (room.startsWith('tenant-') && room !== `tenant-${tenantId}-INTERNAL`) {
+    this.logger.debug(
+      `[DEBUG] Current rooms before switch: ${currentRooms.filter((r) => r.startsWith('tenant-')).join(', ')}`,
+    );
+
+    currentRooms.forEach((room) => {
+      if (
+        room.startsWith('tenant-') &&
+        room !== `tenant-${tenantId}-INTERNAL`
+      ) {
         client.leave(room);
       }
     });
@@ -378,7 +398,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.data.currentTenantId = tenantId;
 
     const newRooms = Array.from(client.rooms);
-    this.logger.log(`[DEBUG] Superadmin switched to tenant ${tenantId} - New rooms: ${newRooms.filter(r => r.startsWith('tenant-')).join(', ')}`);
+    this.logger.log(
+      `[DEBUG] Superadmin switched to tenant ${tenantId} - New rooms: ${newRooms.filter((r) => r.startsWith('tenant-')).join(', ')}`,
+    );
     return { success: true, tenantId };
   }
 }

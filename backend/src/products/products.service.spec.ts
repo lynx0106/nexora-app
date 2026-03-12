@@ -123,9 +123,9 @@ describe('ProductsService', () => {
     it('should throw NotFoundException if product not found', async () => {
       productRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.findOne('nonexistent', 'tenant-123')).rejects.toThrow(
-        NotFoundException,
-      );
+      await expect(
+        service.findOne('nonexistent', 'tenant-123'),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -137,7 +137,11 @@ describe('ProductsService', () => {
       productRepo.update.mockResolvedValue({ affected: 1 } as any);
       productRepo.findOne.mockResolvedValue(updatedProduct as any);
 
-      const result = await service.update('product-123', 'tenant-123', updateData);
+      const result = await service.update(
+        'product-123',
+        'tenant-123',
+        updateData,
+      );
 
       expect(result.name).toBe('Updated Product');
       expect(result.price).toBe(150);
@@ -159,7 +163,10 @@ describe('ProductsService', () => {
       const result = await service.updateAsAdmin('product-123', updateData);
 
       expect(result!.name).toBe('Admin Updated');
-      expect(productRepo.update).toHaveBeenCalledWith({ id: 'product-123' }, updateData);
+      expect(productRepo.update).toHaveBeenCalledWith(
+        { id: 'product-123' },
+        updateData,
+      );
     });
   });
 
@@ -190,7 +197,9 @@ describe('ProductsService', () => {
 
   describe('uploadProducts', () => {
     it('should upload new products from CSV', async () => {
-      const csvBuffer = Buffer.from('name,price,description,stock\nProduct 1,100,Desc 1,10\nProduct 2,200,Desc 2,20');
+      const csvBuffer = Buffer.from(
+        'name,price,description,stock\nProduct 1,100,Desc 1,10\nProduct 2,200,Desc 2,20',
+      );
 
       productRepo.findOne.mockResolvedValue(null);
       productRepo.create.mockReturnValue({} as any);
@@ -198,7 +207,9 @@ describe('ProductsService', () => {
 
       const result = await service.uploadProducts(csvBuffer, 'tenant-123');
 
-      expect(result).toEqual({ message: 'Procesados 2 productos correctamente' });
+      expect(result).toEqual({
+        message: 'Procesados 2 productos correctamente',
+      });
     });
 
     it('should update existing products from CSV', async () => {
@@ -209,7 +220,9 @@ describe('ProductsService', () => {
 
       const result = await service.uploadProducts(csvBuffer, 'tenant-123');
 
-      expect(result).toEqual({ message: 'Procesados 1 productos correctamente' });
+      expect(result).toEqual({
+        message: 'Procesados 1 productos correctamente',
+      });
       expect(productRepo.update).toHaveBeenCalled();
     });
 
@@ -222,11 +235,15 @@ describe('ProductsService', () => {
 
       const result = await service.uploadProducts(csvBuffer, 'tenant-123');
 
-      expect(result).toEqual({ message: 'Procesados 0 productos correctamente' });
+      expect(result).toEqual({
+        message: 'Procesados 0 productos correctamente',
+      });
     });
 
     it('should parse duration and imageUrl from CSV', async () => {
-      const csvBuffer = Buffer.from('name,price,duration,imageUrl\nService,100,60,https://example.com/img.jpg');
+      const csvBuffer = Buffer.from(
+        'name,price,duration,imageUrl\nService,100,60,https://example.com/img.jpg',
+      );
 
       productRepo.findOne.mockResolvedValue(null);
       productRepo.create.mockReturnValue({} as any);
@@ -241,7 +258,9 @@ describe('ProductsService', () => {
   describe('seedProducts', () => {
     it('should seed belleza-plus products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('belleza-plus');
 
@@ -251,7 +270,9 @@ describe('ProductsService', () => {
 
     it('should seed clinica-dental-vital products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('clinica-dental-vital');
 
@@ -261,7 +282,9 @@ describe('ProductsService', () => {
 
     it('should seed abastos-la-frescura products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('abastos-la-frescura');
 
@@ -271,7 +294,9 @@ describe('ProductsService', () => {
 
     it('should seed moda-urbana products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('moda-urbana');
 
@@ -281,7 +306,9 @@ describe('ProductsService', () => {
 
     it('should seed pet-friends products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('pet-friends');
 
@@ -291,7 +318,9 @@ describe('ProductsService', () => {
 
     it('should seed tech-master products', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('tech-master');
 
@@ -301,7 +330,9 @@ describe('ProductsService', () => {
 
     it('should seed default products for unknown tenant', async () => {
       productRepo.create.mockImplementation((p) => p as any);
-      productRepo.save.mockImplementation((p) => Promise.resolve({ ...p, id: 'generated-id' } as any));
+      productRepo.save.mockImplementation((p) =>
+        Promise.resolve({ ...p, id: 'generated-id' } as any),
+      );
 
       const result = await service.seedProducts('unknown-tenant');
 

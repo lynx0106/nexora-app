@@ -25,7 +25,7 @@ export class SentryFilter implements ExceptionFilter {
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      
+
       if (typeof exceptionResponse === 'string') {
         message = exceptionResponse;
       } else if (typeof exceptionResponse === 'object') {
@@ -51,7 +51,7 @@ export class SentryFilter implements ExceptionFilter {
         scope.setExtra('body', request.body);
         scope.setExtra('query', request.query);
         scope.setExtra('params', request.params);
-        
+
         const user = (request as any).user;
         if (user) {
           scope.setUser({
@@ -65,7 +65,10 @@ export class SentryFilter implements ExceptionFilter {
         if (exception instanceof Error) {
           Sentry.captureException(exception);
         } else {
-          Sentry.captureMessage(`Non-Error exception: ${JSON.stringify(exception)}`, 'error');
+          Sentry.captureMessage(
+            `Non-Error exception: ${JSON.stringify(exception)}`,
+            'error',
+          );
         }
       });
     }

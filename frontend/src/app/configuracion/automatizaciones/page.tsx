@@ -12,20 +12,12 @@ interface Automation {
   description: string | null;
   enabled: boolean;
   schedule: string | null;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
   lastRunAt: string | null;
   nextRunAt: string | null;
   createdAt: string;
 }
 
-interface AutomationRun {
-  id: string;
-  status: string;
-  result: Record<string, any>;
-  errorMessage: string | null;
-  startedAt: string;
-  completedAt: string | null;
-}
 
 const automationTypes = {
   reminder: { label: 'Recordatorio de Citas', icon: '📅', color: 'bg-blue-900/40 text-blue-200' },
@@ -128,13 +120,20 @@ export default function AutomatizacionesPage() {
 
   const handleEdit = (automation: Automation) => {
     setEditingAutomation(automation);
+    const defaultConfig = {
+      hoursBefore: [24, 2],
+      channels: ['email'],
+      target: 'all_clients',
+      message: '',
+      tasks: ['expired_tokens'],
+    };
     setFormData({
       name: automation.name,
       type: automation.type,
       description: automation.description || '',
       enabled: automation.enabled,
       schedule: automation.schedule || '0 * * * *',
-      config: automation.config as any || {},
+      config: { ...defaultConfig, ...(automation.config || {}) },
     });
     setShowModal(true);
   };

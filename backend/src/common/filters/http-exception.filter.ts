@@ -8,7 +8,10 @@ import {
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { reportError } from '../observability/error-tracker';
-import { BusinessException, BusinessErrorCode } from '../exceptions/business.exception';
+import {
+  BusinessException,
+  BusinessErrorCode,
+} from '../exceptions/business.exception';
 
 interface ErrorResponse {
   statusCode: number;
@@ -38,7 +41,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const user = (request as any).user;
 
     // Construir respuesta de error estructurada
-    const errorResponse = this.buildErrorResponse(exception, status, request, requestId);
+    const errorResponse = this.buildErrorResponse(
+      exception,
+      status,
+      request,
+      requestId,
+    );
 
     // Logging estructurado
     const logPayload = {
@@ -50,7 +58,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
       tenantId: user?.tenantId,
       userId: user?.userId,
       error: exception instanceof Error ? exception.message : exception,
-      stack: exception instanceof Error && status >= 500 ? exception.stack : undefined,
+      stack:
+        exception instanceof Error && status >= 500
+          ? exception.stack
+          : undefined,
     };
 
     // Solo loggear errores 4xx y 5xx
@@ -100,7 +111,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Manejar HttpException estándar
     if (exception instanceof HttpException) {
       const httpResponse = exception.getResponse();
-      
+
       // Si ya es un objeto estructurado
       if (typeof httpResponse === 'object' && httpResponse !== null) {
         return {
@@ -115,7 +126,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       // Si es un string
       return {
         statusCode: status,
-        message: httpResponse as string,
+        message: httpResponse,
         timestamp,
         path,
         requestId,
@@ -124,13 +135,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // Errores no controlados (500)
     const isProduction = process.env.NODE_ENV === 'production';
-    
+
     return {
       statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       code: BusinessErrorCode.INTERNAL_ERROR,
-      message: isProduction 
-        ? 'Error interno del servidor' 
-        : (exception instanceof Error ? exception.message : 'Error desconocido'),
+      message: isProduction
+        ? 'Error interno del servidor'
+        : exception instanceof Error
+          ? exception.message
+          : 'Error desconocido',
       timestamp,
       path,
       requestId,

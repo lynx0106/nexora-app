@@ -10,7 +10,10 @@ import {
 } from 'class-validator';
 
 export class CreateProductDto {
-  @ApiProperty({ description: 'Nombre del producto', example: 'Hamburguesa Clásica' })
+  @ApiProperty({
+    description: 'Nombre del producto',
+    example: 'Hamburguesa Clásica',
+  })
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -26,7 +29,10 @@ export class CreateProductDto {
   @Min(0)
   price?: number;
 
-  @ApiPropertyOptional({ description: 'Duración en minutos (para servicios)', example: 30 })
+  @ApiPropertyOptional({
+    description: 'Duración en minutos (para servicios)',
+    example: 30,
+  })
   @IsOptional()
   @IsNumber()
   @Min(0)
@@ -43,7 +49,10 @@ export class CreateProductDto {
   @Min(0)
   stock?: number;
 
-  @ApiPropertyOptional({ description: 'Si el producto está activo', default: true })
+  @ApiPropertyOptional({
+    description: 'Si el producto está activo',
+    default: true,
+  })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

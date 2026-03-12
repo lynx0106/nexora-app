@@ -45,7 +45,9 @@ export class DashboardService {
   ) {}
 
   async getDashboardByBusinessType(tenantId: string): Promise<BusinessMetrics> {
-    const tenant = await this.tenantsRepository.findOne({ where: { id: tenantId } });
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
     if (!tenant) {
       throw new Error('Tenant not found');
     }
@@ -88,7 +90,10 @@ export class DashboardService {
     };
   }
 
-  private async getSpecificMetrics(tenantId: string, businessType: string): Promise<Record<string, any>> {
+  private async getSpecificMetrics(
+    tenantId: string,
+    businessType: string,
+  ): Promise<Record<string, any>> {
     switch (businessType) {
       case 'restaurant':
         return await this.getRestaurantMetrics(tenantId);
@@ -109,8 +114,12 @@ export class DashboardService {
     }
   }
 
-  private async getRestaurantMetrics(tenantId: string): Promise<Record<string, any>> {
-    const tenant = await this.tenantsRepository.findOne({ where: { id: tenantId } });
+  private async getRestaurantMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
     const tablesCount = tenant?.tablesCount || 0;
 
     // Peak hours analysis
@@ -125,7 +134,9 @@ export class DashboardService {
       salesByHour[hour] = (salesByHour[hour] || 0) + 1;
     });
 
-    const peakHour = Object.entries(salesByHour).sort(([, a], [, b]) => b - a)[0];
+    const peakHour = Object.entries(salesByHour).sort(
+      ([, a], [, b]) => b - a,
+    )[0];
 
     // Today's orders
     const today = new Date();
@@ -142,42 +153,64 @@ export class DashboardService {
       peakHour: peakHour ? parseInt(peakHour[0]) : null,
       peakHourOrders: peakHour ? peakHour[1] : 0,
       todayOrders,
-      averageOrdersPerDay: orders.length > 0 ? Math.ceil(orders.length / 30) : 0,
+      averageOrdersPerDay:
+        orders.length > 0 ? Math.ceil(orders.length / 30) : 0,
     };
   }
 
-  private async getHotelMetrics(tenantId: string): Promise<Record<string, any>> {
-    const tenant = await this.tenantsRepository.findOne({ where: { id: tenantId } });
+  private async getHotelMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
     const capacity = tenant?.capacity || 0;
 
     // Check-ins and check-outs (simulated with appointments)
     const today = new Date();
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
     const checkInsToday = appointments.filter((a) => {
       const date = new Date(a.dateTime);
-      return date.toDateString() === today.toDateString() && a.status === 'confirmed';
+      return (
+        date.toDateString() === today.toDateString() && a.status === 'confirmed'
+      );
     }).length;
 
     const checkOutsToday = appointments.filter((a) => {
       const date = new Date(a.dateTime);
-      return date.toDateString() === today.toDateString() && a.status === 'completed';
+      return (
+        date.toDateString() === today.toDateString() && a.status === 'completed'
+      );
     }).length;
 
     return {
       totalRooms: capacity,
       checkInsToday,
       checkOutsToday,
-      occupancyRate: capacity > 0 ? Math.round((checkInsToday / capacity) * 100) : 0,
+      occupancyRate:
+        capacity > 0 ? Math.round((checkInsToday / capacity) * 100) : 0,
     };
   }
 
-  private async getClinicMetrics(tenantId: string): Promise<Record<string, any>> {
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+  private async getClinicMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
-    const completedAppointments = appointments.filter((a) => a.status === 'completed').length;
-    const pendingAppointments = appointments.filter((a) => a.status === 'pending').length;
-    const cancelledAppointments = appointments.filter((a) => a.status === 'cancelled').length;
+    const completedAppointments = appointments.filter(
+      (a) => a.status === 'completed',
+    ).length;
+    const pendingAppointments = appointments.filter(
+      (a) => a.status === 'pending',
+    ).length;
+    const cancelledAppointments = appointments.filter(
+      (a) => a.status === 'cancelled',
+    ).length;
 
     // Doctors count
     const doctors = await this.usersRepository.count({
@@ -190,11 +223,16 @@ export class DashboardService {
       pendingAppointments,
       cancelledAppointments,
       doctorsCount: doctors,
-      completionRate: appointments.length > 0 ? Math.round((completedAppointments / appointments.length) * 100) : 0,
+      completionRate:
+        appointments.length > 0
+          ? Math.round((completedAppointments / appointments.length) * 100)
+          : 0,
     };
   }
 
-  private async getRetailMetrics(tenantId: string): Promise<Record<string, any>> {
+  private async getRetailMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
     // Low stock products
     const lowStockProducts = await this.productsRepository
       .createQueryBuilder('product')
@@ -210,7 +248,9 @@ export class DashboardService {
       .getCount();
 
     // Total products
-    const totalProducts = await this.productsRepository.count({ where: { tenantId } });
+    const totalProducts = await this.productsRepository.count({
+      where: { tenantId },
+    });
 
     return {
       lowStockCount: lowStockProducts.length,
@@ -223,11 +263,19 @@ export class DashboardService {
     };
   }
 
-  private async getServicesMetrics(tenantId: string): Promise<Record<string, any>> {
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+  private async getServicesMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
-    const completedAppointments = appointments.filter((a) => a.status === 'completed').length;
-    const cancelledAppointments = appointments.filter((a) => a.status === 'cancelled').length;
+    const completedAppointments = appointments.filter(
+      (a) => a.status === 'completed',
+    ).length;
+    const cancelledAppointments = appointments.filter(
+      (a) => a.status === 'cancelled',
+    ).length;
 
     // Staff count
     const staff = await this.usersRepository.count({
@@ -239,7 +287,10 @@ export class DashboardService {
       completedServices: completedAppointments,
       cancelledServices: cancelledAppointments,
       staffCount: staff,
-      completionRate: appointments.length > 0 ? Math.round((completedAppointments / appointments.length) * 100) : 0,
+      completionRate:
+        appointments.length > 0
+          ? Math.round((completedAppointments / appointments.length) * 100)
+          : 0,
     };
   }
 
@@ -268,12 +319,17 @@ export class DashboardService {
       activeMembers,
       totalMembers,
       todayCheckIns,
-      retentionRate: totalMembers > 0 ? Math.round((activeMembers / totalMembers) * 100) : 0,
+      retentionRate:
+        totalMembers > 0 ? Math.round((activeMembers / totalMembers) * 100) : 0,
     };
   }
 
-  private async getSalonMetrics(tenantId: string): Promise<Record<string, any>> {
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+  private async getSalonMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
     // Popular services
     const serviceCounts: Record<string, number> = {};
@@ -296,13 +352,18 @@ export class DashboardService {
       totalAppointments: appointments.length,
       popularServices,
       stylistsCount: stylists,
-      averageAppointmentsPerDay: appointments.length > 0 ? Math.ceil(appointments.length / 30) : 0,
+      averageAppointmentsPerDay:
+        appointments.length > 0 ? Math.ceil(appointments.length / 30) : 0,
     };
   }
 
-  private async getDefaultMetrics(tenantId: string): Promise<Record<string, any>> {
+  private async getDefaultMetrics(
+    tenantId: string,
+  ): Promise<Record<string, any>> {
     const orders = await this.ordersRepository.find({ where: { tenantId } });
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
     return {
       totalOrders: orders.length,
@@ -310,7 +371,10 @@ export class DashboardService {
     };
   }
 
-  private async getChartsData(tenantId: string, businessType: string): Promise<any> {
+  private async getChartsData(
+    tenantId: string,
+    businessType: string,
+  ): Promise<any> {
     const salesByDate = await this.getSalesChart(tenantId);
     const topProducts = await this.getTopProducts(tenantId);
     const appointmentsByStatus = await this.getAppointmentsByStatus(tenantId);
@@ -318,8 +382,16 @@ export class DashboardService {
 
     return {
       salesByDate,
-      topProducts: ['restaurant', 'retail', 'services'].includes(businessType) ? topProducts : undefined,
-      appointmentsByStatus: ['clinic', 'hotel', 'services', 'gym', 'salon'].includes(businessType)
+      topProducts: ['restaurant', 'retail', 'services'].includes(businessType)
+        ? topProducts
+        : undefined,
+      appointmentsByStatus: [
+        'clinic',
+        'hotel',
+        'services',
+        'gym',
+        'salon',
+      ].includes(businessType)
         ? appointmentsByStatus
         : undefined,
       salesByHour: businessType === 'restaurant' ? salesByHour : undefined,
@@ -384,13 +456,18 @@ export class DashboardService {
       .sort((a, b) => a.date.localeCompare(b.date));
   }
 
-  private async getTopProducts(tenantId: string): Promise<{ name: string; quantity: number; revenue: number }[]> {
+  private async getTopProducts(
+    tenantId: string,
+  ): Promise<{ name: string; quantity: number; revenue: number }[]> {
     const orders = await this.ordersRepository.find({
       where: { tenantId },
       relations: ['items', 'items.product'],
     });
 
-    const productStats: Record<string, { quantity: number; revenue: number; name: string }> = {};
+    const productStats: Record<
+      string,
+      { quantity: number; revenue: number; name: string }
+    > = {};
 
     orders.forEach((order) => {
       order.items?.forEach((item) => {
@@ -412,18 +489,27 @@ export class DashboardService {
       .slice(0, 5);
   }
 
-  private async getAppointmentsByStatus(tenantId: string): Promise<{ status: string; count: number }[]> {
-    const appointments = await this.appointmentsRepository.find({ where: { tenantId } });
+  private async getAppointmentsByStatus(
+    tenantId: string,
+  ): Promise<{ status: string; count: number }[]> {
+    const appointments = await this.appointmentsRepository.find({
+      where: { tenantId },
+    });
 
     const statusCounts: Record<string, number> = {};
     appointments.forEach((a) => {
       statusCounts[a.status] = (statusCounts[a.status] || 0) + 1;
     });
 
-    return Object.entries(statusCounts).map(([status, count]) => ({ status, count }));
+    return Object.entries(statusCounts).map(([status, count]) => ({
+      status,
+      count,
+    }));
   }
 
-  private async getSalesByHour(tenantId: string): Promise<{ hour: number; count: number }[]> {
+  private async getSalesByHour(
+    tenantId: string,
+  ): Promise<{ hour: number; count: number }[]> {
     const orders = await this.ordersRepository.find({ where: { tenantId } });
 
     const hourCounts: Record<number, number> = {};

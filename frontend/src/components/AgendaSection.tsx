@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { appointmentsService, Appointment } from "../services/appointments";
 import { fetchAPIWithAuth } from "../lib/api";
+import { showToast } from "../lib/toast";
 import EmptyState from "./ui/EmptyState";
 import Skeleton from "./ui/Skeleton";
 
@@ -107,15 +108,15 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
     }
   }, [selectedTenantId, role]);
 
-  if (!tenantId && role !== 'superadmin') {
-      return <div className="text-zinc-500 text-center py-8">{t('agenda.no_tenant_assigned')}</div>;
-  }
-
   useEffect(() => {
     if (role === 'user' && currentUserId) {
       setNewAppointment(prev => ({ ...prev, clientId: currentUserId }));
     }
   }, [role, currentUserId]);
+
+  if (!tenantId && role !== 'superadmin') {
+      return <div className="text-slate-400 text-center py-8">{t('agenda.no_tenant_assigned')}</div>;
+  }
 
   async function loadData(tid: string) {
     setLoading(true);
@@ -194,18 +195,24 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
            ...newClient,
            tenantId: selectedTenantId,
            role: 'user',
-           password: 'TempPassword123!', 
+           generateTempPassword: true,
         })
-      });
+      }) as { id: string; firstName: string; lastName: string; temporaryPassword?: string };
       
       setClients([...clients, createdUser]);
       setNewAppointment({ ...newAppointment, clientId: createdUser.id });
       setShowCreateClientForm(false);
       setNewClient({ firstName: "", lastName: "", email: "", phone: "" });
-      alert(`${t('agenda.alerts.client_created')}: ${createdUser.firstName} ${createdUser.lastName}. ${t('agenda.alerts.temp_password')}: TempPassword123!`);
+      const tempPw = createdUser.temporaryPassword;
+      showToast(
+        tempPw
+          ? `${t('agenda.alerts.client_created')}: ${createdUser.firstName} ${createdUser.lastName}. ${t('agenda.alerts.temp_password')}: ${tempPw}`
+          : `${t('agenda.alerts.client_created')}: ${createdUser.firstName} ${createdUser.lastName}`,
+        'success'
+      );
 
-    } catch (err: any) {
-      alert(err.message || t('agenda.alerts.create_error'));
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : t('agenda.alerts.create_error'), 'error');
     } finally {
       setCreateClientLoading(false);
     }
@@ -223,7 +230,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       };
 
       if (!payload.tenantId) {
-        alert(t('agenda.alerts.select_tenant'));
+        showToast(t('agenda.alerts.select_tenant'), 'error');
         setCreateLoading(false);
         return;
       }
@@ -240,7 +247,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       loadData(selectedTenantId); 
     } catch (err: any) {
       const actionError = editingId ? t('agenda.alerts.update_error') : t('agenda.alerts.create_error');
-      alert(err.message || `${actionError} ${itemLabel}`);
+      showToast(err.message || `${actionError} ${itemLabel}`, 'error');
     } finally {
       setCreateLoading(false);
     }
@@ -268,7 +275,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
         await appointmentsService.updateStatus(id, newStatus);
         setAppointments(appointments.map(a => a.id === id ? { ...a, status: newStatus } : a));
     } catch (err: any) {
-        alert(err.message || t('agenda.alerts.status_update_error'));
+        showToast(err.message || t('agenda.alerts.status_update_error'), 'error');
     }
   }
 
@@ -278,7 +285,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
         await appointmentsService.delete(id);
         setAppointments(appointments.filter(a => a.id !== id));
     } catch (err: any) {
-        alert(err.message || t('agenda.alerts.delete_error'));
+        showToast(err.message || t('agenda.alerts.delete_error'), 'error');
     }
   }
 
@@ -304,14 +311,14 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900">
+          <h2 className="text-xl font-semibold text-slate-100">
             {isRestaurant ? t('agenda.title_restaurant') : t('agenda.title_service')}
           </h2>
           {role === 'superadmin' && (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-zinc-500">{t('agenda.viewing_tenant')}</span>
+              <span className="text-sm text-slate-400">{t('agenda.viewing_tenant')}</span>
               <select
-                className="rounded-md border border-zinc-300 px-2 py-1 text-sm font-medium"
+                className="rounded-md border border-slate-600 px-2 py-1 text-sm font-medium"
                 value={selectedTenantId}
                 onChange={(e) => setSelectedTenantId(e.target.value)}
               >
@@ -322,7 +329,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                   </option>
                 ))}
               </select>
-              <div className="text-xs text-zinc-400">
+              <div className="text-xs text-slate-400">
                  {selectedTenantId ? `(ID: ${selectedTenantId} | Docs: ${doctors.length}, Servs: ${services.length}, Clis: ${clients.length})` : t('agenda.global_view')}
               </div>
             </div>
@@ -346,22 +353,22 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                 });
              }
           }}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
         >
           {showCreateForm ? t('common.cancel') : `${t('common.create')} ${itemLabel}`}
         </button>
       </div>
 
       {showCreateForm && (
-        <form onSubmit={handleSubmit} className="rounded-lg border border-zinc-200 bg-white p-6 shadow-sm space-y-4">
+        <form onSubmit={handleSubmit} className="rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-sm space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {role !== 'user' && (
             <div>
-              <label className="block text-sm font-medium text-zinc-700">{t('agenda.client')}</label>
+              <label className="block text-sm font-medium text-slate-300">{t('agenda.client')}</label>
               <div className="flex gap-2">
                 <select
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                   value={newAppointment.clientId}
                   onChange={(e) => setNewAppointment({...newAppointment, clientId: e.target.value})}
                 >
@@ -373,7 +380,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                 <button
                   type="button"
                   onClick={() => setShowCreateClientForm(true)}
-                  className="mt-1 rounded-md bg-zinc-100 px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-200 whitespace-nowrap"
+                  className="mt-1 rounded-md bg-slate-700 px-3 py-2 text-sm font-medium text-slate-300 hover:bg-slate-600 whitespace-nowrap"
                 >
                   + {t('common.create')}
                 </button>
@@ -382,12 +389,12 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             )}
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700">
+              <label className="block text-sm font-medium text-slate-300">
                 {isRestaurant ? t('agenda.assign_staff_optional') : t('agenda.doctor')}
               </label>
               <select
                 required={!isRestaurant}
-                className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 value={newAppointment.doctorId}
                 onChange={(e) => setNewAppointment({...newAppointment, doctorId: e.target.value})}
               >
@@ -399,12 +406,12 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700">
+              <label className="block text-sm font-medium text-slate-300">
                 {isRestaurant ? t('products.menu_title') : t('agenda.service')}
               </label>
               <select
                 required
-                className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 value={newAppointment.serviceId}
                 onChange={(e) => setNewAppointment({...newAppointment, serviceId: e.target.value})}
               >
@@ -416,11 +423,11 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-zinc-700">{t('agenda.date_time')}</label>
+              <label className="block text-sm font-medium text-slate-300">{t('agenda.date_time')}</label>
               <input
                 type="datetime-local"
                 required
-                className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 value={newAppointment.dateTime}
                 onChange={(e) => setNewAppointment({...newAppointment, dateTime: e.target.value})}
               />
@@ -429,20 +436,20 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             {isRestaurant && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">{t('agenda.pax')}</label>
+                  <label className="block text-sm font-medium text-slate-300">{t('agenda.pax')}</label>
                   <input
                     type="number"
                     min="1"
                     required
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                     value={newAppointment.pax}
                     onChange={(e) => setNewAppointment({...newAppointment, pax: parseInt(e.target.value)})}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-zinc-700">{t('agenda.occasion')}</label>
+                  <label className="block text-sm font-medium text-slate-300">{t('agenda.occasion')}</label>
                   <select
-                    className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                    className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                     value={newAppointment.occasion}
                     onChange={(e) => setNewAppointment({...newAppointment, occasion: e.target.value})}
                   >
@@ -460,9 +467,9 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-zinc-700">{t('agenda.notes')}</label>
+            <label className="block text-sm font-medium text-slate-300">{t('agenda.notes')}</label>
             <textarea
-              className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
               rows={2}
               value={newAppointment.notes}
               onChange={(e) => setNewAppointment({...newAppointment, notes: e.target.value})}
@@ -473,7 +480,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
             <button
               type="submit"
               disabled={createLoading}
-              className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50"
             >
               {createLoading ? t('common.loading') : `${t('common.save')} ${itemLabel}`}
             </button>
@@ -481,28 +488,28 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
         </form>
       )}
 
-      <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-zinc-200">
-          <thead className="bg-zinc-50">
+      <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-sm">
+        <table className="min-w-full divide-y divide-slate-700">
+          <thead className="bg-slate-800/80">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.date_time')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.client')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.date_time')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.client')}</th>
               {isRestaurant && (
                  <>
-                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.pax')}</th>
-                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.occasion')}</th>
+                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.pax')}</th>
+                   <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.occasion')}</th>
                  </>
               )}
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.service')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.doctor')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('agenda.status')}</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-zinc-500">{t('common.actions')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.service')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.doctor')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('agenda.status')}</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-slate-400">{t('common.actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200 bg-white">
+          <tbody className="divide-y divide-slate-700 bg-slate-800">
             {appointments.length === 0 ? (
               <tr>
-                <td colSpan={isRestaurant ? 8 : 6} className="px-6 py-8 text-center text-sm text-zinc-500">
+                <td colSpan={isRestaurant ? 8 : 6} className="px-6 py-8 text-center text-sm text-slate-400">
                   <EmptyState
                     titulo={`No hay ${itemLabel.toLowerCase()}s programadas`}
                     descripcion={t('agenda.create_first') || t('common.create')}
@@ -511,54 +518,54 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
               </tr>
             ) : (
               appointments.map((appt) => (
-                <tr key={appt.id}>
+                <tr key={appt.id} className="hover:bg-slate-800/50">
                   {role === 'superadmin' && !selectedTenantId && (
-                    <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                    <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                        {appt.tenant?.name || appt.tenantId}
-                       {appt.tenant?.sector ? <span className="ml-1 text-xs text-gray-500">({appt.tenant.sector})</span> : ''}
+                       {appt.tenant?.sector ? <span className="ml-1 text-xs text-slate-400">({appt.tenant.sector})</span> : ''}
                     </td>
                   )}
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                     {new Date(appt.dateTime).toLocaleString()}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                     {appt.client ? `${appt.client.firstName} ${appt.client.lastName}` : 'Cliente eliminado'}
                   </td>
                   {isRestaurant && (
                     <>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                         {/* @ts-ignore - pax exists in backend entity */}
                         {(appt as any).pax || '-'}
                       </td>
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                         {/* @ts-ignore - occasion exists in backend entity */}
                         {(appt as any).occasion || '-'}
                       </td>
                     </>
                   )}
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
                     {appt.service ? appt.service.name : 'Servicio eliminado'}
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-400">
                     {appt.doctor ? `${appt.doctor.firstName} ${appt.doctor.lastName}` : 'N/A'}
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm">
                     <span className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                      appt.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                      appt.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-gray-100 text-gray-800'
+                      appt.status === 'confirmed' ? 'bg-emerald-900/40 text-emerald-300' :
+                      appt.status === 'pending' ? 'bg-amber-900/40 text-amber-300' :
+                      'bg-slate-700 text-slate-300'
                     }`}>
                       {appt.status}
                     </span>
                   </td>
-                  <td className="whitespace-nowrap px-6 py-4 text-sm text-zinc-500">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-400">
                     <div className="flex items-center gap-2">
                         {role !== 'user' ? (
                         <>
                         <select
                             value={appt.status}
                             onChange={(e) => handleStatusChange(appt.id, e.target.value)}
-                            className="rounded-md border-zinc-300 py-1 pl-2 pr-6 text-xs focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                            className="rounded-md border-slate-600 py-1 pl-2 pr-6 text-xs focus:border-teal-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                         >
                             <option value="pending">Pendiente</option>
                             <option value="confirmed">Confirmada</option>
@@ -567,7 +574,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                         </select>
                         <button
                             onClick={() => handleDelete(appt.id)}
-                            className="text-red-600 hover:text-red-900 text-xs font-medium"
+                            className="text-red-400 hover:text-red-300 text-xs font-medium"
                         >
                             Eliminar
                         </button>
@@ -576,7 +583,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                           appt.status === 'pending' || appt.status === 'confirmed' ? (
                              <button
                                 onClick={() => handleStatusChange(appt.id, 'cancelled')}
-                                className="text-red-600 hover:text-red-900 text-xs font-medium"
+                                className="text-red-400 hover:text-red-300 text-xs font-medium"
                             >
                                 Cancelar {itemLabel}
                             </button>
@@ -593,44 +600,44 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       {/* Modal de Nuevo Cliente */}
       {showCreateClientForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-medium text-zinc-900">Nuevo Cliente</h3>
+          <div className="w-full max-w-md rounded-lg bg-slate-800 p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-medium text-slate-100">Nuevo Cliente</h3>
             <form onSubmit={handleCreateClient} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Nombre</label>
+                <label className="block text-sm font-medium text-slate-300">Nombre</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.firstName}
                   onChange={(e) => setNewClient({...newClient, firstName: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Apellido</label>
+                <label className="block text-sm font-medium text-slate-300">Apellido</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.lastName}
                   onChange={(e) => setNewClient({...newClient, lastName: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Email</label>
+                <label className="block text-sm font-medium text-slate-300">Email</label>
                 <input
                   type="email"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.email}
                   onChange={(e) => setNewClient({...newClient, email: e.target.value})}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Teléfono</label>
+                <label className="block text-sm font-medium text-slate-300">Teléfono</label>
                 <input
                   type="tel"
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.phone}
                   onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
                 />
@@ -639,14 +646,14 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                 <button
                   type="button"
                   onClick={() => setShowCreateClientForm(false)}
-                  className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                  className="rounded-md border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-300 hover:bg-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={createClientLoading}
-                  className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+                  className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50"
                 >
                   {createClientLoading ? "Guardando..." : "Crear Cliente"}
                 </button>

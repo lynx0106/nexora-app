@@ -11,10 +11,11 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 import { AppointmentsService } from './appointments.service';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('appointments')
 @UseGuards(AuthGuard('jwt'))
@@ -22,8 +23,11 @@ export class AppointmentsController {
   constructor(private readonly appointmentsService: AppointmentsService) {}
 
   @Post()
-  create(@Body() createAppointmentDto: CreateAppointmentDto, @Req() req: any) {
-    const user = req.user;
+  create(
+    @Body() createAppointmentDto: CreateAppointmentDto,
+    @Req() req: Request,
+  ) {
+    const user = req.user!;
     if (
       user.tenantId !== createAppointmentDto.tenantId &&
       user.role !== 'superadmin'
@@ -33,29 +37,31 @@ export class AppointmentsController {
 
     // Security: If user is normal user, force clientId to be their own ID
     if (user.role === 'user') {
-      createAppointmentDto.clientId = user.userId || user.sub || user.id;
+      createAppointmentDto.clientId = user.userId;
     }
 
     return this.appointmentsService.create(createAppointmentDto);
   }
 
   @Get('stats/:tenantId')
-  async getStats(@Param('tenantId') tenantId: string, @Req() req: any) {
-    const user = req.user;
+  async getStats(@Param('tenantId') tenantId: string, @Req() req: Request) {
+    const user = req.user!;
     if (user.role !== 'superadmin' && user.tenantId !== tenantId) {
       throw new ForbiddenException(
         'No tienes permiso para ver estadísticas de otro tenant',
       );
     }
-    const targetUserId = user.role === 'user' ? user.id : undefined;
+    const targetUserId = user.role === 'user' ? user.userId : undefined;
     return this.appointmentsService.getDashboardStats(tenantId, targetUserId);
   }
 
   @Get('all')
-  findAllGlobal(@Req() req: any) {
-    const user = req.user;
+  findAllGlobal(@Req() req: Request) {
+    const user = req.user!;
     if (user.role !== 'superadmin') {
-      throw new ForbiddenException('Solo el superadmin puede ver todas las citas');
+      throw new ForbiddenException(
+        'Solo el superadmin puede ver todas las citas',
+      );
     }
     return this.appointmentsService.findAllGlobal();
   }
@@ -63,10 +69,10 @@ export class AppointmentsController {
   @Get('tenant/:tenantId')
   findAll(
     @Param('tenantId') tenantId: string,
-    @Req() req: any,
+    @Req() req: Request,
     @Query('userId') userId?: string,
   ) {
-    const user = req.user;
+    const user = req.user!;
     if (user.role !== 'superadmin' && user.tenantId !== tenantId) {
       throw new ForbiddenException(
         'No tienes permiso para ver citas de otro tenant',
@@ -77,7 +83,7 @@ export class AppointmentsController {
     if (user.role === 'user') {
       return this.appointmentsService.findAllByTenantAndUser(
         tenantId,
-        user.userId || user.sub || user.id,
+        user.userId,
       );
     }
 
@@ -97,9 +103,9 @@ export class AppointmentsController {
   async updateStatus(
     @Param('id') id: string,
     @Body('status') status: string,
-    @Req() req: any,
+    @Req() req: Request,
   ) {
-    const user = req.user;
+    const user = req.user!;
     // Only admin/superadmin/staff can update status. Users cannot.
     if (user.role === 'user') {
       throw new ForbiddenException(
@@ -113,41 +119,40 @@ export class AppointmentsController {
   async update(
     @Param('id') id: string,
     @Body() updateData: UpdateAppointmentDto,
-    @Req() req: any,
+    @Req() req: Request,
   ) {
-    const user = req.user;
+    const user = req.user!;
 
     // Check ownership if user
     if (user.role === 'user') {
       const appointment = await this.appointmentsService.findOne(id);
       if (!appointment) return null;
 
-      if (appointment.clientId !== user.id) {
+      if (appointment.clientId !== user.userId) {
         throw new ForbiddenException(
           'No puedes editar una cita que no es tuya',
         );
       }
 
-      // Users can only update specific fields (e.g. notes, or maybe reschedule?)
-      // For now, let's allow them to update, but ensure they can't change the 'status' or 'price' via this endpoint if payload has it.
-      // Sanitizing payload:
-      delete (updateData as any).status;
-      delete (updateData as any).price;
-      delete (updateData as any).doctorId; // Cannot change doctor? Maybe allow.
+      // Users can only update specific fields (e.g. notes, reschedule). Sanitize payload to block status/price/doctorId.
+      const payload = updateData as Record<string, unknown>;
+      delete payload.status;
+      delete payload.price;
+      delete payload.doctorId;
     }
 
     return this.appointmentsService.update(id, updateData);
   }
 
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: any) {
-    const user = req.user;
+  async remove(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user!;
 
     if (user.role === 'user') {
       const appointment = await this.appointmentsService.findOne(id);
       if (!appointment) return { deleted: false };
 
-      if (appointment.clientId !== user.id) {
+      if (appointment.clientId !== user.userId) {
         throw new ForbiddenException(
           'No puedes eliminar una cita que no es tuya',
         );

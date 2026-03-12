@@ -18,11 +18,17 @@ export class RegisterDto {
   @IsString()
   lastName: string;
 
-  @ApiProperty({ example: 'john@example.com', description: 'User email address' })
+  @ApiProperty({
+    example: 'john@example.com',
+    description: 'User email address',
+  })
   @IsEmail()
   email: string;
 
-  @ApiPropertyOptional({ example: '+573001234567', description: 'User phone number' })
+  @ApiPropertyOptional({
+    example: '+573001234567',
+    description: 'User phone number',
+  })
   @IsOptional()
   @IsString()
   phone?: string;
@@ -32,30 +38,44 @@ export class RegisterDto {
   @IsString()
   address?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg', description: 'User avatar URL' })
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'User avatar URL',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string;
 
-  @ApiProperty({ example: 'password123', description: 'User password - minimum 6 characters', minLength: 6 })
+  @ApiProperty({
+    example: 'password123',
+    description: 'User password - minimum 6 characters',
+    minLength: 6,
+  })
   @IsString()
   @MinLength(6)
   password: string;
 
-  @ApiPropertyOptional({ example: 'restaurante-demo', description: 'Tenant ID (opcional si se usa invitationId)' })
+  @ApiPropertyOptional({
+    example: 'restaurante-demo',
+    description: 'Tenant ID (opcional si se usa invitationId)',
+  })
   @IsOptional()
   @IsString()
   tenantId?: string;
 
-  @ApiPropertyOptional({ 
-    example: '550e8400-e29b-41d4-a716-446655440000', 
-    description: 'ID de la invitación (reemplaza tenantId y role)' 
+  @ApiPropertyOptional({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    description: 'ID de la invitación (reemplaza tenantId y role)',
   })
   @IsOptional()
   @IsUUID()
   invitationId?: string;
 
-  @ApiPropertyOptional({ enum: Role, description: 'User role - defaults to user if not specified', default: 'user' })
+  @ApiPropertyOptional({
+    enum: Role,
+    description: 'User role - defaults to user if not specified',
+    default: 'user',
+  })
   @IsOptional()
   @IsIn(Object.values(Role))
   role?: string;

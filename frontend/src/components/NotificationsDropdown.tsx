@@ -109,7 +109,7 @@ export default function NotificationsDropdown() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+        className="relative p-2 text-slate-400 hover:text-slate-100 focus:outline-none"
       >
         <Bell className="w-6 h-6" />
         {unreadCount > 0 && (
@@ -120,14 +120,14 @@ export default function NotificationsDropdown() {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 z-50 w-80 mt-2 origin-top-right bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+        <div className="absolute right-0 z-50 w-80 mt-2 origin-top-right bg-slate-900 border border-slate-800 rounded-md shadow-lg ring-1 ring-slate-700 focus:outline-none">
           <div className="py-1">
-            <div className="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+            <div className="px-4 py-2 border-b border-slate-700 flex justify-between items-center">
               <h3 className="text-sm font-semibold text-gray-700">{t('notifications.title')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-xs text-blue-600 hover:text-blue-800"
+                  className="text-xs text-teal-400 hover:text-teal-300"
                 >
                   {t('notifications.mark_all_read')}
                 </button>
@@ -136,26 +136,26 @@ export default function NotificationsDropdown() {
             
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                <div className="px-4 py-3 text-sm text-slate-400 text-center">
                   {t('notifications.no_notifications')}
                 </div>
               ) : (
                 notifications.map((notification) => (
                   <div
                     key={notification.id}
-                    className={`px-4 py-3 hover:bg-gray-50 border-b border-gray-100 last:border-0 ${
-                      !notification.isRead ? 'bg-blue-50' : ''
+                    className={`px-4 py-3 hover:bg-slate-800 border-b border-slate-700 last:border-0 ${
+                      !notification.isRead ? 'bg-teal-900/20' : ''
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">
+                        <p className="text-sm font-medium text-slate-100">
                           {notification.title}
                         </p>
-                        <p className="text-sm text-gray-500 mt-1">
+                        <p className="text-sm text-slate-400 mt-1">
                           {notification.message}
                         </p>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-slate-400 mt-1">
                           {new Date(notification.createdAt).toLocaleString()}
                         </p>
                       </div>

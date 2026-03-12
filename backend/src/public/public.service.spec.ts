@@ -1,4 +1,8 @@
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 import * as crypto from 'crypto';
 import { PublicService } from './public.service';
 
@@ -6,7 +10,10 @@ describe('PublicService', () => {
   const tenantsService = { findOne: jest.fn() };
   const productsService = { findAllByTenant: jest.fn() };
   const appointmentsService = { findByDateRange: jest.fn(), create: jest.fn() };
-  const usersService = { findByEmail: jest.fn(), createUserForTenant: jest.fn() };
+  const usersService = {
+    findByEmail: jest.fn(),
+    createUserForTenant: jest.fn(),
+  };
   const ordersService = { create: jest.fn(), findOne: jest.fn() };
 
   let service: PublicService;
@@ -111,25 +118,25 @@ describe('PublicService', () => {
         appointmentDuration: 60,
       });
 
-      await expect(service.getAvailability('tenant-1', 'invalid')).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.getAvailability('tenant-1', 'invalid'),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('should throw BadRequestException if tenant not found', async () => {
       tenantsService.findOne.mockResolvedValue(null);
 
-      await expect(service.getAvailability('tenant-1', '2026-02-20')).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.getAvailability('tenant-1', '2026-02-20'),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
   });
 
   describe('getOrderStatus', () => {
     it('bloquea cuando falta token en consulta publica de pedido', async () => {
-      await expect(service.getOrderStatus('order-1', '')).rejects.toBeInstanceOf(
-        BadRequestException,
-      );
+      await expect(
+        service.getOrderStatus('order-1', ''),
+      ).rejects.toBeInstanceOf(BadRequestException);
     });
 
     it('bloquea token expirado', async () => {
@@ -141,9 +148,9 @@ describe('PublicService', () => {
         tenant: { currency: 'USD', name: 'Demo', logoUrl: '', phone: '' },
       });
 
-      await expect(service.getOrderStatus('order-2', 'token')).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.getOrderStatus('order-2', 'token'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('rechaza token invalido', async () => {
@@ -158,9 +165,9 @@ describe('PublicService', () => {
         tenant: { currency: 'USD', name: 'Demo', logoUrl: '', phone: '' },
       });
 
-      await expect(service.getOrderStatus('order-3', 'other')).rejects.toBeInstanceOf(
-        ForbiddenException,
-      );
+      await expect(
+        service.getOrderStatus('order-3', 'other'),
+      ).rejects.toBeInstanceOf(ForbiddenException);
     });
 
     it('retorna estado si token es valido', async () => {

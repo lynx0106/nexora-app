@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +18,22 @@ import { GlobalUserRow } from "../../components/GlobalUserRow";
 import NotificationsDropdown from "../../components/NotificationsDropdown";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "../../components/LanguageSwitcher";
+import {
+  LayoutDashboard,
+  Building2,
+  Users,
+  ShoppingBag,
+  Package,
+  Calendar,
+  CalendarDays,
+  MessageSquare,
+  Mail,
+  UserCog,
+  FileText,
+  Settings,
+  SlidersHorizontal,
+  LogOut,
+} from "lucide-react";
 
 const SettingsSection = dynamic(() => import("../../components/SettingsSection").then((m) => ({ default: m.SettingsSection })), {
   loading: () => <div className="animate-pulse h-32 rounded-lg bg-slate-800/50" />,
@@ -107,16 +123,11 @@ export default function DashboardPage() {
   const isRetail = !tenantSector || ['retail', 'comercio', 'restaurante', 'belleza', 'otros'].includes(tenantSector);
   const isService = !tenantSector || ['salud', 'belleza', 'legal', 'educacion', 'servicios', 'restaurante', 'otros'].includes(tenantSector);
 
-  // Redirect 'user' role from 'resumen' to their first available section
+  // Redirect 'user' role from 'resumen' to their first available section (deferred to avoid sync setState in effect)
   useEffect(() => {
     if (role === 'user' && activeSection === 'resumen') {
-      if (isService) {
-        setActiveSection('agenda');
-      } else if (isRetail) {
-        setActiveSection('pedidos');
-      } else {
-        setActiveSection('ajustes');
-      }
+      const section = isService ? 'agenda' : isRetail ? 'pedidos' : 'ajustes';
+      queueMicrotask(() => setActiveSection(section));
     }
   }, [role, activeSection, isService, isRetail]);
 
@@ -148,7 +159,7 @@ export default function DashboardPage() {
   const [loadingTenants, setLoadingTenants] = useState(false);
   const [tenantSummaryError, setTenantSummaryError] = useState<string | null>(null);
 
-  const fetchTenantSummary = () => {
+  const fetchTenantSummary = useCallback(() => {
     if (role !== "superadmin") return;
     setLoadingTenants(true);
     setTenantSummaryError(null);
@@ -166,18 +177,20 @@ export default function DashboardPage() {
       .finally(() => {
         setLoadingTenants(false);
       });
-  };
-
-  useEffect(() => {
-    if (role === "superadmin") {
-      fetchTenantSummary();
-    }
   }, [role]);
 
   useEffect(() => {
+    if (role === "superadmin") {
+      queueMicrotask(() => fetchTenantSummary());
+    }
+  }, [role, fetchTenantSummary]);
+
+  useEffect(() => {
     if (role === "superadmin" && activeSection === "usuarios_globales") {
-      setLoadingAllUsers(true);
-      setAllUsersError(null);
+      queueMicrotask(() => {
+        setLoadingAllUsers(true);
+        setAllUsersError(null);
+      });
       fetchAPIWithAuth("/users/all")
         .then((data) => {
           setAllUsers(data ?? []);
@@ -218,82 +231,88 @@ export default function DashboardPage() {
       if (mobile) setIsMobileMenuOpen(false);
     };
 
+    const IconWrapper = ({ children, icon: Icon }: { children: React.ReactNode; icon: React.ComponentType<{ className?: string }> }) => (
+      <span className="flex items-center gap-3">
+        {Icon && <Icon className="w-4 h-4 flex-shrink-0" />}
+        {children}
+      </span>
+    );
+
     return (
       <>
         {(role === "admin" || role === "superadmin") && (
           <button onClick={() => handleNavClick("resumen")} className={getItemClass("resumen")}>
-            <span>{t('sidebar.dashboard')}</span>
+            <IconWrapper icon={LayoutDashboard}><span>{t('sidebar.dashboard')}</span></IconWrapper>
           </button>
         )}
         
         {(role === "admin" || role === "superadmin" || (role === "user" && isService)) && (
           <button onClick={() => handleNavClick(role === 'superadmin' ? 'empresas' : 'usuarios')} className={getItemClass(role === 'superadmin' ? 'empresas' : 'usuarios')}>
-             <span>{role === 'superadmin' ? t('sidebar.companies') : role === 'user' ? t('sidebar.professionals') : t('sidebar.team')}</span>
+            <IconWrapper icon={Building2}><span>{role === 'superadmin' ? t('sidebar.companies') : role === 'user' ? t('sidebar.professionals') : t('sidebar.team')}</span></IconWrapper>
           </button>
         )}
 
         {(role === "admin" || role === "superadmin") && (
           <button onClick={() => handleNavClick("clientes")} className={getItemClass("clientes")}>
-            <span>{t('sidebar.clients')}</span>
+            <IconWrapper icon={Users}><span>{t('sidebar.clients')}</span></IconWrapper>
           </button>
         )}
 
         {(role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
           <button onClick={() => handleNavClick("catalogo")} className={getItemClass("catalogo")}>
-            <span>{role === 'user' ? t('sidebar.products') : t('sidebar.catalog')}</span>
+            <IconWrapper icon={Package}><span>{role === 'user' ? t('sidebar.products') : t('sidebar.catalog')}</span></IconWrapper>
           </button>
         )}
 
         {(role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
           <button onClick={() => handleNavClick("pedidos")} className={getItemClass("pedidos")}>
-            <span>{role === 'user' ? t('sidebar.my_orders') : t('sidebar.orders')}</span>
+            <IconWrapper icon={ShoppingBag}><span>{role === 'user' ? t('sidebar.my_orders') : t('sidebar.orders')}</span></IconWrapper>
           </button>
         )}
 
-        {/* Agenda (Service Sector) */}
         {(isService || role === 'superadmin') && (
           <button onClick={() => handleNavClick("agenda")} className={getItemClass("agenda")}>
-            <span>{role === 'user' ? t('sidebar.my_appointments') : t('sidebar.agenda')}</span>
+            <IconWrapper icon={Calendar}><span>{role === 'user' ? t('sidebar.my_appointments') : t('sidebar.agenda')}</span></IconWrapper>
           </button>
         )}
 
-        {/* Reservas (Restaurant Sector) */}
         {((tenantSector === 'restaurante') || role === 'superadmin') && (
           <button onClick={() => handleNavClick("reservas")} className={getItemClass("reservas")}>
-            <span>{role === 'user' ? t('sidebar.my_reservations') : t('sidebar.reservations')}</span>
+            <IconWrapper icon={CalendarDays}><span>{role === 'user' ? t('sidebar.my_reservations') : t('sidebar.reservations')}</span></IconWrapper>
           </button>
         )}
 
         {(role === "admin" || role === "superadmin") && (
           <button onClick={() => handleNavClick("mensajes")} className={getItemClass("mensajes")}>
-            <span>{t('sidebar.messages')}</span>
+            <IconWrapper icon={MessageSquare}><span>{t('sidebar.messages')}</span></IconWrapper>
           </button>
         )}
 
         {(role === "admin" || role === "superadmin") && (
           <button onClick={() => handleNavClick("invitaciones")} className={getItemClass("invitaciones")}>
-            <span>Invitaciones y QR</span>
+            <IconWrapper icon={Mail}><span>Invitaciones y QR</span></IconWrapper>
           </button>
         )}
 
         {role === "superadmin" && (
            <button onClick={() => handleNavClick("usuarios_globales")} className={getItemClass("usuarios_globales")}>
-            <span>{t('sidebar.global_users')}</span>
+            <IconWrapper icon={UserCog}><span>{t('sidebar.global_users')}</span></IconWrapper>
           </button>
         )}
 
         {role === "superadmin" && (
            <button onClick={() => handleNavClick("auditoria")} className={getItemClass("auditoria")}>
-            <span>{t('sidebar.audit')}</span>
+            <IconWrapper icon={FileText}><span>{t('sidebar.audit')}</span></IconWrapper>
           </button>
         )}
 
         <button onClick={() => handleNavClick("ajustes")} className={getItemClass("ajustes")}>
-           <span>{t('sidebar.settings')}</span>
+           <IconWrapper icon={Settings}><span>{t('sidebar.settings')}</span></IconWrapper>
         </button>
 
         {(role === "admin" || role === "superadmin") && (
-             <Link href="/configuracion" onClick={() => mobile && setIsMobileMenuOpen(false)} className={mobile ? baseClass + " text-slate-300 hover:bg-slate-900/60" : "mt-4 inline-flex items-center justify-between rounded-md px-3 py-2 text-left text-slate-300 hover:bg-slate-900/60"}>
+             <Link href="/configuracion" onClick={() => mobile && setIsMobileMenuOpen(false)} className={mobile ? baseClass + " text-slate-300 hover:bg-slate-900/60" : "mt-4 inline-flex items-center gap-3 rounded-md px-3 py-2 text-left text-slate-300 hover:bg-slate-900/60"}>
+                <SlidersHorizontal className="w-4 h-4 flex-shrink-0" />
                 <span>{t('sidebar.configuration')}</span>
              </Link>
         )}
@@ -321,10 +340,10 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100">
-      <div className="flex min-h-screen">
-        <aside className="hidden w-64 flex-col border-r border-slate-800 bg-slate-950/70 px-4 py-6 md:flex">
-          <div className="mb-8 flex flex-col items-center">
+    <div className="h-screen bg-slate-950 text-slate-100 overflow-hidden">
+      <div className="flex h-screen">
+        <aside className="hidden md:flex flex-col flex-shrink-0 w-64 h-screen overflow-y-auto border-r border-slate-800 bg-slate-950/95 sticky top-0 px-4 py-6">
+          <div className="mb-6 flex flex-col items-center flex-shrink-0">
               <Image 
                 src="/logo-fondo.png" 
                 alt="Logo Agencia" 
@@ -339,24 +358,25 @@ export default function DashboardPage() {
               {t('common.role')}: {role?.toUpperCase()}
             </div>
           </div>
-          <nav className="flex flex-1 flex-col gap-1 text-sm">
+          <nav className="flex flex-1 flex-col gap-1 text-sm min-h-0 overflow-y-auto">
             {renderNavItems(false)}
           </nav>
           <button
             onClick={() => {
               logout();
             }}
-            className="mt-6 rounded-md border border-red-500/40 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-950/40"
+            className="mt-4 flex-shrink-0 flex items-center gap-2 rounded-md border border-red-500/40 px-3 py-2 text-xs font-medium text-red-300 hover:bg-red-950/40 transition-colors"
           >
+            <LogOut className="w-4 h-4" />
             {t('sidebar.logout')}
           </button>
-          <div className="mt-6 border-t border-slate-800 pt-4 text-center text-[11px] text-slate-500">
+          <div className="mt-4 flex-shrink-0 border-t border-slate-800 pt-4 text-center text-[11px] text-slate-500">
             Powered by Lynx IA
           </div>
         </aside>
 
-        <div className="flex flex-1 flex-col">
-          <header className="bg-slate-950/70 shadow-sm md:border-b md:border-slate-800 md:shadow-none relative backdrop-blur">
+        <div className="flex flex-1 flex-col min-h-0 overflow-hidden">
+          <header className="flex-shrink-0 bg-slate-950/95 shadow-sm md:border-b md:border-slate-800 relative backdrop-blur">
             <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
               {/* Logo Centered (or Left on Desktop if preferred, but keeping existing style mostly) */}
               <div className="flex flex-1 justify-center md:justify-start items-center gap-3">
@@ -415,7 +435,7 @@ export default function DashboardPage() {
             )}
           </header>
 
-          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 sm:px-6 lg:px-8">
+          <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col min-h-0 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
             {activeSection === "resumen" && (
               <StatsSection
                 role={role}
@@ -528,9 +548,9 @@ export default function DashboardPage() {
             )}
 
             {activeSection === "usuarios_globales" && role === "superadmin" && (
-              <div className="mb-8 rounded-lg bg-white p-6 shadow">
+              <div className="mb-8 rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
                 <div className="mb-4">
-                  <h3 className="text-lg font-medium text-zinc-900">
+                  <h3 className="text-lg font-medium text-slate-100">
                     Usuarios globales del SaaS
                   </h3>
                   <p className="mt-2 text-sm text-zinc-800">
@@ -539,16 +559,16 @@ export default function DashboardPage() {
                 </div>
 
                 {loadingAllUsers ? (
-                  <p className="text-sm text-zinc-700">Cargando usuarios globales...</p>
+                  <p className="text-sm text-slate-300">Cargando usuarios globales...</p>
                 ) : allUsersError ? (
                   <p className="text-sm text-red-600">{allUsersError}</p>
                 ) : allUsers.length === 0 ? (
-                  <p className="text-sm text-zinc-700">Aún no hay usuarios registrados.</p>
+                  <p className="text-sm text-slate-300">Aún no hay usuarios registrados.</p>
                 ) : (
                   <div className="mt-4 overflow-x-auto">
                     <table className="min-w-full text-left text-sm">
-                      <thead className="bg-zinc-50">
-                        <tr className="border-b border-zinc-200 text-xs uppercase text-zinc-700">
+                      <thead className="bg-slate-800/80">
+                        <tr className="border-b border-slate-700 text-xs uppercase text-slate-300">
                           <th className="py-2 pr-4">Tenant</th>
                           <th className="py-2 pr-4">Nombre</th>
                           <th className="py-2 pr-4">Correo</th>
@@ -578,7 +598,7 @@ export default function DashboardPage() {
               <AuditSection />
             )}
           </main>
-          <footer className="mt-4 border-t border-zinc-100 px-4 py-4 text-center text-[11px] text-zinc-400 sm:px-6 lg:px-8">
+          <footer className="flex-shrink-0 mt-auto border-t border-slate-800 px-4 py-3 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
             Powered by Lynx IA
           </footer>
         </div>

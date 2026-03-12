@@ -22,7 +22,12 @@ export class ReportsService {
     userId?: string,
   ) {
     const { start, end } = this.parseRange(from, to);
-    const orders = await this.ordersService.findForReport(tenantId, start, end, userId);
+    const orders = await this.ordersService.findForReport(
+      tenantId,
+      start,
+      end,
+      userId,
+    );
 
     return orders.map((order) => ({
       id: order.id,

@@ -10,7 +10,8 @@ export class StorageService {
 
   constructor() {
     const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
+    const supabaseKey =
+      process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (supabaseUrl && supabaseKey) {
       this.supabase = createClient(supabaseUrl, supabaseKey);
@@ -42,9 +43,16 @@ export class StorageService {
     }
 
     // Validate bucket
-    const validBuckets: StorageBucket[] = ['products', 'avatars', 'chat', 'tenants'];
+    const validBuckets: StorageBucket[] = [
+      'products',
+      'avatars',
+      'chat',
+      'tenants',
+    ];
     if (!validBuckets.includes(bucket)) {
-      throw new BadRequestException(`Invalid bucket: ${bucket}. Valid buckets are: ${validBuckets.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid bucket: ${bucket}. Valid buckets are: ${validBuckets.join(', ')}`,
+      );
     }
 
     // Generate unique filename
@@ -66,7 +74,9 @@ export class StorageService {
 
       if (error) {
         this.logger.error(`Upload error: ${error.message}`);
-        throw new BadRequestException(`Failed to upload file: ${error.message}`);
+        throw new BadRequestException(
+          `Failed to upload file: ${error.message}`,
+        );
       }
 
       // Get public URL
@@ -122,7 +132,9 @@ export class StorageService {
       .createSignedUrl(path, expiresIn);
 
     if (error) {
-      throw new BadRequestException(`Failed to create signed URL: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to create signed URL: ${error.message}`,
+      );
     }
 
     return data.signedUrl;
@@ -131,7 +143,10 @@ export class StorageService {
   /**
    * List files in a bucket
    */
-  async listFiles(bucket: StorageBucket, limit: number = 100): Promise<string[]> {
+  async listFiles(
+    bucket: StorageBucket,
+    limit: number = 100,
+  ): Promise<string[]> {
     if (!this.supabase) {
       throw new BadRequestException('Supabase Storage is not configured');
     }

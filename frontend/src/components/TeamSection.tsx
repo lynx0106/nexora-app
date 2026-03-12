@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { fetchAPIWithAuth } from "../lib/api";
+import { showToast } from "../lib/toast";
 
 interface User {
   id: string;
@@ -148,7 +149,7 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
       await fetchAPIWithAuth(`/users/${userId}`, { method: "DELETE" });
       setUsers(users.filter(u => u.id !== userId));
     } catch {
-      alert("Error al eliminar usuario");
+      showToast(t("team.delete_error") ?? "Error al eliminar usuario", "error");
     }
   }
 
@@ -173,11 +174,11 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
   const teamMembers = users.filter(u => u.role !== 'user');
 
   return (
-    <div className="mb-8 rounded-lg bg-white p-6 shadow">
+    <div className="mb-8 rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-1">
-          <h2 className="text-xl font-semibold text-zinc-900">{t('team.title')}</h2>
-          <p className="text-sm text-zinc-500">
+          <h2 className="text-xl font-semibold text-slate-100">{t('team.title')}</h2>
+          <p className="text-sm text-slate-400">
             {isRestaurant 
               ? t('team.subtitle_restaurant')
               : t('team.subtitle_service')}
@@ -190,21 +191,21 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
               resetForm();
             }
           }}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          className="rounded-md bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-500"
         >
           {showCreateForm ? t('team.cancel') : t('team.new_member')}
         </button>
       </div>
 
       {role === "superadmin" && (
-        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-zinc-50 p-3">
-          <span className="text-xs font-medium text-zinc-700">
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-slate-800/50 p-3">
+          <span className="text-xs font-medium text-slate-300">
             {t('team.tenant_manage')}:
           </span>
           <select
             value={selectedTenantId ?? ""}
             onChange={(e) => onTenantChange(e.target.value === "" ? null : e.target.value)}
-            className="h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+            className="h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
           >
             <option value="">{t('team.my_tenant')}</option>
             {tenants.map((tenant) => (
@@ -219,65 +220,65 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
       <div className="mt-6 space-y-6">
         {showCreateForm && (
           <form
-            className="grid gap-4 rounded-md border border-zinc-200 p-4 md:grid-cols-2"
+            className="grid gap-4 rounded-md border border-slate-700 p-4 md:grid-cols-2"
             onSubmit={handleCreateUser}
           >
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_first_name')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_first_name')}</label>
               <input
                 type="text"
                 value={newUserFirstName}
                 onChange={(e) => setNewUserFirstName(e.target.value)}
                 required
                 placeholder={t('team.placeholder_first_name')}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_last_name')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_last_name')}</label>
               <input
                 type="text"
                 value={newUserLastName}
                 onChange={(e) => setNewUserLastName(e.target.value)}
                 required
                 placeholder={t('team.placeholder_last_name')}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_email')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_email')}</label>
               <input
                 type="email"
                 value={newUserEmail}
                 onChange={(e) => setNewUserEmail(e.target.value)}
                 required
                 placeholder={t('team.placeholder_email')}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_phone')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_phone')}</label>
               <input
                 type="tel"
                 value={newUserPhone}
                 onChange={(e) => setNewUserPhone(e.target.value)}
                 placeholder="+34 600 000 000"
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_address')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_address')}</label>
               <input
                 type="text"
                 value={newUserAddress}
                 onChange={(e) => setNewUserAddress(e.target.value)}
                 placeholder={t('team.placeholder_address')}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">
-                {t('team.form_password')} {editingUserId && <span className="text-xs font-normal text-zinc-700">{t('team.form_password_optional')}</span>}
+              <label className="text-sm font-semibold text-slate-100">
+                {t('team.form_password')} {editingUserId && <span className="text-xs font-normal text-slate-300">{t('team.form_password_optional')}</span>}
               </label>
               <input
                 type="password"
@@ -285,15 +286,15 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
                 onChange={(e) => setNewUserPassword(e.target.value)}
                 required={!editingUserId}
                 placeholder={editingUserId ? t('team.placeholder_password_edit') : t('team.placeholder_password_new')}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('team.form_role')}</label>
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_role')}</label>
               <select
                 value={newUserRole}
                 onChange={(e) => setNewUserRole(e.target.value as "admin" | "doctor" | "support")}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               >
                 <option value="admin">{t('team.role_option_admin')}</option>
                 <option value="doctor">{isRestaurant ? t('team.role_option_doctor_restaurant') : t('team.role_option_doctor_service')}</option>
@@ -313,14 +314,14 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
                   setNewUserAddress("");
                   setEditingUserId(null);
                 }}
-                className="h-9 rounded-md border border-zinc-300 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                className="h-9 rounded-md border border-slate-600 px-4 text-sm font-medium text-slate-300 hover:bg-slate-800/50"
               >
                 {t('team.clean')}
               </button>
               <button
                 type="submit"
                 disabled={creatingUser}
-                className="h-9 rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:cursor-not-allowed disabled:bg-zinc-400"
+                className="h-9 rounded-md bg-teal-600 px-4 text-sm font-medium text-white hover:bg-teal-500 disabled:cursor-not-allowed disabled:bg-slate-500"
               >
                 {creatingUser
                   ? t('team.saving')
@@ -339,43 +340,43 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
         )}
 
         {createUserSuccess && (
-          <div className="rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          <div className="rounded-md border border-emerald-700 bg-emerald-900/30 px-3 py-2 text-sm text-emerald-300">
             {createUserSuccess}
           </div>
         )}
 
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-zinc-200 text-sm">
-            <thead className="bg-zinc-50">
+          <table className="min-w-full divide-y divide-slate-700 text-sm">
+            <thead className="bg-slate-800/50">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_name')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_email')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_phone')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_permissions')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_name')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_email')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_phone')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_permissions')}</th>
                 {role !== 'user' && (
                   <>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_status')}</th>
-                <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('team.table_actions')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_status')}</th>
+                <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_actions')}</th>
                   </>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-200">
+            <tbody className="divide-y divide-slate-700">
               {loading && (
-                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-zinc-700">{t('team.loading')}</td></tr>
+                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.loading')}</td></tr>
               )}
               {error && !loading && (
                 <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-red-600">{error}</td></tr>
               )}
               {!loading && !error && teamMembers.length === 0 && (
-                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-zinc-700">{t('team.no_members')}</td></tr>
+                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.no_members')}</td></tr>
               )}
               {!loading && !error && teamMembers.map((user) => (
-                <tr key={user.id}>
-                  <td className="px-3 py-2 text-zinc-900">{user.firstName} {user.lastName}</td>
-                  <td className="px-3 py-2 text-zinc-700">{user.email}</td>
-                  <td className="px-3 py-2 text-zinc-700">{user.phone || '-'}</td>
-                  <td className="px-3 py-2 text-zinc-700">
+                <tr key={user.id} className="hover:bg-slate-800/50">
+                  <td className="px-3 py-2 text-slate-100">{user.firstName} {user.lastName}</td>
+                  <td className="px-3 py-2 text-slate-300">{user.email}</td>
+                  <td className="px-3 py-2 text-slate-300">{user.phone || '-'}</td>
+                  <td className="px-3 py-2 text-slate-300">
                     {user.role === 'doctor' 
                       ? (isRestaurant ? t('team.role_staff') : t('team.role_professional')) 
                       : user.role === 'support' 
@@ -385,13 +386,13 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
                   {(role === 'admin' || role === 'superadmin') && (
                     <>
                   <td className="px-3 py-2">
-                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${user.isActive ? "bg-emerald-100 text-emerald-800" : "bg-zinc-100 text-zinc-700"}`}>
+                    <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${user.isActive ? "bg-emerald-900/40 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>
                       {user.isActive ? t('team.active') : t('team.inactive')}
                     </span>
                   </td>
                   <td className="px-3 py-2 flex items-center gap-3">
-                    <button onClick={() => handleEditClick(user)} className="text-blue-600 hover:text-blue-800 text-sm font-medium">{t('common.edit')}</button>
-                    <button onClick={() => handleDeleteUser(user.id)} className="text-red-600 hover:text-red-800 text-sm font-medium">{t('common.delete')}</button>
+                    <button onClick={() => handleEditClick(user)} className="text-teal-400 hover:text-teal-300 text-sm font-medium">{t('common.edit')}</button>
+                    <button onClick={() => handleDeleteUser(user.id)} className="text-red-400 hover:text-red-300 text-sm font-medium">{t('common.delete')}</button>
                   </td>
                     </>
                   )}

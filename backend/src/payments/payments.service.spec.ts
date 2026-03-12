@@ -98,7 +98,10 @@ describe('PaymentsService', () => {
 
   describe('createPreference', () => {
     it('should create a payment preference successfully', async () => {
-      const result = await service.createPreference(mockOrder as any, mockTenant as any);
+      const result = await service.createPreference(
+        mockOrder as any,
+        mockTenant as any,
+      );
 
       expect(result).toBeDefined();
       expect(result.preferenceId).toBe('preference-123');
@@ -106,7 +109,10 @@ describe('PaymentsService', () => {
     });
 
     it('should throw InternalServerErrorException if no access token', async () => {
-      const tenantWithoutToken = { ...mockTenant, mercadoPagoAccessToken: null };
+      const tenantWithoutToken = {
+        ...mockTenant,
+        mercadoPagoAccessToken: null,
+      };
       delete process.env.MP_ACCESS_TOKEN;
 
       await expect(
@@ -123,7 +129,10 @@ describe('PaymentsService', () => {
         status: 'pending',
       });
 
-      await service.processPaymentNotificationWithRetry('123456789', 'tenant-123');
+      await service.processPaymentNotificationWithRetry(
+        '123456789',
+        'tenant-123',
+      );
 
       // Verify order was updated
       expect(orderRepo.save).toHaveBeenCalled();
@@ -148,7 +157,10 @@ describe('PaymentsService', () => {
       orderRepo.findOne.mockResolvedValue(null);
 
       await expect(
-        service.processPaymentNotificationWithRetry('sim_nonexistent_approved', 'tenant-123'),
+        service.processPaymentNotificationWithRetry(
+          'sim_nonexistent_approved',
+          'tenant-123',
+        ),
       ).resolves.not.toThrow();
     });
   });

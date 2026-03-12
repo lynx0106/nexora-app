@@ -14,7 +14,14 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { UsersService } from './users.service';
 import { TenantsService } from '../tenants/tenants.service';
 import type { Request } from 'express';
@@ -47,8 +54,14 @@ export class UsersController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user profile' })
-  @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - invalid or missing token' })
+  @ApiResponse({
+    status: 200,
+    description: 'User profile retrieved successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing token',
+  })
   async getProfile(@Req() req: AuthRequest) {
     const userId = req.user?.userId;
     const tenantId = req.user?.tenantId;
@@ -174,7 +187,10 @@ export class UsersController {
     @Req() req: AuthRequest,
   ) {
     const user = req.user;
-    if (!hasRole(user?.role, [Role.Superadmin]) && user?.tenantId !== tenantId) {
+    if (
+      !hasRole(user?.role, [Role.Superadmin]) &&
+      user?.tenantId !== tenantId
+    ) {
       throw new ForbiddenException(
         'No tienes permiso para ver usuarios de otro tenant',
       );
@@ -280,18 +296,30 @@ export class UsersController {
     }
 
     try {
+      let passwordToUse = body.password;
+      let temporaryPassword: string | undefined;
+
+      if (body.generateTempPassword || !passwordToUse) {
+        const { randomBytes } = await import('crypto');
+        temporaryPassword =
+          'Nx' + randomBytes(8).toString('base64url') + '!';
+        passwordToUse = temporaryPassword;
+      }
+
       const user = await this.usersService.createUserForTenant(targetTenantId, {
         firstName: body.firstName,
         lastName: body.lastName,
         email: body.email,
-        password: body.password || 'TempPass123!',
+        password: passwordToUse,
         role: body.role || 'user',
         phone: body.phone,
         address: body.address,
       });
       const { passwordHash: _, ...safeUser } = user;
       void _;
-      return safeUser;
+      return temporaryPassword
+        ? { ...safeUser, temporaryPassword }
+        : safeUser;
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Error creando usuario';
       throw new BadRequestException(message);
@@ -458,7 +486,8 @@ export class UsersController {
     return {
       ...result,
       password: 'NexoraTemp2026!', // Temporary password - change after login!
-      message: 'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)'
+      message:
+        'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)',
     };
   }
 
@@ -470,7 +499,8 @@ export class UsersController {
       ...result,
       password: 'NexoraTemp2026!',
       warning: 'THIS IS A TEMPORARY PUBLIC ENDPOINT - REMOVE AFTER SETUP!',
-      message: 'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)'
+      message:
+        'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)',
     };
   }
 
@@ -495,7 +525,7 @@ export class UsersController {
     const allUsers = await this.usersService.findAllGlobal();
     return {
       totalUsers: allUsers.length,
-      users: allUsers.map(u => ({
+      users: allUsers.map((u) => ({
         id: u.id,
         email: u.email,
         role: u.role,
@@ -512,20 +542,24 @@ export class UsersController {
   async fixSuperadmin() {
     const email = 'superadmin@saas.com';
     const password = 'NexoraTemp2026!';
-    
+
     // Check if user exists
     const existing = await this.usersService.findByEmail(email);
-    
+
     if (existing) {
       // Update password - superadmin uses 'system' tenant
-      await this.usersService.updateUser(existing.id, existing.tenantId || 'system', { password });
+      await this.usersService.updateUser(
+        existing.id,
+        existing.tenantId || 'system',
+        { password },
+      );
       return {
         message: 'Superadmin password reset',
         email,
         password,
         userId: existing.id,
         tenantId: existing.tenantId || 'system',
-        action: 'PASSWORD_RESET'
+        action: 'PASSWORD_RESET',
       };
     } else {
       // Create new superadmin

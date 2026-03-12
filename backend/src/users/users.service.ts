@@ -200,17 +200,17 @@ export class UsersService {
   async seedSuperAdmin() {
     const email = 'superadmin@saas.com';
     const existing = await this.findByEmail(email);
-    
+
     // Get password from environment variable or use fixed temporary password
     // IMPORTANT: Change this after first login!
     const password = process.env.SUPERADMIN_PASSWORD || 'NexoraTemp2026!';
     const passwordHash = await bcrypt.hash(password, 10);
-    
+
     // Log warning if using default password
     if (!process.env.SUPERADMIN_PASSWORD) {
       this.logger.warn(
         'SUPERADMIN_PASSWORD environment variable not set. ' +
-        'Using fixed temporary password. Change it immediately after login!'
+          'Using fixed temporary password. Change it immediately after login!',
       );
       this.logger.log(`Superadmin password: ${password}`);
     }
@@ -340,7 +340,9 @@ export class UsersService {
   async seedDemoUsers() {
     // Use fixed temporary password for demo users
     const demoPassword = 'Demo2026!';
-    this.logger.warn('Demo users seeded with fixed temporary password - NOT FOR PRODUCTION');
+    this.logger.warn(
+      'Demo users seeded with fixed temporary password - NOT FOR PRODUCTION',
+    );
     const demoUsers = [
       {
         firstName: 'Carlos',
@@ -398,14 +400,16 @@ export class UsersService {
     return {
       message: 'Demo users seeded (NOT FOR PRODUCTION)',
       count: createdOrExisting.length,
-      demoPassword: process.env.NODE_ENV === 'development' ? demoPassword : '[REDACTED]',
+      demoPassword:
+        process.env.NODE_ENV === 'development' ? demoPassword : '[REDACTED]',
       users: createdOrExisting.map((u) => ({
         id: u.id,
         email: u.email,
         role: u.role,
         tenantId: u.tenantId,
       })),
-      warning: 'These are demo users with auto-generated passwords. Not for production use!',
+      warning:
+        'These are demo users with auto-generated passwords. Not for production use!',
     };
   }
 
@@ -413,22 +417,27 @@ export class UsersService {
    * Generate a secure random password
    */
   private generateSecurePassword(length: number = 16): string {
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    const charset =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
     let password = '';
-    
+
     // Ensure at least one of each required character type
     password += charset.match(/[a-z]/)![Math.floor(Math.random() * 26)];
     password += charset.match(/[A-Z]/)![Math.floor(Math.random() * 26) + 26];
     password += charset.match(/[0-9]/)![Math.floor(Math.random() * 10) + 52];
-    password += charset.match(/[!@#$%^&*]/)![Math.floor(Math.random() * 8) + 62];
-    
+    password +=
+      charset.match(/[!@#$%^&*]/)![Math.floor(Math.random() * 8) + 62];
+
     // Fill the rest randomly
     for (let i = 4; i < length; i++) {
       const randomIndex = Math.floor(Math.random() * charset.length);
       password += charset[randomIndex];
     }
-    
+
     // Shuffle the password
-    return password.split('').sort(() => 0.5 - Math.random()).join('');
+    return password
+      .split('')
+      .sort(() => 0.5 - Math.random())
+      .join('');
   }
 }

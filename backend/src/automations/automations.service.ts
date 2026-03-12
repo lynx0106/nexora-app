@@ -1,8 +1,16 @@
-import { Injectable, Logger, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Automation, AutomationType } from './entities/automation.entity';
-import { AutomationRun, AutomationRunStatus } from './entities/automation-run.entity';
+import {
+  AutomationRun,
+  AutomationRunStatus,
+} from './entities/automation-run.entity';
 import { UsersService } from '../users/users.service';
 import { ChatService } from '../chat/chat.service';
 
@@ -60,10 +68,17 @@ export class AutomationsService {
     return automation;
   }
 
-  async create(createAutomationDto: CreateAutomationDto, tenantId: string, userId: string): Promise<Automation> {
-    this.logger.log(`Creating automation: ${createAutomationDto.name} for tenant: ${tenantId}`);
+  async create(
+    createAutomationDto: CreateAutomationDto,
+    tenantId: string,
+    userId: string,
+  ): Promise<Automation> {
+    this.logger.log(
+      `Creating automation: ${createAutomationDto.name} for tenant: ${tenantId}`,
+    );
 
-    const nextRunAt = this.calculateNextRunTime(createAutomationDto.schedule) ?? undefined;
+    const nextRunAt =
+      this.calculateNextRunTime(createAutomationDto.schedule) ?? undefined;
 
     const automation = this.automationsRepository.create({
       ...createAutomationDto,
@@ -79,13 +94,21 @@ export class AutomationsService {
     return saved;
   }
 
-  async update(id: string, updateAutomationDto: UpdateAutomationDto, tenantId: string): Promise<Automation> {
+  async update(
+    id: string,
+    updateAutomationDto: UpdateAutomationDto,
+    tenantId: string,
+  ): Promise<Automation> {
     this.logger.log(`Updating automation: ${id} for tenant: ${tenantId}`);
 
     const automation = await this.findOne(id, tenantId);
 
-    if (updateAutomationDto.schedule && updateAutomationDto.schedule !== automation.schedule) {
-      automation.nextRunAt = this.calculateNextRunTime(updateAutomationDto.schedule) ?? null;
+    if (
+      updateAutomationDto.schedule &&
+      updateAutomationDto.schedule !== automation.schedule
+    ) {
+      automation.nextRunAt =
+        this.calculateNextRunTime(updateAutomationDto.schedule) ?? null;
     }
 
     Object.assign(automation, updateAutomationDto);
@@ -108,7 +131,10 @@ export class AutomationsService {
 
   // ========== RUN MANAGEMENT ==========
 
-  async getRuns(automationId: string, tenantId: string): Promise<AutomationRun[]> {
+  async getRuns(
+    automationId: string,
+    tenantId: string,
+  ): Promise<AutomationRun[]> {
     await this.findOne(automationId, tenantId);
 
     return this.automationRunsRepository.find({
@@ -118,7 +144,11 @@ export class AutomationsService {
     });
   }
 
-  async runNow(id: string, tenantId: string, userId: string): Promise<AutomationRun> {
+  async runNow(
+    id: string,
+    tenantId: string,
+    userId: string,
+  ): Promise<AutomationRun> {
     this.logger.log(`Manual execution requested for automation: ${id}`);
     const automation = await this.findOne(id, tenantId);
 
@@ -131,7 +161,10 @@ export class AutomationsService {
     const savedRun = await this.automationRunsRepository.save(run);
 
     this.executeAutomation(automation, savedRun).catch((err) => {
-      this.logger.error(`Error executing automation ${id}: ${err.message}`, err.stack);
+      this.logger.error(
+        `Error executing automation ${id}: ${err.message}`,
+        err.stack,
+      );
     });
 
     return savedRun;
@@ -148,8 +181,13 @@ export class AutomationsService {
       .getMany();
   }
 
-  async executeAutomation(automation: Automation, run: AutomationRun): Promise<void> {
-    this.logger.log(`Executing automation: ${automation.id} (${automation.name})`);
+  async executeAutomation(
+    automation: Automation,
+    run: AutomationRun,
+  ): Promise<void> {
+    this.logger.log(
+      `Executing automation: ${automation.id} (${automation.name})`,
+    );
 
     try {
       run.status = AutomationRunStatus.RUNNING;
@@ -179,14 +217,18 @@ export class AutomationsService {
       run.completedAt = new Date();
 
       automation.lastRunAt = new Date();
-      automation.nextRunAt = this.calculateNextRunTime(automation.schedule) ?? null;
+      automation.nextRunAt =
+        this.calculateNextRunTime(automation.schedule) ?? null;
 
       await this.automationRunsRepository.save(run);
       await this.automationsRepository.save(automation);
 
       this.logger.log(`Automation ${automation.id} completed successfully`);
     } catch (error) {
-      this.logger.error(`Error executing automation ${automation.id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error executing automation ${automation.id}: ${error.message}`,
+        error.stack,
+      );
       run.status = AutomationRunStatus.FAILED;
       run.errorMessage = error.message;
       run.completedAt = new Date();
@@ -196,12 +238,16 @@ export class AutomationsService {
 
   // ========== AUTOMATION EXECUTORS ==========
 
-  private async executeReminderAutomation(automation: Automation): Promise<Record<string, any>> {
+  private async executeReminderAutomation(
+    automation: Automation,
+  ): Promise<Record<string, any>> {
     const config = automation.config;
     const hoursBefore = config.hoursBefore || [24, 2];
     const channels = config.channels || ['email'];
 
-    this.logger.log(`Executing reminder automation: ${hoursBefore.join(', ')} hours before`);
+    this.logger.log(
+      `Executing reminder automation: ${hoursBefore.join(', ')} hours before`,
+    );
 
     return {
       type: 'reminder',
@@ -212,7 +258,9 @@ export class AutomationsService {
     };
   }
 
-  private async executeBulkMessageAutomation(automation: Automation): Promise<Record<string, any>> {
+  private async executeBulkMessageAutomation(
+    automation: Automation,
+  ): Promise<Record<string, any>> {
     const config = automation.config;
     const target = config.target || 'all_clients';
 
@@ -227,9 +275,11 @@ export class AutomationsService {
     };
   }
 
-  private async executeIndividualMessageAutomation(automation: Automation): Promise<Record<string, any>> {
+  private async executeIndividualMessageAutomation(
+    automation: Automation,
+  ): Promise<Record<string, any>> {
     const config = automation.config;
-    
+
     // Config expected:
     // - targetUserId: specific user ID to send message to
     // - message: the message content
@@ -238,7 +288,9 @@ export class AutomationsService {
     const message = config.message;
     const scope = config.scope || 'INTERNAL';
 
-    this.logger.log(`Executing individual message automation to user: ${targetUserId}`);
+    this.logger.log(
+      `Executing individual message automation to user: ${targetUserId}`,
+    );
 
     if (!targetUserId) {
       return {
@@ -261,7 +313,7 @@ export class AutomationsService {
     try {
       // Get the target user to find their tenant
       const targetUser = await this.usersService.findOne(targetUserId);
-      
+
       if (!targetUser) {
         return {
           type: 'individual_message',
@@ -275,13 +327,15 @@ export class AutomationsService {
 
       // Security: Verify tenant isolation - only allow sending to users in the same tenant
       if (targetUser.tenantId !== tenantId) {
-        throw new ForbiddenException('No puedes enviar mensajes a usuarios de otros tenants');
+        throw new ForbiddenException(
+          'No puedes enviar mensajes a usuarios de otros tenants',
+        );
       }
-      
+
       // Determine sender: use system automation sender
       // We use null senderId for automation-generated messages
       const senderId = config.senderId || null;
-      
+
       // Create and send the message via ChatService
       const createdMessage = await this.chatService.createMessage(
         message,
@@ -294,7 +348,9 @@ export class AutomationsService {
         'text',
       );
 
-      this.logger.log(`Individual message sent to user ${targetUserId}: ${message.substring(0, 50)}...`);
+      this.logger.log(
+        `Individual message sent to user ${targetUserId}: ${message.substring(0, 50)}...`,
+      );
 
       return {
         type: 'individual_message',
@@ -303,11 +359,15 @@ export class AutomationsService {
         tenantId,
         scope,
         messageId: createdMessage.id,
-        messagePreview: message.substring(0, 50) + (message.length > 50 ? '...' : ''),
+        messagePreview:
+          message.substring(0, 50) + (message.length > 50 ? '...' : ''),
         messagesSent: 1,
       };
     } catch (error) {
-      this.logger.error(`Error sending individual message: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error sending individual message: ${error.message}`,
+        error.stack,
+      );
       return {
         type: 'individual_message',
         success: false,
@@ -317,7 +377,9 @@ export class AutomationsService {
     }
   }
 
-  private async executeCleanupAutomation(automation: Automation): Promise<Record<string, any>> {
+  private async executeCleanupAutomation(
+    automation: Automation,
+  ): Promise<Record<string, any>> {
     const config = automation.config;
     const tasks = config.tasks || ['expired_tokens'];
 

@@ -102,7 +102,9 @@ describe('UsersService', () => {
       const result = await service.findOne('user-123');
 
       expect(result).toEqual(mockUser);
-      expect(userRepo.findOne).toHaveBeenCalledWith({ where: { id: 'user-123' } });
+      expect(userRepo.findOne).toHaveBeenCalledWith({
+        where: { id: 'user-123' },
+      });
     });
   });
 
@@ -170,7 +172,10 @@ describe('UsersService', () => {
       userRepo.create.mockReturnValue(mockUser as any);
       userRepo.save.mockResolvedValue(mockUser as any);
 
-      const result = await service.createUserForTenant('tenant-123', createData);
+      const result = await service.createUserForTenant(
+        'tenant-123',
+        createData,
+      );
 
       expect(result).toBeDefined();
       expect(bcrypt.hash).toHaveBeenCalledWith('plainPassword123', 10);
@@ -208,7 +213,11 @@ describe('UsersService', () => {
       userRepo.findOne.mockResolvedValue(mockUser as any);
       userRepo.save.mockResolvedValue({ ...mockUser, ...updateData } as any);
 
-      const result = await service.updateUser('user-123', 'tenant-123', updateData);
+      const result = await service.updateUser(
+        'user-123',
+        'tenant-123',
+        updateData,
+      );
 
       expect(result?.firstName).toBe('Updated');
       expect(userRepo.save).toHaveBeenCalled();

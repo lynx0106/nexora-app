@@ -6,6 +6,8 @@ import Image from "next/image";
 import { User, Briefcase, Store, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
+import { isValidEmail, validatePassword } from "@/lib/validation";
+import { showToast } from "@/lib/toast";
 
 type ProfileType = 'client' | 'employee' | 'admin' | 'superadmin';
 
@@ -60,10 +62,31 @@ function HomeContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
     setError(null);
     setSuccess(null);
 
+    // Validación básica en cliente
+    if (!isValidEmail(email.trim())) {
+      setError(t('auth.validation_email_invalid'));
+      return;
+    }
+    const pwCheck = validatePassword(password);
+    if (!pwCheck.valid) {
+      setError(pwCheck.message || t('auth.validation_password_min'));
+      return;
+    }
+    if (!isLogin) {
+      if (!firstName.trim() || !lastName.trim()) {
+        setError(t('auth.validation_required'));
+        return;
+      }
+      if (!inviteTenantId && !tenantName.trim()) {
+        setError(t('auth.validation_required'));
+        return;
+      }
+    }
+
+    setLoading(true);
     try {
       const endpoint = isLogin 
         ? `${API_URL}/auth/login`
@@ -179,8 +202,8 @@ function HomeContent() {
             }
         }
       }
-    } catch (err: any) {
-      setError(err.message || t('auth.generic_error'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('auth.generic_error'));
     } finally {
       if (!success) setLoading(false);
     }
@@ -227,9 +250,10 @@ function HomeContent() {
         <div className="flex flex-col items-center">
            <Image 
              src="/logo-fondo.png" 
-             alt="Logo Agencia" 
+             alt="Logo NEXORA - Núcleo inteligente de tu negocio" 
              width={96}
              height={96}
+             priority
              className="mb-2 h-24 w-auto object-contain"
            />
            <h2 className="text-center text-3xl font-semibold tracking-tight ds-text">

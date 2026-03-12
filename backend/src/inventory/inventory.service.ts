@@ -77,9 +77,7 @@ export class InventoryService {
     const potentialProfit = totalInventoryValue - totalCostValue;
 
     // Calculate average margin
-    const productsWithPrice = products.filter(
-      (p) => Number(p.price || 0) > 0,
-    );
+    const productsWithPrice = products.filter((p) => Number(p.price || 0) > 0);
     const averageMargin =
       productsWithPrice.length > 0
         ? productsWithPrice.reduce((sum, p) => {

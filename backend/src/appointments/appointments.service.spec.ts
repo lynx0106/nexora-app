@@ -92,7 +92,10 @@ describe('AppointmentsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AppointmentsService,
-        { provide: getRepositoryToken(Appointment), useValue: mockAppointmentRepo },
+        {
+          provide: getRepositoryToken(Appointment),
+          useValue: mockAppointmentRepo,
+        },
         { provide: MailService, useValue: mockMailService },
         { provide: UsersService, useValue: mockUsersService },
         { provide: TenantsService, useValue: mockTenantsService },
@@ -133,7 +136,9 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      appointmentRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
       appointmentRepo.create.mockReturnValue(mockAppointment as any);
       appointmentRepo.save.mockResolvedValue(mockAppointment as any);
       appointmentRepo.findOne.mockResolvedValue(mockAppointment as any);
@@ -155,7 +160,9 @@ describe('AppointmentsService', () => {
 
       productsService.findOne.mockResolvedValue(null as any);
 
-      await expect(service.create(createDto as any)).rejects.toThrow(NotFoundException);
+      await expect(service.create(createDto as any)).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ConflictException for doctor schedule conflict', async () => {
@@ -180,9 +187,13 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      appointmentRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
 
-      await expect(service.create(createDto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto as any)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should throw ConflictException for client double booking', async () => {
@@ -208,9 +219,13 @@ describe('AppointmentsService', () => {
       };
 
       productsService.findOne.mockResolvedValue(mockService as any);
-      appointmentRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder as any);
+      appointmentRepo.createQueryBuilder.mockReturnValue(
+        mockQueryBuilder as any,
+      );
 
-      await expect(service.create(createDto as any)).rejects.toThrow(ConflictException);
+      await expect(service.create(createDto as any)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -255,7 +270,10 @@ describe('AppointmentsService', () => {
     it('should return all appointments for a tenant and user', async () => {
       appointmentRepo.find.mockResolvedValue([mockAppointment] as any);
 
-      const result = await service.findAllByTenantAndUser('tenant-123', 'client-123');
+      const result = await service.findAllByTenantAndUser(
+        'tenant-123',
+        'client-123',
+      );
 
       expect(result).toEqual([mockAppointment]);
       expect(appointmentRepo.find).toHaveBeenCalledWith({
@@ -306,7 +324,10 @@ describe('AppointmentsService', () => {
       const result = await service.update('appointment-123', updateData);
 
       expect(result?.notes).toBe('Updated notes');
-      expect(appointmentRepo.update).toHaveBeenCalledWith('appointment-123', updateData);
+      expect(appointmentRepo.update).toHaveBeenCalledWith(
+        'appointment-123',
+        updateData,
+      );
     });
   });
 
@@ -328,7 +349,9 @@ describe('AppointmentsService', () => {
       const result = await service.removeAllByTenant('tenant-123');
 
       expect(result).toBeDefined();
-      expect(appointmentRepo.delete).toHaveBeenCalledWith({ tenantId: 'tenant-123' });
+      expect(appointmentRepo.delete).toHaveBeenCalledWith({
+        tenantId: 'tenant-123',
+      });
     });
   });
 
@@ -345,11 +368,12 @@ describe('AppointmentsService', () => {
     });
 
     it('should filter by user when provided', async () => {
-      appointmentRepo.count
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1);
+      appointmentRepo.count.mockResolvedValueOnce(2).mockResolvedValueOnce(1);
 
-      const result = await service.getDashboardStats('tenant-123', 'client-123');
+      const result = await service.getDashboardStats(
+        'tenant-123',
+        'client-123',
+      );
 
       expect(result).toBeDefined();
     });
@@ -399,7 +423,12 @@ describe('AppointmentsService', () => {
 
       const start = new Date('2024-12-01');
       const end = new Date('2024-12-31');
-      const result = await service.findForReport('tenant-123', start, end, 'client-123');
+      const result = await service.findForReport(
+        'tenant-123',
+        start,
+        end,
+        'client-123',
+      );
 
       expect(result).toBeDefined();
     });

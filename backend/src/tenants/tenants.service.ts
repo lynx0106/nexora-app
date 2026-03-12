@@ -281,7 +281,8 @@ export class TenantsService {
       .getMany();
 
     const tenantIds = testTenants.map((t) => t.id);
-    if (tenantIds.length === 0) return { count: 0, message: 'No test tenants found' };
+    if (tenantIds.length === 0)
+      return { count: 0, message: 'No test tenants found' };
 
     // Found tenants to delete
 

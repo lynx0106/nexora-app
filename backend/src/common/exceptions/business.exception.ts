@@ -92,10 +92,18 @@ export const Errors = {
     ),
 
   unauthorized: (message = 'No autorizado') =>
-    new BusinessException(BusinessErrorCode.UNAUTHORIZED, message, HttpStatus.UNAUTHORIZED),
+    new BusinessException(
+      BusinessErrorCode.UNAUTHORIZED,
+      message,
+      HttpStatus.UNAUTHORIZED,
+    ),
 
   forbidden: (message = 'Acceso denegado') =>
-    new BusinessException(BusinessErrorCode.FORBIDDEN, message, HttpStatus.FORBIDDEN),
+    new BusinessException(
+      BusinessErrorCode.FORBIDDEN,
+      message,
+      HttpStatus.FORBIDDEN,
+    ),
 
   // Users
   userNotFound: (id?: string) =>
@@ -140,7 +148,11 @@ export const Errors = {
       id ? { productId: id } : undefined,
     ),
 
-  productOutOfStock: (productName: string, requested: number, available: number) =>
+  productOutOfStock: (
+    productName: string,
+    requested: number,
+    available: number,
+  ) =>
     new BusinessException(
       BusinessErrorCode.PRODUCT_OUT_OF_STOCK,
       `Stock insuficiente para ${productName}`,
@@ -203,7 +215,9 @@ export const Errors = {
   resourceNotFound: (resource: string, id?: string) =>
     new BusinessException(
       BusinessErrorCode.RESOURCE_NOT_FOUND,
-      id ? `${resource} con ID ${id} no encontrado` : `${resource} no encontrado`,
+      id
+        ? `${resource} con ID ${id} no encontrado`
+        : `${resource} no encontrado`,
       HttpStatus.NOT_FOUND,
       id ? { resource, id } : { resource },
     ),

@@ -77,7 +77,10 @@ describe('AuthService', () => {
         { provide: JwtService, useValue: mockJwtService },
         { provide: MailService, useValue: mockMailService },
         { provide: InvitationsService, useValue: mockInvitationsService },
-        { provide: getRepositoryToken(RefreshToken), useValue: mockRefreshTokenRepo },
+        {
+          provide: getRepositoryToken(RefreshToken),
+          useValue: mockRefreshTokenRepo,
+        },
       ],
     }).compile();
 
@@ -224,7 +227,9 @@ describe('AuthService', () => {
       usersService.setPasswordResetToken.mockResolvedValue(undefined);
       mailService.sendPasswordReset.mockResolvedValue(undefined);
 
-      const result = await service.requestPasswordReset({ email: 'test@test.com' });
+      const result = await service.requestPasswordReset({
+        email: 'test@test.com',
+      });
 
       expect(result).toEqual({ ok: true });
       expect(usersService.setPasswordResetToken).toHaveBeenCalled();
@@ -256,7 +261,9 @@ describe('AuthService', () => {
         passwordResetTokenExpiresAt: new Date(Date.now() + 3600000), // 1 hour from now
       };
 
-      usersService.findByPasswordResetTokenHash.mockResolvedValue(userWithToken);
+      usersService.findByPasswordResetTokenHash.mockResolvedValue(
+        userWithToken,
+      );
       (bcrypt.hash as jest.Mock).mockResolvedValue('newHash');
       usersService.update.mockResolvedValue(undefined);
 

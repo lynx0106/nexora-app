@@ -1,4 +1,11 @@
-import { Injectable, UnauthorizedException, BadRequestException, forwardRef, Inject, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Logger,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -41,15 +48,19 @@ export class AuthService {
     let role = data.role;
 
     if (data.invitationId) {
-      const invitation = await this.invitationsService.findById(data.invitationId);
-      
+      const invitation = await this.invitationsService.findById(
+        data.invitationId,
+      );
+
       if (!invitation) {
         throw new BadRequestException('Código de invitación inválido');
       }
 
       if (!invitation.isValid()) {
         if (invitation.status === 'used') {
-          throw new BadRequestException('Este código de invitación ya fue utilizado');
+          throw new BadRequestException(
+            'Este código de invitación ya fue utilizado',
+          );
         }
         throw new BadRequestException('Este código de invitación ha expirado');
       }
@@ -60,7 +71,9 @@ export class AuthService {
     }
 
     if (!tenantId) {
-      throw new BadRequestException('Se requiere un código de invitación válido para registrarse');
+      throw new BadRequestException(
+        'Se requiere un código de invitación válido para registrarse',
+      );
     }
 
     const passwordHash = await bcrypt.hash(data.password, 10);
@@ -105,7 +118,7 @@ export class AuthService {
 
   async login(data: LoginDto) {
     const user = await this.validateUser(data.email, data.password);
-    
+
     // Obtener businessType del tenant
     let businessType: string | null = null;
     if (user.tenantId && user.tenantId !== 'system') {
@@ -117,7 +130,7 @@ export class AuthService {
         this.logger.error('Error fetching tenant for businessType:', error);
       }
     }
-    
+
     const payload = {
       sub: user.id,
       email: user.email,
@@ -125,14 +138,14 @@ export class AuthService {
       role: user.role,
     };
     const accessToken = await this.jwtService.signAsync(payload);
-    
+
     // user ya viene sin passwordHash desde validateUser
-    return { 
-      accessToken, 
+    return {
+      accessToken,
       user: {
         ...user,
         businessType,
-      }
+      },
     };
   }
 
@@ -147,7 +160,11 @@ export class AuthService {
     const ttlMinutes = Number(process.env.PASSWORD_RESET_TTL_MINUTES || 30);
     const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
 
-    await this.usersService.setPasswordResetToken(user.id, tokenHash, expiresAt);
+    await this.usersService.setPasswordResetToken(
+      user.id,
+      tokenHash,
+      expiresAt,
+    );
 
     await this.mailService.sendPasswordReset({
       email: user.email,
@@ -160,7 +177,8 @@ export class AuthService {
 
   async confirmPasswordReset(data: ConfirmPasswordResetDto) {
     const tokenHash = this.hashToken(data.token);
-    const user = await this.usersService.findByPasswordResetTokenHash(tokenHash);
+    const user =
+      await this.usersService.findByPasswordResetTokenHash(tokenHash);
 
     if (!user || !user.passwordResetTokenExpiresAt) {
       throw new UnauthorizedException('Token invalido o expirado');
@@ -185,7 +203,7 @@ export class AuthService {
     if (!user) {
       return null;
     }
-    
+
     // Get business type from tenant
     let businessType: string | null = null;
     if (user.tenantId && user.tenantId !== 'system') {
@@ -196,8 +214,13 @@ export class AuthService {
         // Silently fail, businessType is optional
       }
     }
-    
-    const { passwordHash, passwordResetTokenHash, passwordResetTokenExpiresAt, ...safeUser } = user;
+
+    const {
+      passwordHash,
+      passwordResetTokenHash,
+      passwordResetTokenExpiresAt,
+      ...safeUser
+    } = user;
     return {
       ...safeUser,
       businessType,
@@ -219,7 +242,7 @@ export class AuthService {
     // Generate a random token
     const token = crypto.randomBytes(64).toString('hex');
     const tokenHash = this.hashToken(token);
-    
+
     // Calculate expiration (default 7 days)
     const expiresAt = new Date(
       Date.now() + this.REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000,
@@ -236,9 +259,9 @@ export class AuthService {
     });
 
     await this.refreshTokenRepository.save(refreshToken);
-    
+
     this.logger.log(`Created refresh token for user: ${userId}`);
-    
+
     // Return the plain token (to be sent to client)
     return token;
   }
@@ -248,7 +271,7 @@ export class AuthService {
    */
   async validateRefreshToken(token: string): Promise<RefreshToken | null> {
     const tokenHash = this.hashToken(token);
-    
+
     const refreshToken = await this.refreshTokenRepository.findOne({
       where: { token: tokenHash, isRevoked: false },
       relations: ['user'],
@@ -260,7 +283,9 @@ export class AuthService {
 
     // Check if token is expired
     if (refreshToken.expiresAt.getTime() < Date.now()) {
-      this.logger.warn(`Expired refresh token used for user: ${refreshToken.userId}`);
+      this.logger.warn(
+        `Expired refresh token used for user: ${refreshToken.userId}`,
+      );
       return null;
     }
 
@@ -272,7 +297,7 @@ export class AuthService {
    */
   async revokeRefreshToken(token: string): Promise<boolean> {
     const tokenHash = this.hashToken(token);
-    
+
     const result = await this.refreshTokenRepository.update(
       { token: tokenHash },
       { isRevoked: true },
@@ -295,7 +320,9 @@ export class AuthService {
       { isRevoked: true },
     );
 
-    this.logger.log(`Revoked ${result.affected} refresh tokens for user: ${userId}`);
+    this.logger.log(
+      `Revoked ${result.affected} refresh tokens for user: ${userId}`,
+    );
     return result.affected || 0;
   }
 

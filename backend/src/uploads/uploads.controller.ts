@@ -13,7 +13,14 @@ import { diskStorage } from 'multer';
 import { extname } from 'path';
 import { AuthGuard } from '@nestjs/passport';
 import { StorageService, StorageBucket } from '../storage/storage.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiConsumes,
+  ApiBody,
+} from '@nestjs/swagger';
 import { fileTypeFromFile } from 'file-type';
 import { readFile, unlink } from 'fs/promises';
 
@@ -38,7 +45,18 @@ const ALLOWED_MIME_TYPES = [
 ];
 
 // Allowed file extensions
-const ALLOWED_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.pdf', '.mp3', '.wav', '.webm', '.ogg'];
+const ALLOWED_EXTENSIONS = [
+  '.jpg',
+  '.jpeg',
+  '.png',
+  '.gif',
+  '.webp',
+  '.pdf',
+  '.mp3',
+  '.wav',
+  '.webm',
+  '.ogg',
+];
 
 @ApiTags('uploads')
 @Controller('uploads')
@@ -59,13 +77,17 @@ export class UploadsController {
         file: {
           type: 'string',
           format: 'binary',
-          description: 'The file to upload (max 5MB). Allowed: images, PDF, audio',
+          description:
+            'The file to upload (max 5MB). Allowed: images, PDF, audio',
         },
       },
     },
   })
   @ApiResponse({ status: 201, description: 'File uploaded successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid file type, size, or upload type' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid file type, size, or upload type',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseInterceptors(
     FileInterceptor('file', {
@@ -100,17 +122,16 @@ export class UploadsController {
         const ext = extname(file.originalname).toLowerCase();
         if (!ALLOWED_EXTENSIONS.includes(ext)) {
           return cb(
-            new BadRequestException(`File extension not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`),
+            new BadRequestException(
+              `File extension not allowed. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`,
+            ),
             false,
           );
         }
 
         // Check MIME type (first line of defense)
         if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-          return cb(
-            new BadRequestException('File type not allowed'),
-            false,
-          );
+          return cb(new BadRequestException('File type not allowed'), false);
         }
 
         cb(null, true);
@@ -137,16 +158,23 @@ export class UploadsController {
     }
 
     // Validate type parameter
-    const validTypes: StorageBucket[] = ['avatars', 'products', 'chat', 'tenants'];
+    const validTypes: StorageBucket[] = [
+      'avatars',
+      'products',
+      'chat',
+      'tenants',
+    ];
     if (!validTypes.includes(type as StorageBucket)) {
       await unlink(file.path).catch(() => {});
-      throw new BadRequestException(`Invalid upload type: ${type}. Valid types are: ${validTypes.join(', ')}`);
+      throw new BadRequestException(
+        `Invalid upload type: ${type}. Valid types are: ${validTypes.join(', ')}`,
+      );
     }
 
     // Validate file by magic bytes (content-based validation)
     try {
       const fileType = await fileTypeFromFile(file.path);
-      
+
       if (!fileType) {
         await unlink(file.path).catch(() => {});
         throw new BadRequestException('Could not determine file type');
@@ -154,7 +182,9 @@ export class UploadsController {
 
       if (!ALLOWED_MIME_TYPES.includes(fileType.mime)) {
         await unlink(file.path).catch(() => {});
-        throw new BadRequestException(`File content type not allowed: ${fileType.mime}`);
+        throw new BadRequestException(
+          `File content type not allowed: ${fileType.mime}`,
+        );
       }
 
       // Verify that the extension matches the actual content
@@ -175,11 +205,14 @@ export class UploadsController {
       const validExts = mimeToExt[fileType.mime] || [];
       if (!validExts.includes(ext)) {
         await unlink(file.path).catch(() => {});
-        throw new BadRequestException(`File extension does not match content. Expected: ${validExts.join(' or ')}`);
+        throw new BadRequestException(
+          `File extension does not match content. Expected: ${validExts.join(' or ')}`,
+        );
       }
 
-      this.logger.log(`File validated: ${fileType.mime}, size: ${file.size} bytes`);
-
+      this.logger.log(
+        `File validated: ${fileType.mime}, size: ${file.size} bytes`,
+      );
     } catch (error) {
       if (error instanceof BadRequestException) {
         throw error;
@@ -196,17 +229,19 @@ export class UploadsController {
           file,
         );
         this.logger.log(`File uploaded to Supabase: ${result.url}`);
-        
+
         // Clean up local file after successful upload
         await unlink(file.path).catch(() => {});
-        
+
         return {
           url: result.url,
           path: result.path,
           storage: 'supabase',
         };
       } catch (error) {
-        this.logger.warn(`Supabase upload failed, falling back to local: ${error.message}`);
+        this.logger.warn(
+          `Supabase upload failed, falling back to local: ${error.message}`,
+        );
         // Fall through to local storage
       }
     }

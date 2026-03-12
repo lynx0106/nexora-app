@@ -1,5 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react';
 import { fetchAPIWithAuth } from '../lib/api';
+import { showToast } from '../lib/toast';
+import { isValidEmail } from '../lib/validation';
 import { useTranslation } from 'react-i18next';
 
 interface Product {
@@ -27,13 +29,12 @@ interface OrderItem {
 
 export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: CreateOrderModalProps) {
   const { t } = useTranslation();
-  const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [createdOrder, setCreatedOrder] = useState<any | null>(null);
+  const [createdOrder, setCreatedOrder] = useState<unknown | null>(null);
 
   // Form states
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -97,13 +98,25 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
 
   const handleCreateClient = async (e: FormEvent) => {
     e.preventDefault();
+    if (!newClient.firstName?.trim() || !newClient.lastName?.trim()) {
+      showToast(t('clients.validation_name') ?? 'Nombre y apellido son obligatorios', 'error');
+      return;
+    }
+    if (!newClient.email?.trim()) {
+      showToast(t('clients.validation_email') ?? 'El correo es obligatorio', 'error');
+      return;
+    }
+    if (!isValidEmail(newClient.email.trim())) {
+      showToast(t('auth.validation_email_invalid'), 'error');
+      return;
+    }
     setCreateClientLoading(true);
     try {
       const payload = {
         ...newClient,
         role: 'user',
         tenantId,
-        password: 'TempPassword123!' // Default password for manually created clients
+        generateTempPassword: true,
       };
       
       const created = await fetchAPIWithAuth('/users', {
@@ -117,7 +130,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
       setNewClient({ firstName: "", lastName: "", email: "", phone: "" });
     } catch (err) {
       console.error("Error creating client:", err);
-      alert("Error al crear cliente. Verifique los datos.");
+      showToast("Error al crear cliente. Verifique los datos.", "error");
     } finally {
       setCreateClientLoading(false);
     }
@@ -132,7 +145,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
       if (existing.quantity < product.stock) {
         setItems(items.map(i => i.productId === selectedProductId ? { ...i, quantity: i.quantity + 1 } : i));
       } else {
-        alert("No hay suficiente stock");
+        showToast("No hay suficiente stock", "error");
       }
     } else {
       setItems([...items, {
@@ -152,7 +165,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
         const newQty = item.quantity + delta;
         if (newQty < 1) return item;
         if (newQty > item.maxStock) {
-           alert("Stock máximo alcanzado");
+           showToast("Stock máximo alcanzado", "error");
            return item;
         }
         return { ...item, quantity: newQty };
@@ -226,10 +239,10 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
     return (
       <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-          <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" onClick={onClose}></div>
+          <div className="fixed inset-0 bg-slate-950/80 transition-opacity" aria-hidden="true" onClick={onClose}></div>
           <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-          <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+          <div className="inline-block align-bottom bg-slate-900 border border-slate-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+            <div className="bg-slate-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
                   <svg className="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -237,18 +250,18 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                   </svg>
                 </div>
                 <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                  <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                  <h3 className="text-lg leading-6 font-medium text-slate-100" id="modal-title">
                     Error de Configuración
                   </h3>
                   <div className="mt-2">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-slate-400">
                       No se ha detectado el ID de la sede (Tenant ID). Por favor recargue la página o contacte soporte.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+            <div className="bg-slate-800/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
               <button type="button" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm" onClick={onClose}>
                 Cerrar
               </button>
@@ -261,22 +274,22 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80"
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl"
+        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-slate-900 border border-slate-800 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+            <h3 className="text-lg leading-6 font-medium text-slate-100" id="modal-title">
               Nuevo Pedido Manual
             </h3>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+            <button onClick={onClose} className="text-slate-400 hover:text-slate-400">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-6 w-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
               </svg>
@@ -296,7 +309,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
           <div className="grid grid-cols-1 gap-6">
             <div>
               <div className="flex justify-between items-center mb-2">
-                <label className="block text-sm font-medium text-gray-700">Cliente</label>
+                <label className="block text-sm font-medium text-slate-300">Cliente</label>
                 <button
                   type="button"
                   onClick={() => setShowCreateClientForm(true)}
@@ -306,7 +319,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                 </button>
               </div>
               <select
-                className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border text-gray-900"
+                className="block w-full rounded-md border-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border text-slate-100"
                 value={selectedClientId}
                 onChange={(e) => handleClientChange(e.target.value)}
                 disabled={loadingClients}
@@ -318,14 +331,14 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                   </option>
                 ))}
               </select>
-              {loadingClients && <p className="text-xs text-gray-500 mt-1">Cargando clientes...</p>}
+              {loadingClients && <p className="text-xs text-slate-400 mt-1">Cargando clientes...</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Método de Pago</label>
                 <select
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border text-gray-900"
+                  className="block w-full rounded-md border-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border text-slate-100"
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
                 >
@@ -353,9 +366,9 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Estado de Pago</label>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Estado de Pago</label>
                 <select
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border text-gray-900"
+                  className="block w-full rounded-md border-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border text-slate-100"
                   value={paymentStatus}
                   onChange={(e) => setPaymentStatus(e.target.value)}
                 >
@@ -365,11 +378,11 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
               </div>
             </div>
 
-            <div className="bg-gray-50 p-4 rounded-md">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Agregar Producto</label>
+            <div className="bg-slate-800/50 p-4 rounded-md">
+              <label className="block text-sm font-medium text-slate-300 mb-2">Agregar Producto</label>
               <div className="flex gap-2">
                 <select
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border text-gray-900"
+                  className="block w-full rounded-md border-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border text-slate-100"
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
                   disabled={loadingProducts}
@@ -392,26 +405,26 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                   </svg>
                 </button>
               </div>
-              {loadingProducts && <p className="text-xs text-gray-500 mt-1">Cargando productos...</p>}
+              {loadingProducts && <p className="text-xs text-slate-400 mt-1">Cargando productos...</p>}
             </div>
 
             <div>
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Ítems del Pedido</h4>
+              <h4 className="text-sm font-medium text-slate-300 mb-2">Ítems del Pedido</h4>
               {items.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">No hay ítems agregados.</p>
+                <p className="text-sm text-slate-400 italic">No hay ítems agregados.</p>
               ) : (
                 <ul className="divide-y divide-gray-200 border rounded-md">
                   {items.map((item) => (
                     <li key={item.productId} className="px-4 py-3 flex items-center justify-between">
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{item.productName}</p>
-                        <p className="text-xs text-gray-500">{formatPrice(item.price)} x {item.quantity}</p>
+                        <p className="text-sm font-medium text-slate-100">{item.productName}</p>
+                        <p className="text-xs text-slate-400">{formatPrice(item.price)} x {item.quantity}</p>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center border rounded">
-                          <button onClick={() => updateQuantity(item.productId, -1)} className="px-2 py-1 text-gray-600 hover:bg-gray-100">-</button>
+                          <button onClick={() => updateQuantity(item.productId, -1)} className="px-2 py-1 text-slate-400 hover:bg-slate-700">-</button>
                           <span className="px-2 text-sm">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productId, 1)} className="px-2 py-1 text-gray-600 hover:bg-gray-100">+</button>
+                          <button onClick={() => updateQuantity(item.productId, 1)} className="px-2 py-1 text-slate-400 hover:bg-slate-700">+</button>
                         </div>
                         <span className="text-sm font-semibold w-20 text-right">
                           {formatPrice(item.price * item.quantity)}
@@ -432,19 +445,19 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
             </div>
 
             <div className="border-t pt-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">Dirección de Envío (Opcional)</h4>
+              <h4 className="text-sm font-medium text-slate-300 mb-2">Dirección de Envío (Opcional)</h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <input
                   type="text"
                   placeholder="Calle / Dirección"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-slate-600 shadow-sm focus:ring-teal-500 focus:border-indigo-500 sm:text-sm p-2 border"
                   value={shippingAddress.street}
                   onChange={e => setShippingAddress({ ...shippingAddress, street: e.target.value })}
                 />
                 <input
                   type="text"
                   placeholder="Ciudad"
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm p-2 border"
+                  className="block w-full rounded-md border-slate-600 shadow-sm focus:ring-teal-500 focus:border-indigo-500 sm:text-sm p-2 border"
                   value={shippingAddress.city}
                   onChange={e => setShippingAddress({ ...shippingAddress, city: e.target.value })}
                 />
@@ -452,10 +465,10 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+        <div className="bg-slate-800/50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
           <button
             type="button"
-            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
+            className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
             onClick={handleSubmit}
             disabled={submitting || items.length === 0}
           >
@@ -463,7 +476,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
           </button>
           <button
             type="button"
-            className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+            className="mt-3 w-full inline-flex justify-center rounded-md border border-slate-600 shadow-sm px-4 py-2 bg-white text-base font-medium text-slate-300 hover:bg-slate-800/50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
             onClick={onClose}
           >
             Cancelar
@@ -473,44 +486,44 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
 
       {showCreateClientForm && (
         <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50">
-          <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
-            <h3 className="mb-4 text-lg font-medium text-zinc-900">Nuevo Cliente</h3>
+          <div className="w-full max-w-md rounded-lg bg-slate-900 border border-slate-800 p-6 shadow-lg">
+            <h3 className="mb-4 text-lg font-medium text-slate-100">Nuevo Cliente</h3>
             <form onSubmit={handleCreateClient} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Nombre</label>
+                <label className="block text-sm font-medium text-slate-300">Nombre</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.firstName}
                   onChange={(e) => setNewClient({ ...newClient, firstName: e.target.value })}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Apellido</label>
+                <label className="block text-sm font-medium text-slate-300">Apellido</label>
                 <input
                   type="text"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.lastName}
                   onChange={(e) => setNewClient({ ...newClient, lastName: e.target.value })}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Email</label>
+                <label className="block text-sm font-medium text-slate-300">Email</label>
                 <input
                   type="email"
                   required
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.email}
                   onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-zinc-700">Teléfono</label>
+                <label className="block text-sm font-medium text-slate-300">Teléfono</label>
                 <input
                   type="tel"
-                  className="mt-1 block w-full rounded-md border border-zinc-300 px-3 py-2 text-sm"
+                  className="mt-1 block w-full rounded-md border border-slate-600 px-3 py-2 text-sm"
                   value={newClient.phone}
                   onChange={(e) => setNewClient({ ...newClient, phone: e.target.value })}
                 />
@@ -519,7 +532,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
                 <button
                   type="button"
                   onClick={() => setShowCreateClientForm(false)}
-                  className="rounded-md border border-zinc-300 bg-white px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
+                  className="rounded-md border border-slate-600 bg-white px-4 py-2 text-sm font-medium text-slate-300 hover:bg-zinc-50"
                 >
                   Cancelar
                 </button>

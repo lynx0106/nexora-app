@@ -27,7 +27,7 @@ describe('StorageService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    
+
     mockSupabaseClient = {
       storage: {
         from: jest.fn().mockReturnThis(),
@@ -121,7 +121,10 @@ describe('StorageService', () => {
           error: null,
         });
         mockSupabaseClient.storage.getPublicUrl.mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/uploads/products/123-test.jpg' },
+          data: {
+            publicUrl:
+              'https://test.supabase.co/storage/v1/object/public/uploads/products/123-test.jpg',
+          },
         });
 
         const result = await service.uploadFile('products', mockFile);
@@ -131,9 +134,9 @@ describe('StorageService', () => {
       });
 
       it('should throw error for invalid bucket', async () => {
-        await expect(service.uploadFile('invalid' as any, mockFile)).rejects.toThrow(
-          BadRequestException,
-        );
+        await expect(
+          service.uploadFile('invalid' as any, mockFile),
+        ).rejects.toThrow(BadRequestException);
       });
 
       it('should handle upload error', async () => {
@@ -153,10 +156,17 @@ describe('StorageService', () => {
           error: null,
         });
         mockSupabaseClient.storage.getPublicUrl.mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/uploads/products/custom-path.jpg' },
+          data: {
+            publicUrl:
+              'https://test.supabase.co/storage/v1/object/public/uploads/products/custom-path.jpg',
+          },
         });
 
-        const result = await service.uploadFile('products', mockFile, 'custom-path.jpg');
+        const result = await service.uploadFile(
+          'products',
+          mockFile,
+          'custom-path.jpg',
+        );
 
         expect(result.path).toBe('products/custom-path.jpg');
       });
@@ -167,7 +177,10 @@ describe('StorageService', () => {
           error: null,
         });
         mockSupabaseClient.storage.getPublicUrl.mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/uploads/avatars/avatar.jpg' },
+          data: {
+            publicUrl:
+              'https://test.supabase.co/storage/v1/object/public/uploads/avatars/avatar.jpg',
+          },
         });
 
         const result = await service.uploadFile('avatars', mockFile);
@@ -181,7 +194,10 @@ describe('StorageService', () => {
           error: null,
         });
         mockSupabaseClient.storage.getPublicUrl.mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/uploads/chat/message.jpg' },
+          data: {
+            publicUrl:
+              'https://test.supabase.co/storage/v1/object/public/uploads/chat/message.jpg',
+          },
         });
 
         const result = await service.uploadFile('chat', mockFile);
@@ -195,7 +211,10 @@ describe('StorageService', () => {
           error: null,
         });
         mockSupabaseClient.storage.getPublicUrl.mockReturnValue({
-          data: { publicUrl: 'https://test.supabase.co/storage/v1/object/public/uploads/tenants/logo.jpg' },
+          data: {
+            publicUrl:
+              'https://test.supabase.co/storage/v1/object/public/uploads/tenants/logo.jpg',
+          },
         });
 
         const result = await service.uploadFile('tenants', mockFile);
@@ -226,7 +245,9 @@ describe('StorageService', () => {
       });
 
       it('should return false on exception', async () => {
-        mockSupabaseClient.storage.remove.mockRejectedValue(new Error('Network error'));
+        mockSupabaseClient.storage.remove.mockRejectedValue(
+          new Error('Network error'),
+        );
 
         const result = await service.deleteFile('products/test.jpg');
 
@@ -275,10 +296,7 @@ describe('StorageService', () => {
     describe('listFiles', () => {
       it('should list files successfully', async () => {
         mockSupabaseClient.storage.list.mockResolvedValue({
-          data: [
-            { name: 'file1.jpg' },
-            { name: 'file2.jpg' },
-          ],
+          data: [{ name: 'file1.jpg' }, { name: 'file2.jpg' }],
           error: null,
         });
 
@@ -297,10 +315,13 @@ describe('StorageService', () => {
 
         await service.listFiles('products', 50);
 
-        expect(mockSupabaseClient.storage.list).toHaveBeenCalledWith('products', {
-          limit: 50,
-          sortBy: { column: 'created_at', order: 'desc' },
-        });
+        expect(mockSupabaseClient.storage.list).toHaveBeenCalledWith(
+          'products',
+          {
+            limit: 50,
+            sortBy: { column: 'created_at', order: 'desc' },
+          },
+        );
       });
 
       it('should throw error on list failure', async () => {

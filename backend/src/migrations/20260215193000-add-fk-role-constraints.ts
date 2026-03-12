@@ -178,23 +178,57 @@ END $$;`,
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS fk_audit_logs_user');
-    await queryRunner.query('ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS fk_audit_logs_tenant');
-    await queryRunner.query('ALTER TABLE ai_usage DROP CONSTRAINT IF EXISTS fk_ai_usage_tenant');
-    await queryRunner.query('ALTER TABLE messages DROP CONSTRAINT IF EXISTS fk_messages_sender');
-    await queryRunner.query('ALTER TABLE messages DROP CONSTRAINT IF EXISTS fk_messages_tenant');
-    await queryRunner.query('ALTER TABLE notifications DROP CONSTRAINT IF EXISTS fk_notifications_user');
-    await queryRunner.query('ALTER TABLE notifications DROP CONSTRAINT IF EXISTS fk_notifications_tenant');
-    await queryRunner.query('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_service');
-    await queryRunner.query('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_client');
-    await queryRunner.query('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_doctor');
-    await queryRunner.query('ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_tenant');
-    await queryRunner.query('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS fk_order_items_product');
-    await queryRunner.query('ALTER TABLE order_items DROP CONSTRAINT IF EXISTS fk_order_items_order');
-    await queryRunner.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_user');
-    await queryRunner.query('ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_tenant');
-    await queryRunner.query('ALTER TABLE products DROP CONSTRAINT IF EXISTS fk_products_tenant');
-    await queryRunner.query('ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_role_allowed');
+    await queryRunner.query(
+      'ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS fk_audit_logs_user',
+    );
+    await queryRunner.query(
+      'ALTER TABLE audit_logs DROP CONSTRAINT IF EXISTS fk_audit_logs_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE ai_usage DROP CONSTRAINT IF EXISTS fk_ai_usage_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE messages DROP CONSTRAINT IF EXISTS fk_messages_sender',
+    );
+    await queryRunner.query(
+      'ALTER TABLE messages DROP CONSTRAINT IF EXISTS fk_messages_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE notifications DROP CONSTRAINT IF EXISTS fk_notifications_user',
+    );
+    await queryRunner.query(
+      'ALTER TABLE notifications DROP CONSTRAINT IF EXISTS fk_notifications_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_service',
+    );
+    await queryRunner.query(
+      'ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_client',
+    );
+    await queryRunner.query(
+      'ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_doctor',
+    );
+    await queryRunner.query(
+      'ALTER TABLE appointments DROP CONSTRAINT IF EXISTS fk_appointments_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE order_items DROP CONSTRAINT IF EXISTS fk_order_items_product',
+    );
+    await queryRunner.query(
+      'ALTER TABLE order_items DROP CONSTRAINT IF EXISTS fk_order_items_order',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_user',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP CONSTRAINT IF EXISTS fk_orders_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE products DROP CONSTRAINT IF EXISTS fk_products_tenant',
+    );
+    await queryRunner.query(
+      'ALTER TABLE users DROP CONSTRAINT IF EXISTS chk_users_role_allowed',
+    );
 
     await queryRunner.query(
       'ALTER TABLE audit_logs ALTER COLUMN "userId" TYPE character varying USING "userId"::text',
@@ -224,10 +258,20 @@ END $$;`,
       'ALTER TABLE orders ALTER COLUMN "userId" TYPE character varying USING "userId"::text',
     );
 
-    await queryRunner.query('DROP INDEX IF EXISTS "IDX_orders_public_token_hash"');
-    await queryRunner.query('ALTER TABLE orders DROP COLUMN IF EXISTS "publicTokenExpiresAt"');
-    await queryRunner.query('ALTER TABLE orders DROP COLUMN IF EXISTS "publicTokenHash"');
-    await queryRunner.query('ALTER TABLE users DROP COLUMN IF EXISTS "passwordResetTokenExpiresAt"');
-    await queryRunner.query('ALTER TABLE users DROP COLUMN IF EXISTS "passwordResetTokenHash"');
+    await queryRunner.query(
+      'DROP INDEX IF EXISTS "IDX_orders_public_token_hash"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP COLUMN IF EXISTS "publicTokenExpiresAt"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE orders DROP COLUMN IF EXISTS "publicTokenHash"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE users DROP COLUMN IF EXISTS "passwordResetTokenExpiresAt"',
+    );
+    await queryRunner.query(
+      'ALTER TABLE users DROP COLUMN IF EXISTS "passwordResetTokenHash"',
+    );
   }
 }

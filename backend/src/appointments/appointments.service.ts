@@ -1,4 +1,9 @@
-import { Injectable, Logger, ConflictException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ConflictException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { Appointment } from './entities/appointment.entity';
@@ -32,7 +37,10 @@ export class AppointmentsService {
 
     // --- Validation: Check for Overlapping Appointments ---
     if (createAppointmentDto.serviceId) {
-      const service = await this.productsService.findOne(createAppointmentDto.serviceId, createAppointmentDto.tenantId);
+      const service = await this.productsService.findOne(
+        createAppointmentDto.serviceId,
+        createAppointmentDto.tenantId,
+      );
       if (!service) {
         throw new NotFoundException('Servicio/Producto no encontrado');
       }
@@ -43,45 +51,59 @@ export class AppointmentsService {
 
       // 1. Check Doctor Availability (if doctor assigned)
       if (createAppointmentDto.doctorId) {
-        const overlappingDocs = await this.appointmentsRepository.createQueryBuilder('appt')
+        const overlappingDocs = await this.appointmentsRepository
+          .createQueryBuilder('appt')
           .leftJoinAndSelect('appt.service', 'service')
-          .where('appt.doctorId = :doctorId', { doctorId: createAppointmentDto.doctorId })
+          .where('appt.doctorId = :doctorId', {
+            doctorId: createAppointmentDto.doctorId,
+          })
           .andWhere('appt.status != :cancelled', { cancelled: 'cancelled' })
           .andWhere('appt.dateTime < :newEnd', { newEnd }) // Optimization: Start must be before New End
           .getMany();
 
-        const hasDocOverlap = overlappingDocs.some(existing => {
+        const hasDocOverlap = overlappingDocs.some((existing) => {
           const existingDuration = existing.service?.duration || 60;
           const existingStart = new Date(existing.dateTime);
-          const existingEnd = new Date(existingStart.getTime() + existingDuration * 60000);
+          const existingEnd = new Date(
+            existingStart.getTime() + existingDuration * 60000,
+          );
           // Overlap if: (StartA < EndB) and (EndA > StartB)
           // We already filtered StartA < EndB in SQL.
           return existingEnd > newStart;
         });
 
         if (hasDocOverlap) {
-          throw new ConflictException('El especialista ya tiene una cita agendada en ese horario (conflicto de agenda).');
+          throw new ConflictException(
+            'El especialista ya tiene una cita agendada en ese horario (conflicto de agenda).',
+          );
         }
       }
 
       // 2. Check Client Availability (prevent double booking for same client)
       if (createAppointmentDto.clientId) {
-        const overlappingClients = await this.appointmentsRepository.createQueryBuilder('appt')
+        const overlappingClients = await this.appointmentsRepository
+          .createQueryBuilder('appt')
           .leftJoinAndSelect('appt.service', 'service')
-          .where('appt.clientId = :clientId', { clientId: createAppointmentDto.clientId })
+          .where('appt.clientId = :clientId', {
+            clientId: createAppointmentDto.clientId,
+          })
           .andWhere('appt.status != :cancelled', { cancelled: 'cancelled' })
           .andWhere('appt.dateTime < :newEnd', { newEnd })
           .getMany();
 
-        const hasClientOverlap = overlappingClients.some(existing => {
+        const hasClientOverlap = overlappingClients.some((existing) => {
           const existingDuration = existing.service?.duration || 60;
           const existingStart = new Date(existing.dateTime);
-          const existingEnd = new Date(existingStart.getTime() + existingDuration * 60000);
+          const existingEnd = new Date(
+            existingStart.getTime() + existingDuration * 60000,
+          );
           return existingEnd > newStart;
         });
 
         if (hasClientOverlap) {
-          throw new ConflictException('El cliente ya tiene una reserva/cita activa en ese horario.');
+          throw new ConflictException(
+            'El cliente ya tiene una reserva/cita activa en ese horario.',
+          );
         }
       }
     }
@@ -145,8 +167,14 @@ export class AppointmentsService {
   }
 
   findAllGlobal() {
-    return this.appointmentsRepository.createQueryBuilder('appointment')
-      .leftJoinAndMapOne('appointment.tenant', Tenant, 'tenant', 'tenant.id = appointment.tenantId')
+    return this.appointmentsRepository
+      .createQueryBuilder('appointment')
+      .leftJoinAndMapOne(
+        'appointment.tenant',
+        Tenant,
+        'tenant',
+        'tenant.id = appointment.tenantId',
+      )
       .leftJoinAndSelect('appointment.doctor', 'doctor')
       .leftJoinAndSelect('appointment.client', 'client')
       .leftJoinAndSelect('appointment.service', 'service')
@@ -294,11 +322,11 @@ export class AppointmentsService {
    */
   async sendReminders() {
     const now = new Date();
-    
+
     // Send 24h reminders
     const start24h = new Date(now.getTime() + 23 * 60 * 60 * 1000);
     const end24h = new Date(now.getTime() + 25 * 60 * 60 * 1000);
-    
+
     const appointments24h = await this.appointmentsRepository.find({
       where: {
         dateTime: Between(start24h, end24h),
@@ -310,7 +338,11 @@ export class AppointmentsService {
 
     for (const appt of appointments24h) {
       try {
-        await this.mailService.sendAppointmentReminder(appt, appt.tenant, '24h');
+        await this.mailService.sendAppointmentReminder(
+          appt,
+          appt.tenant,
+          '24h',
+        );
         appt.reminderSent24h = true;
         await this.appointmentsRepository.save(appt);
       } catch (error) {
@@ -321,7 +353,7 @@ export class AppointmentsService {
     // Send 2h reminders
     const start2h = new Date(now.getTime() + 1 * 60 * 60 * 1000);
     const end2h = new Date(now.getTime() + 2.5 * 60 * 60 * 1000);
-    
+
     const appointments2h = await this.appointmentsRepository.find({
       where: {
         dateTime: Between(start2h, end2h),

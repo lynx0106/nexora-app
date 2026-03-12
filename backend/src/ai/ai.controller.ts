@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Query, Param } from '@nestjs/common';
+import { Controller, Get, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AiService } from './ai.service';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -30,7 +30,12 @@ export class AiController {
       .addSelect('COUNT(usage.id)', 'requestCount')
       .groupBy('usage.provider')
       .addGroupBy('usage.model')
-      .getRawMany();
+      .getRawMany<{
+        provider: string;
+        model: string;
+        totalTokens: string;
+        requestCount: string;
+      }>();
 
     return stats;
   }
@@ -40,7 +45,7 @@ export class AiController {
     @Query('tenantId') tenantId?: string,
     @Query('limit') limit: number = 50,
   ) {
-    const where: any = {};
+    const where: { tenantId?: string } = {};
     if (tenantId) {
       where.tenantId = tenantId;
     }

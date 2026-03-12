@@ -96,7 +96,9 @@ describe('OrdersService', () => {
     };
 
     const mockPaymentsService = {
-      createPaymentLink: jest.fn().mockResolvedValue({ url: 'https://payment.link' }),
+      createPaymentLink: jest
+        .fn()
+        .mockResolvedValue({ url: 'https://payment.link' }),
     };
 
     const mockChatGateway = {
@@ -148,7 +150,9 @@ describe('OrdersService', () => {
         items: [],
       };
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if quantity is zero or negative', async () => {
@@ -158,7 +162,9 @@ describe('OrdersService', () => {
         items: [{ productId: 'product-123', quantity: 0 }],
       };
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if product not found', async () => {
@@ -170,7 +176,9 @@ describe('OrdersService', () => {
 
       mockQueryRunner.manager.findOne.mockResolvedValueOnce(null);
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw BadRequestException if insufficient stock', async () => {
@@ -185,7 +193,9 @@ describe('OrdersService', () => {
         stock: 5,
       });
 
-      await expect(service.create(createData)).rejects.toThrow(BadRequestException);
+      await expect(service.create(createData)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -208,7 +218,10 @@ describe('OrdersService', () => {
     it('should return all orders for a tenant and user', async () => {
       orderRepo.find.mockResolvedValue([mockOrder]);
 
-      const result = await service.findAllByTenantAndUser('tenant-123', 'user-123');
+      const result = await service.findAllByTenantAndUser(
+        'tenant-123',
+        'user-123',
+      );
 
       expect(result).toBeDefined();
       expect(orderRepo.find).toHaveBeenCalledWith({
@@ -275,7 +288,9 @@ describe('OrdersService', () => {
       orderRepo.findOne.mockResolvedValue(mockOrder);
       orderRepo.save.mockResolvedValue({ ...mockOrder, paymentStatus: 'paid' });
 
-      const result = await service.update('order-123', { paymentStatus: 'paid' });
+      const result = await service.update('order-123', {
+        paymentStatus: 'paid',
+      });
 
       expect(result).toBeDefined();
     });
@@ -283,7 +298,9 @@ describe('OrdersService', () => {
     it('should throw error if order not found', async () => {
       orderRepo.findOne.mockResolvedValue(null);
 
-      await expect(service.update('nonexistent', { status: 'completed' })).rejects.toThrow('Order not found');
+      await expect(
+        service.update('nonexistent', { status: 'completed' }),
+      ).rejects.toThrow('Order not found');
     });
   });
 
@@ -376,7 +393,12 @@ describe('OrdersService', () => {
 
       const start = new Date('2024-01-01');
       const end = new Date('2024-12-31');
-      const result = await service.findForReport('tenant-123', start, end, 'user-123');
+      const result = await service.findForReport(
+        'tenant-123',
+        start,
+        end,
+        'user-123',
+      );
 
       expect(result).toBeDefined();
     });
@@ -454,7 +476,9 @@ describe('OrdersService', () => {
       };
 
       mockQueryRunner.manager.findOne.mockResolvedValue(mockProduct);
-      mockQueryRunner.manager.save.mockRejectedValue(new Error('Database error'));
+      mockQueryRunner.manager.save.mockRejectedValue(
+        new Error('Database error'),
+      );
 
       await expect(service.create(createData)).rejects.toThrow();
       expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
@@ -495,7 +519,7 @@ describe('OrdersService', () => {
       mockQueryRunner.manager.findOne.mockResolvedValue(mockProduct);
       mockQueryRunner.manager.save.mockResolvedValue(mockOrder);
 
-      const result = await service.create(createData) as any;
+      const result = (await service.create(createData)) as any;
 
       expect(result.publicToken).toBeDefined();
     });
@@ -513,7 +537,7 @@ describe('OrdersService', () => {
       };
 
       orderRepo.findOne.mockResolvedValue(orderWithItems);
-      
+
       const mockCancelQueryRunner = {
         connect: jest.fn().mockResolvedValue(undefined),
         startTransaction: jest.fn().mockResolvedValue(undefined),
@@ -525,8 +549,10 @@ describe('OrdersService', () => {
           save: jest.fn().mockImplementation(async (entity) => entity),
         },
       };
-      
-      dataSource.createQueryRunner.mockReturnValue(mockCancelQueryRunner as any);
+
+      dataSource.createQueryRunner.mockReturnValue(
+        mockCancelQueryRunner as any,
+      );
 
       const result = await service.update('order-123', { status: 'cancelled' });
 
@@ -561,9 +587,11 @@ describe('OrdersService', () => {
         addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         limit: jest.fn().mockReturnThis(),
-        getRawMany: jest.fn().mockResolvedValue([
-          { id: 'prod-1', name: 'Product 1', total_quantity: '10' },
-        ]),
+        getRawMany: jest
+          .fn()
+          .mockResolvedValue([
+            { id: 'prod-1', name: 'Product 1', total_quantity: '10' },
+          ]),
       };
       orderRepo.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 

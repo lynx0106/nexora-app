@@ -1,7 +1,7 @@
 /**
  * Test básico de la página de login/landing
  */
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import Home from '@/app/page';
 
 // Mock next/navigation

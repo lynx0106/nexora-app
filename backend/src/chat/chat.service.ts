@@ -32,7 +32,7 @@ export class ChatService {
       type,
     });
     const savedMessage = await this.messagesRepository.save(message);
-    
+
     // Reload to get sender relations
     const fullMessage = await this.messagesRepository.findOne({
       where: { id: savedMessage.id },

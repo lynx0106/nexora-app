@@ -1,5 +1,20 @@
-import { Body, Controller, Post, Res, Get, UseGuards, Req, Ip, UnauthorizedException } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Get,
+  UseGuards,
+  Req,
+  Ip,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Response, Request } from 'express';
 import { AuthService } from './auth.service';
@@ -15,7 +30,7 @@ import { StructuredLogger } from '../common/logger';
 @Controller('auth')
 export class AuthController {
   private readonly logger = new StructuredLogger(AuthController.name);
-  
+
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
@@ -25,7 +40,10 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'User successfully registered' })
   @ApiResponse({ status: 400, description: 'Bad request - validation error' })
   @ApiResponse({ status: 409, description: 'Conflict - email already exists' })
-  @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests - rate limit exceeded',
+  })
   register(@Body() dto: RegisterDto) {
     return this.authService.register(dto);
   }
@@ -34,9 +52,18 @@ export class AuthController {
   @UseGuards(AuthThrottleGuard)
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 intentos por minuto
   @ApiOperation({ summary: 'User login' })
-  @ApiResponse({ status: 200, description: 'Login successful - sets httpOnly cookie and returns token' })
-  @ApiResponse({ status: 401, description: 'Unauthorized - invalid credentials' })
-  @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful - sets httpOnly cookie and returns token',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid credentials',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests - rate limit exceeded',
+  })
   async login(
     @Body() dto: LoginDto,
     @Res({ passthrough: true }) res: Response,
@@ -45,7 +72,7 @@ export class AuthController {
   ) {
     try {
       const result = await this.authService.login(dto);
-      
+
       // Create refresh token and store in database
       const deviceInfo = req.headers['user-agent'] || 'Unknown';
       const refreshToken = await this.authService.createRefreshToken(
@@ -53,7 +80,7 @@ export class AuthController {
         deviceInfo,
         ip,
       );
-      
+
       // Set HTTP-only cookie with JWT (for same-domain deployments)
       res.cookie('access_token', result.accessToken, {
         httpOnly: true,
@@ -81,16 +108,20 @@ export class AuthController {
         path: '/',
       });
 
-      this.logger.log(`Successful login for user: ${result.user.email} from IP: ${ip}`);
+      this.logger.log(
+        `Successful login for user: ${result.user.email} from IP: ${ip}`,
+      );
 
       // Return token in body for cross-domain deployments (cookies blocked by browser)
-      return { 
+      return {
         user: result.user,
         accessToken: result.accessToken,
-        message: 'Login successful' 
+        message: 'Login successful',
       };
     } catch (error) {
-      this.logger.warn(`Failed login attempt for email: ${dto.email} from IP: ${ip}`);
+      this.logger.warn(
+        `Failed login attempt for email: ${dto.email} from IP: ${ip}`,
+      );
       throw error;
     }
   }
@@ -99,14 +130,14 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
   @ApiOperation({ summary: 'User logout' })
-  @ApiResponse({ status: 200, description: 'Logout successful - cookies cleared and tokens revoked' })
-  async logout(
-    @Res({ passthrough: true }) res: Response,
-    @Req() req: Request,
-  ) {
+  @ApiResponse({
+    status: 200,
+    description: 'Logout successful - cookies cleared and tokens revoked',
+  })
+  async logout(@Res({ passthrough: true }) res: Response, @Req() req: Request) {
     // Get refresh token from cookie and revoke it in database
     const refreshToken = req.cookies?.refresh_token;
-    
+
     if (refreshToken) {
       try {
         await this.authService.revokeRefreshToken(refreshToken);
@@ -147,7 +178,7 @@ export class AuthController {
     if (!user) {
       return { user: null };
     }
-    
+
     // Fetch fresh user data from database
     const userData = await this.authService.getUserById(user.userId);
     return { user: userData };
@@ -159,7 +190,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Request password reset' })
   @ApiResponse({ status: 200, description: 'Password reset email sent' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests - rate limit exceeded',
+  })
   requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
     return this.authService.requestPasswordReset(dto);
   }
@@ -170,7 +204,10 @@ export class AuthController {
   @ApiOperation({ summary: 'Confirm password reset with token' })
   @ApiResponse({ status: 200, description: 'Password successfully reset' })
   @ApiResponse({ status: 400, description: 'Invalid or expired token' })
-  @ApiResponse({ status: 429, description: 'Too many requests - rate limit exceeded' })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many requests - rate limit exceeded',
+  })
   confirmPasswordReset(@Body() dto: ConfirmPasswordResetDto) {
     return this.authService.confirmPasswordReset(dto);
   }

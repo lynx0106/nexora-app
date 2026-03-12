@@ -58,9 +58,7 @@ describe('PermissionsGuard', () => {
 
   it('rejects when permission is missing', () => {
     const guard = new PermissionsGuard();
-    const context = createContext({ role: Role.User }, [
-      Permission.UserManage,
-    ]);
+    const context = createContext({ role: Role.User }, [Permission.UserManage]);
 
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
   });

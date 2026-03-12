@@ -1,5 +1,14 @@
-import { Controller, Get, Post, Req, UseGuards, Query, Body } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
+  Query,
+  Body,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 import { ChatService } from './chat.service';
 import { UsersService } from '../users/users.service';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -13,8 +22,11 @@ export class ChatController {
   ) {}
 
   @Get('conversations')
-  async getConversations(@Req() req, @Query('tenantId') tenantId?: string) {
-    const user = req.user;
+  async getConversations(
+    @Req() req: Request,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    const user = req.user!;
     // Only admins/staff see conversations list
     if (user.role === 'user') return [];
 
@@ -43,8 +55,11 @@ export class ChatController {
    * This allows admin/staff to see all team members
    */
   @Get('users')
-  async getTenantUsers(@Req() req, @Query('tenantId') tenantId?: string) {
-    const user = req.user;
+  async getTenantUsers(
+    @Req() req: Request,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    const user = req.user!;
 
     let effectiveTenantId = user.tenantId;
     if (user.role === 'superadmin' && tenantId) {
@@ -63,13 +78,13 @@ export class ChatController {
 
   @Get('history')
   async getHistory(
-    @Req() req,
+    @Req() req: Request,
     @Query('limit') limit: number,
     @Query('scope') scope: string = 'INTERNAL',
     @Query('targetUserId') targetUserId?: string,
     @Query('tenantId') tenantId?: string,
   ) {
-    const user = req.user;
+    const user = req.user!;
 
     // Security Check:
     // If scope is INTERNAL, user must be admin or superadmin (or staff)
@@ -80,10 +95,8 @@ export class ChatController {
 
     let effectiveTargetUserId = targetUserId;
 
-    if (scope === 'CUSTOMER') {
-      if (user.role === 'user') {
-        effectiveTargetUserId = user.userId;
-      }
+    if (scope === 'CUSTOMER' && user.role === 'user') {
+      effectiveTargetUserId = user.userId;
     }
 
     // If Superadmin is viewing, allow tenantId override
@@ -107,13 +120,13 @@ export class ChatController {
 
   @Post('mark-read')
   async markRead(
-    @Req() req,
+    @Req() req: Request,
     @Query('scope') scope: string,
     @Query('targetUserId') targetUserId?: string,
     @Query('tenantId') tenantId?: string,
   ) {
-    const user = req.user;
-    
+    const user = req.user!;
+
     // For superadmin, allow tenantId override
     let effectiveTenantId = user.tenantId;
     if (user.role === 'superadmin' && tenantId) {
@@ -135,9 +148,12 @@ export class ChatController {
   }
 
   @Get('unread')
-  async getUnread(@Req() req, @Query('tenantId') tenantId?: string) {
-    const user = req.user;
-    
+  async getUnread(
+    @Req() req: Request,
+    @Query('tenantId') tenantId?: string,
+  ) {
+    const user = req.user!;
+
     // For superadmin, allow tenantId override
     let effectiveTenantId = user.tenantId;
     if (user.role === 'superadmin' && tenantId) {
@@ -152,23 +168,23 @@ export class ChatController {
     const count = await this.chatService.getUnreadCount(
       effectiveTenantId,
       user.userId,
-      user.role,
+      user.role ?? 'user',
     );
     return { count };
   }
 
   @Post('message')
-  async sendMessage(@Req() req, @Body() body: SendMessageDto) {
-    const user = req.user;
-    
+  async sendMessage(@Req() req: Request, @Body() body: SendMessageDto) {
+    const user = req.user!;
+
     // For superadmin, allow tenantId override
-    let effectiveTenantId = body.tenantId || user.tenantId;
-    
+    const effectiveTenantId = body.tenantId || user.tenantId;
+
     // If superadmin without tenant selection, return error
     if (!effectiveTenantId) {
       return { success: false, message: 'No tenant selected' };
     }
-    
+
     const message = await this.chatService.createMessage(
       body.content,
       user.userId,

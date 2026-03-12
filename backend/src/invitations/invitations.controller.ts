@@ -50,19 +50,18 @@ export class InvitationsController {
   })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 403, description: 'Sin permisos' })
-  async generate(
-    @Body() dto: GenerateInvitationDto,
-    @Req() req: Request,
-  ) {
+  async generate(@Body() dto: GenerateInvitationDto, @Req() req: Request) {
     const user = (req as any).user;
-    
+
     if (!user) {
       throw new ForbiddenException('No autorizado');
     }
 
     // Solo admin y superadmin pueden generar invitaciones
     if (!hasRole(user.role, [Role.Admin, Role.Superadmin])) {
-      throw new ForbiddenException('No tienes permiso para generar invitaciones');
+      throw new ForbiddenException(
+        'No tienes permiso para generar invitaciones',
+      );
     }
 
     return this.invitationsService.generate(
@@ -103,15 +102,14 @@ export class InvitationsController {
   @ApiResponse({ status: 200, description: 'Lista de invitaciones' })
   @ApiResponse({ status: 401, description: 'No autorizado' })
   @ApiResponse({ status: 403, description: 'Sin permisos' })
-  async findByTenant(
-    @Param('tenantId') tenantId: string,
-    @Req() req: Request,
-  ) {
+  async findByTenant(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = (req as any).user;
 
     // Solo admin del mismo tenant o superadmin pueden ver
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
-      throw new ForbiddenException('No tienes permiso para ver estas invitaciones');
+      throw new ForbiddenException(
+        'No tienes permiso para ver estas invitaciones',
+      );
     }
 
     return this.invitationsService.findByTenant(tenantId);

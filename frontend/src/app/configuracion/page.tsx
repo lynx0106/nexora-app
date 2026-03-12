@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useSyncExternalStore } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 
-function getUserFromStorage() {
+function getServerSnapshot() {
+  return null;
+}
+
+function getClientSnapshot(): { role?: string } | null {
   if (typeof window === "undefined") return null;
   const userJson = window.localStorage.getItem("user");
   if (userJson) {
     try {
-      return JSON.parse(userJson);
+      return JSON.parse(userJson) as { role?: string };
     } catch {
       return null;
     }
@@ -18,13 +22,13 @@ function getUserFromStorage() {
   return null;
 }
 
+function subscribe() {
+  return () => {};
+}
+
 export default function ConfiguracionPage() {
   const { t } = useTranslation();
-  const [user, setUser] = useState<{ role?: string } | null>(null);
-
-  useEffect(() => {
-    setUser(getUserFromStorage());
-  }, []);
+  const user = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
   const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superadmin';
 

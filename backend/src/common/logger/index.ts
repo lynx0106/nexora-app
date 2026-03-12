@@ -1,1 +1,5 @@
-export { StructuredLogger, createLogger, sanitizeLogData } from './logger.service';
+export {
+  StructuredLogger,
+  createLogger,
+  sanitizeLogData,
+} from './logger.service';

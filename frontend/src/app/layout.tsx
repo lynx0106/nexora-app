@@ -5,11 +5,13 @@ import "./globals.css";
 const spaceGrotesk = Space_Grotesk({
   variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
 });
 
 const fraunces = Fraunces({
   variable: "--font-display",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {

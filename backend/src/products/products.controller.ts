@@ -15,7 +15,13 @@ import {
 import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { Role, hasRole } from '../common/constants/roles';
 import { Permission } from '../common/constants/permissions';
@@ -43,8 +49,15 @@ export class ProductsController {
   @ApiOperation({ summary: 'Upload product image' })
   @ApiResponse({ status: 201, description: 'Image uploaded successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - insufficient permissions' })
-  upload(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() body: UploadProductDto) {
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - insufficient permissions',
+  })
+  upload(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+    @Body() body: UploadProductDto,
+  ) {
     const user = (req as any).user;
 
     if (!user) {
@@ -144,7 +157,11 @@ export class ProductsController {
   @Put(':id')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.ProductManage)
-  update(@Req() req: Request, @Param('id') id: string, @Body() body: UpdateProductDto) {
+  update(
+    @Req() req: Request,
+    @Param('id') id: string,
+    @Body() body: UpdateProductDto,
+  ) {
     const user = (req as any).user;
     if (hasRole(user.role, [Role.Superadmin])) {
       return this.productsService.updateAsAdmin(id, body);

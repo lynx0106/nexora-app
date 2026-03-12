@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
 
@@ -19,7 +20,7 @@ interface OrderStatus {
   total: number;
   currency: string;
   items: OrderItem[];
-  shippingAddress: any;
+  shippingAddress?: { firstName?: string; lastName?: string; street?: string; city?: string; country?: string; zip?: string };
   customerEmail: string;
   paymentLink?: string;
   tenant: {
@@ -79,13 +80,15 @@ export function OrderStatusView({ order }: OrderStatusViewProps) {
       <div className="max-w-3xl mx-auto">
         <div className="text-center mb-8">
           {order.tenant.logoUrl ? (
-            <img
+            <Image
               src={
                 order.tenant.logoUrl.startsWith("http")
                   ? order.tenant.logoUrl
                   : `${API_URL}${order.tenant.logoUrl}`
               }
-              alt={order.tenant.name}
+              alt={`Logo de ${order.tenant.name}`}
+              width={64}
+              height={64}
               className="mx-auto h-16 w-16 rounded-full object-cover shadow-sm mb-4 border border-slate-700"
             />
           ) : (

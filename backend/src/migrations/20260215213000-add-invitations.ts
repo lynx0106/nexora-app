@@ -38,11 +38,21 @@ export class AddInvitations20260215213000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query('ALTER TABLE invitations DROP CONSTRAINT IF EXISTS fk_invitations_inviter');
-    await queryRunner.query('ALTER TABLE invitations DROP CONSTRAINT IF EXISTS fk_invitations_tenant');
-    await queryRunner.query('DROP INDEX IF EXISTS "IDX_invitations_accepted_at"');
-    await queryRunner.query('DROP INDEX IF EXISTS "IDX_invitations_tenant_email"');
-    await queryRunner.query('DROP INDEX IF EXISTS "IDX_invitations_token_hash"');
+    await queryRunner.query(
+      'ALTER TABLE invitations DROP CONSTRAINT IF EXISTS fk_invitations_inviter',
+    );
+    await queryRunner.query(
+      'ALTER TABLE invitations DROP CONSTRAINT IF EXISTS fk_invitations_tenant',
+    );
+    await queryRunner.query(
+      'DROP INDEX IF EXISTS "IDX_invitations_accepted_at"',
+    );
+    await queryRunner.query(
+      'DROP INDEX IF EXISTS "IDX_invitations_tenant_email"',
+    );
+    await queryRunner.query(
+      'DROP INDEX IF EXISTS "IDX_invitations_token_hash"',
+    );
     await queryRunner.query('DROP TABLE IF EXISTS invitations');
   }
 }

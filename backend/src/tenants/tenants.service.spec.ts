@@ -94,7 +94,9 @@ describe('TenantsService', () => {
     }).compile();
 
     service = module.get<TenantsService>(TenantsService);
-    tenantsRepository = module.get<Repository<Tenant>>(getRepositoryToken(Tenant));
+    tenantsRepository = module.get<Repository<Tenant>>(
+      getRepositoryToken(Tenant),
+    );
 
     jest.clearAllMocks();
   });
@@ -174,24 +176,30 @@ describe('TenantsService', () => {
       };
 
       mockTenantsRepository.findOne.mockResolvedValue(null);
-      
+
       // Mock tenant creation - first call for tenant, second for admin
       let saveCallCount = 0;
-      mockQueryRunner.manager.create.mockImplementation((entity, data) => ({ ...data }));
+      mockQueryRunner.manager.create.mockImplementation((entity, data) => ({
+        ...data,
+      }));
       mockQueryRunner.manager.save.mockImplementation((entity, data) => {
         saveCallCount++;
         if (saveCallCount === 1) {
           // First save is for tenant
-          return Promise.resolve({ ...data, id: 'new-tenant', name: 'New Tenant' });
+          return Promise.resolve({
+            ...data,
+            id: 'new-tenant',
+            name: 'New Tenant',
+          });
         }
         // Second save is for admin
-        return Promise.resolve({ 
-          ...data, 
+        return Promise.resolve({
+          ...data,
           id: 'admin-id',
           firstName: 'Admin',
           lastName: 'User',
           email: 'admin@newtenant.com',
-          role: 'admin'
+          role: 'admin',
         });
       });
       mockQueryRunner.manager.findOne.mockResolvedValue(null);
@@ -231,9 +239,13 @@ describe('TenantsService', () => {
 
       mockTenantsRepository.findOne.mockResolvedValue(null);
       mockQueryRunner.manager.create.mockImplementation(() => ({}));
-      mockQueryRunner.manager.save.mockRejectedValue(new Error('Database error'));
+      mockQueryRunner.manager.save.mockRejectedValue(
+        new Error('Database error'),
+      );
 
-      await expect(service.createTenantWithAdmin(createData)).rejects.toThrow('Database error');
+      await expect(service.createTenantWithAdmin(createData)).rejects.toThrow(
+        'Database error',
+      );
       expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.release).toHaveBeenCalled();
     });
@@ -245,7 +257,9 @@ describe('TenantsService', () => {
       mockTenantsRepository.findOne.mockResolvedValue(mockTenant);
       mockTenantsRepository.save.mockResolvedValue(updatedTenant);
 
-      const result = await service.updateTenantProfile('tenant-uuid-1', { name: 'Updated Name' });
+      const result = await service.updateTenantProfile('tenant-uuid-1', {
+        name: 'Updated Name',
+      });
 
       expect(result.name).toBe('Updated Name');
     });
@@ -278,7 +292,9 @@ describe('TenantsService', () => {
       delete process.env.ALLOW_TENANT_AUTO_CREATE;
       mockTenantsRepository.findOne.mockResolvedValue(null);
 
-      await expect(service.getOrCreateTenant('noexistent')).rejects.toThrow(ForbiddenException);
+      await expect(service.getOrCreateTenant('noexistent')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
   });
 });

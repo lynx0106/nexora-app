@@ -20,18 +20,19 @@ export class UsersInitController {
 
       // Read and execute SQL script
       const sqlPath = path.join(process.cwd(), 'scripts', 'init-database.sql');
-      
+
       if (!fs.existsSync(sqlPath)) {
         this.logger.warn('SQL script not found at: ' + sqlPath);
         return {
           success: false,
-          message: 'SQL script not found. Please run SQL manually from Supabase dashboard.',
+          message:
+            'SQL script not found. Please run SQL manually from Supabase dashboard.',
           sqlPath,
         };
       }
 
       const sqlScript = fs.readFileSync(sqlPath, 'utf8');
-      
+
       // Execute SQL script
       await this.dataSource.query(sqlScript);
       this.logger.log('SQL schema executed successfully');
@@ -48,7 +49,6 @@ export class UsersInitController {
         superadmin: superadminResult,
         demoUsers: demoUsersResult,
       };
-
     } catch (error) {
       this.logger.error('Database initialization failed:', error);
       return {
@@ -73,10 +73,14 @@ export class UsersInitController {
       `);
 
       // Check users count
-      const userCount = await this.dataSource.query('SELECT COUNT(*) as count FROM users');
+      const userCount = await this.dataSource.query(
+        'SELECT COUNT(*) as count FROM users',
+      );
 
       // Check tenants count
-      const tenantCount = await this.dataSource.query('SELECT COUNT(*) as count FROM tenants');
+      const tenantCount = await this.dataSource.query(
+        'SELECT COUNT(*) as count FROM tenants',
+      );
 
       return {
         connected: true,
@@ -85,7 +89,6 @@ export class UsersInitController {
         userCount: parseInt(userCount[0].count),
         tenantCount: parseInt(tenantCount[0].count),
       };
-
     } catch (error) {
       return {
         connected: false,
@@ -105,14 +108,14 @@ export class UsersInitController {
       // Check if superadmin exists
       const existing = await this.dataSource.query(
         'SELECT id FROM users WHERE email = $1',
-        [email]
+        [email],
       );
 
       if (existing.length > 0) {
         // Update password
         await this.dataSource.query(
           'UPDATE users SET "passwordHash" = $1, "isActive" = true, role = $2 WHERE email = $3',
-          [passwordHash, 'superadmin', email]
+          [passwordHash, 'superadmin', email],
         );
         this.logger.log('Superadmin password updated');
         return {
@@ -126,7 +129,7 @@ export class UsersInitController {
         await this.dataSource.query(
           `INSERT INTO users (id, email, "passwordHash", "firstName", "lastName", role, "tenantId", "isActive", "createdAt", "updatedAt")
            VALUES (uuid_generate_v4(), $1, $2, 'Super', 'Admin', $3, 'system', true, NOW(), NOW())`,
-          [email, passwordHash, 'superadmin']
+          [email, passwordHash, 'superadmin'],
         );
         this.logger.log('Superadmin created');
         return {
@@ -179,13 +182,14 @@ export class UsersInitController {
       },
     ];
 
-    const results: Array<{email: string; action: string; error?: string}> = [];
+    const results: Array<{ email: string; action: string; error?: string }> =
+      [];
 
     for (const user of demoUsers) {
       try {
         const existing = await this.dataSource.query(
           'SELECT id FROM users WHERE email = $1',
-          [user.email]
+          [user.email],
         );
 
         if (existing.length > 0) {
@@ -194,13 +198,24 @@ export class UsersInitController {
           await this.dataSource.query(
             `INSERT INTO users (id, email, "passwordHash", "firstName", "lastName", role, "tenantId", "isActive", "createdAt", "updatedAt")
              VALUES (uuid_generate_v4(), $1, $2, $3, $4, $5, $6, true, NOW(), NOW())`,
-            [user.email, passwordHash, user.firstName, user.lastName, user.role, user.tenantId]
+            [
+              user.email,
+              passwordHash,
+              user.firstName,
+              user.lastName,
+              user.role,
+              user.tenantId,
+            ],
           );
           results.push({ email: user.email, action: 'CREATED' });
         }
       } catch (error) {
         this.logger.error(`Failed to create user ${user.email}:`, error);
-        results.push({ email: user.email, action: 'ERROR', error: error.message });
+        results.push({
+          email: user.email,
+          action: 'ERROR',
+          error: error.message,
+        });
       }
     }
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { fetchAPIWithAuth } from "../lib/api";
 
@@ -6,7 +7,7 @@ interface StatsSectionProps {
   role: string;
   tenantId: string;
   tenantSummary: { tenantId: string; totalUsers: number; activeUsers: number }[];
-  onNavigate: (section: any) => void;
+  onNavigate: (section: "resumen" | "usuarios" | "clientes" | "catalogo" | "pedidos" | "usuarios_globales" | "ajustes" | "agenda" | "reservas" | "empresas" | "mensajes" | "auditoria" | "invitaciones") => void;
   tenantSector?: string | null;
 }
 
@@ -155,7 +156,7 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
       {/* AI Consumption Stats (Superadmin/Admin) */}
       {(role === 'superadmin' || role === 'admin') && aiStats.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-             {aiStats.map((stat: any, idx: number) => (
+             {aiStats.map((stat: { provider: string; totalTokens: number; model?: string; requestCount?: number }, idx: number) => (
                 <div key={idx} className="rounded-lg border border-purple-100 bg-purple-50 p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -196,21 +197,21 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
             </button>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <div className="rounded-md bg-white p-4 shadow-sm">
-              <div className="text-sm text-zinc-700">Tenants activos</div>
-              <div className="text-2xl font-bold text-zinc-900">
+            <div className="rounded-md bg-slate-900/70 border border-slate-800 p-4 shadow-sm">
+              <div className="text-sm text-slate-300">Tenants activos</div>
+              <div className="text-2xl font-bold text-slate-100">
                 {tenantSummary.length}
               </div>
             </div>
-            <div className="rounded-md bg-white p-4 shadow-sm">
-              <div className="text-sm text-zinc-700">Usuarios totales</div>
-              <div className="text-2xl font-bold text-zinc-900">
+            <div className="rounded-md bg-slate-900/70 border border-slate-800 p-4 shadow-sm">
+              <div className="text-sm text-slate-300">Usuarios totales</div>
+              <div className="text-2xl font-bold text-slate-100">
                 {tenantSummary.reduce((acc, t) => acc + t.totalUsers, 0)}
               </div>
             </div>
-            <div className="rounded-md bg-white p-4 shadow-sm">
-              <div className="text-sm text-zinc-700">Usuarios activos</div>
-              <div className="text-2xl font-bold text-zinc-900">
+            <div className="rounded-md bg-slate-900/70 border border-slate-800 p-4 shadow-sm">
+              <div className="text-sm text-slate-300">Usuarios activos</div>
+              <div className="text-2xl font-bold text-slate-100">
                 {tenantSummary.reduce((acc, t) => acc + t.activeUsers, 0)}
               </div>
             </div>
@@ -219,11 +220,11 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
       )}
 
       {/* Welcome & Context */}
-      <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h3 className="text-lg font-medium text-zinc-900">
+      <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+        <h3 className="text-lg font-medium text-slate-100">
           {welcomeMsg.title}
         </h3>
-        <p className="mt-2 text-sm text-zinc-800">
+        <p className="mt-2 text-sm text-slate-300">
           {welcomeMsg.description}
         </p>
       </div>
@@ -233,29 +234,29 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
           {(role !== 'user' || isService) && (
             <>
-              <div className="rounded-lg bg-white p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-zinc-500">{role === 'user' ? t('stats.my_appointments_today') : t('stats.appointments_today')}</h4>
-                 <p className="mt-2 text-3xl font-bold text-zinc-900">{stats.todayApptCount}</p>
+              <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_appointments_today') : t('stats.appointments_today')}</h4>
+                 <p className="mt-2 text-3xl font-bold text-slate-100">{stats.todayApptCount}</p>
               </div>
-              <div className="rounded-lg bg-white p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-zinc-500">{role === 'user' ? t('stats.my_pending_requests') : t('stats.pending_requests')}</h4>
-                 <p className="mt-2 text-3xl font-bold text-zinc-900">{stats.pendingApptCount}</p>
+              <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_pending_requests') : t('stats.pending_requests')}</h4>
+                 <p className="mt-2 text-3xl font-bold text-slate-100">{stats.pendingApptCount}</p>
               </div>
             </>
           )}
 
           {(role !== 'user' || isRetail) && (
             <>
-              <div className="rounded-lg bg-white p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-zinc-500">{role === 'user' ? t('stats.my_purchases_today') : t('stats.sales_today')}</h4>
-                 <p className="mt-2 text-3xl font-bold text-zinc-900">
+              <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_purchases_today') : t('stats.sales_today')}</h4>
+                 <p className="mt-2 text-3xl font-bold text-slate-100">
                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(stats.todaySales)}
                  </p>
               </div>
-              <div className="rounded-lg bg-white p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-zinc-500">{role === 'user' ? t('stats.my_orders_today') : t('stats.orders_today')}</h4>
+              <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_orders_today') : t('stats.orders_today')}</h4>
                  <div className="mt-2 flex items-baseline gap-2">
-                   <span className="text-3xl font-bold text-zinc-900">{stats.todayOrdersCount}</span>
+                   <span className="text-3xl font-bold text-slate-100">{stats.todayOrdersCount}</span>
                    {stats.pendingOrdersCount > 0 && (
                      <span className="text-sm font-medium text-amber-600">({stats.pendingOrdersCount} pendientes)</span>
                    )}
@@ -269,11 +270,11 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
       {/* Charts & Activity */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Sales Chart (2 cols) */}
-        <div className="rounded-lg bg-white p-6 shadow-sm lg:col-span-2">
+        <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm lg:col-span-2">
            <div className="mb-6 flex items-center justify-between">
-             <h3 className="text-lg font-medium text-zinc-900">{t('stats.sales_chart_title')}</h3>
+             <h3 className="text-lg font-medium text-slate-100">{t('stats.sales_chart_title')}</h3>
            </div>
-           <div className="flex h-64 items-end gap-2 border-b border-zinc-200 pb-4 sm:gap-4">
+           <div className="flex h-64 items-end gap-2 border-b border-slate-700 pb-4 sm:gap-4">
               {salesChart.length > 0 ? (
                 salesChart.map((item) => {
                   const maxSales = Math.max(...salesChart.map(d => Number(d.total)), 1);
@@ -284,18 +285,18 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
                          className="w-full rounded-t bg-indigo-600 transition-all hover:bg-indigo-700"
                          style={{ height: `${heightPercent}%` }}
                       >
-                         <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-zinc-900 px-2 py-1 text-xs text-white shadow-lg group-hover:block z-10">
+                         <div className="absolute -top-8 left-1/2 hidden -translate-x-1/2 whitespace-nowrap rounded bg-slate-950 px-2 py-1 text-xs text-white shadow-lg group-hover:block z-10">
                             {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(Number(item.total))}
                          </div>
                       </div>
-                      <span className="text-center text-[10px] text-zinc-500 sm:text-xs">
+                      <span className="text-center text-[10px] text-slate-400 sm:text-xs">
                         {new Date(item.date).toLocaleDateString('es-ES', { weekday: 'short' })}
                       </span>
                    </div>
                   );
                 })
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-sm text-zinc-400">
+                <div className="flex h-full w-full items-center justify-center text-sm text-slate-400">
                   {t('stats.no_sales_data')}
                 </div>
               )}
@@ -303,8 +304,8 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
         </div>
 
         {/* Recent Activity (1 col) */}
-        <div className="rounded-lg bg-white p-6 shadow-sm">
-           <h3 className="mb-4 text-lg font-medium text-zinc-900">{t('stats.recent_activity')}</h3>
+        <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+           <h3 className="mb-4 text-lg font-medium text-slate-100">{t('stats.recent_activity')}</h3>
            <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2">
               {activity.map((item) => (
                  <div key={`${item.type}-${item.id}`} className="flex items-start gap-3">
@@ -316,43 +317,43 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
                        )}
                     </div>
                     <div>
-                       <p className="text-sm font-medium text-zinc-900">{item.title}</p>
-                       <p className="text-xs text-zinc-500">{item.description}</p>
-                       <p className="mt-1 text-[10px] text-zinc-400">{new Date(item.date).toLocaleString()}</p>
+                       <p className="text-sm font-medium text-slate-100">{item.title}</p>
+                       <p className="text-xs text-slate-400">{item.description}</p>
+                       <p className="mt-1 text-[10px] text-slate-400">{new Date(item.date).toLocaleString()}</p>
                     </div>
                  </div>
               ))}
-              {activity.length === 0 && <p className="text-sm text-zinc-500">{t('stats.no_activity')}</p>}
+              {activity.length === 0 && <p className="text-sm text-slate-400">{t('stats.no_activity')}</p>}
            </div>
         </div>
       </div>
 
       {/* Top Products */}
       {topProducts.length > 0 && (
-        <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h3 className="mb-4 text-lg font-medium text-zinc-900">{t('stats.top_products')}</h3>
-          <div className="overflow-hidden rounded-md border border-zinc-200">
+        <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-medium text-slate-100">{t('stats.top_products')}</h3>
+          <div className="overflow-hidden rounded-md border border-slate-700">
             <table className="min-w-full text-left text-sm">
-              <thead className="bg-zinc-50">
+              <thead className="bg-slate-800/80">
                 <tr>
-                  <th className="px-4 py-3 font-medium text-zinc-700">{t('stats.product')}</th>
-                  <th className="px-4 py-3 font-medium text-zinc-700 text-right">{t('stats.unit_price')}</th>
-                  <th className="px-4 py-3 font-medium text-zinc-700 text-right">{t('stats.units_sold')}</th>
+                  <th className="px-4 py-3 font-medium text-slate-300">{t('stats.product')}</th>
+                  <th className="px-4 py-3 font-medium text-slate-300 text-right">{t('stats.unit_price')}</th>
+                  <th className="px-4 py-3 font-medium text-slate-300 text-right">{t('stats.units_sold')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {topProducts.map((p) => (
                   <tr key={p.id}>
-                    <td className="px-4 py-3 font-medium text-zinc-900 flex items-center gap-3">
+                    <td className="px-4 py-3 font-medium text-slate-100 flex items-center gap-3">
                       {p.imageUrl && (
-                        <img src={p.imageUrl} alt={p.name} className="h-8 w-8 rounded object-cover" />
+                        <Image src={p.imageUrl} alt={p.name} width={32} height={32} className="h-8 w-8 rounded object-cover shrink-0" />
                       )}
                       {p.name}
                     </td>
-                    <td className="px-4 py-3 text-right text-zinc-600">
+                    <td className="px-4 py-3 text-right text-slate-400">
                       {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(p.price)}
                     </td>
-                    <td className="px-4 py-3 text-right font-bold text-zinc-900">
+                    <td className="px-4 py-3 text-right font-bold text-slate-100">
                       {p.total_quantity}
                     </td>
                   </tr>

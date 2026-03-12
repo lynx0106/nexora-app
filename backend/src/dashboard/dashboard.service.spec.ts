@@ -72,8 +72,14 @@ describe('DashboardService', () => {
         { provide: AppointmentsService, useValue: mockAppointmentsService },
         { provide: getRepositoryToken(Tenant), useValue: mockTenantRepository },
         { provide: getRepositoryToken(Order), useValue: mockOrderRepository },
-        { provide: getRepositoryToken(Product), useValue: mockProductRepository },
-        { provide: getRepositoryToken(Appointment), useValue: mockAppointmentRepository },
+        {
+          provide: getRepositoryToken(Product),
+          useValue: mockProductRepository,
+        },
+        {
+          provide: getRepositoryToken(Appointment),
+          useValue: mockAppointmentRepository,
+        },
         { provide: getRepositoryToken(User), useValue: mockUserRepository },
       ],
     }).compile();
@@ -185,7 +191,13 @@ describe('DashboardService', () => {
   describe('getRecentActivity', () => {
     it('should return recent activity', async () => {
       mockOrdersService.findRecent.mockResolvedValue([
-        { id: 'order-1', createdAt: new Date(), total: 100, status: 'pending', user: { firstName: 'John' } },
+        {
+          id: 'order-1',
+          createdAt: new Date(),
+          total: 100,
+          status: 'pending',
+          user: { firstName: 'John' },
+        },
       ]);
       mockAppointmentsService.findRecent.mockResolvedValue([]);
 

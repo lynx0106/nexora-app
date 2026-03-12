@@ -47,12 +47,13 @@ export class AuditInterceptor implements NestInterceptor {
           const entityType = segments[0]
             ? segments[0].charAt(0).toUpperCase() + segments[0].slice(1, -1) // orders -> Order
             : 'System';
-          
-          const entityId = segments[1] || (response && response.id ? response.id : null);
+
+          const entityId =
+            segments[1] || (response && response.id ? response.id : null);
 
           // Sanitize request body to remove PII
           const sanitizedBody = sanitizeLogData(req.body);
-          
+
           await this.auditService.logAction({
             tenantId: user.tenantId,
             userId: user.userId,

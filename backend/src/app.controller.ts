@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Logger, Req, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthGuard } from '@nestjs/passport';
-import * as bcrypt from 'bcrypt';
 import { UsersService } from './users/users.service';
 import { TenantsService } from './tenants/tenants.service';
 import { TasksService } from './tasks/tasks.service';
@@ -59,7 +58,10 @@ export class AppController {
   @Post('cron/run-all')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Run all scheduled tasks manually (appointment reminders, cleanup) - Superadmin only' })
+  @ApiOperation({
+    summary:
+      'Run all scheduled tasks manually (appointment reminders, cleanup) - Superadmin only',
+  })
   async runAllCronTasks() {
     const results = await this.tasksService.runAllTasks();
     return {
@@ -75,10 +77,17 @@ export class AppController {
   @Post('cron/appointments')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Send appointment reminders manually (24h and 2h before) - Superadmin only' })
+  @ApiOperation({
+    summary:
+      'Send appointment reminders manually (24h and 2h before) - Superadmin only',
+  })
   async runAppointmentReminders() {
     await this.tasksService.handleAppointmentReminders();
-    return { success: true, message: 'Appointment reminders sent', timestamp: new Date().toISOString() };
+    return {
+      success: true,
+      message: 'Appointment reminders sent',
+      timestamp: new Date().toISOString(),
+    };
   }
 
   /**
@@ -87,13 +96,16 @@ export class AppController {
   @Post('cron/cleanup')
   @UseGuards(AuthGuard('jwt'))
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Cleanup expired invitations and tokens manually - Superadmin only' })
+  @ApiOperation({
+    summary:
+      'Cleanup expired invitations and tokens manually - Superadmin only',
+  })
   async runCleanup() {
     await this.tasksService.handleCleanup();
     return {
       success: true,
       message: 'Cleanup completed',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

@@ -1,4 +1,5 @@
 import { Controller, Get, Param, Query, Post, Body, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { PublicService } from './public.service';
 import { CreatePublicAppointmentDto } from './dto/create-public-appointment.dto';
 import { CreatePublicOrderDto } from './dto/create-public-order.dto';
@@ -39,7 +40,7 @@ export class PublicController {
   createAppointment(
     @Param('tenantId') tenantId: string,
     @Body() body: CreatePublicAppointmentDto,
-    @Req() req: any,
+    @Req() req: Request,
   ) {
     return this.publicService.createAppointment(tenantId, body, req?.ip);
   }
@@ -48,7 +49,7 @@ export class PublicController {
   createOrder(
     @Param('tenantId') tenantId: string,
     @Body() body: CreatePublicOrderDto,
-    @Req() req: any,
+    @Req() req: Request,
   ) {
     return this.publicService.createOrder(tenantId, body, req?.ip);
   }

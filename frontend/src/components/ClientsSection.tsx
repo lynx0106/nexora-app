@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { fetchAPIWithAuth } from '../lib/api';
+import { showToast } from '../lib/toast';
 
 interface User {
   id: string;
@@ -19,14 +20,14 @@ interface ClientsSectionProps {
   tenantId: string;
   selectedTenantId: string | null;
   onTenantChange: (id: string) => void;
-  tenants: any[];
+  tenants: { id: string; name: string }[];
 }
 
 export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChange, tenants }: ClientsSectionProps) {
   const { t } = useTranslation();
   const [clients, setClients] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   // Form State
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -221,17 +222,17 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
     try {
       await fetchAPIWithAuth(`/users/${id}`, { method: 'DELETE' });
       setClients(clients.filter(c => c.id !== id));
-    } catch (err: any) {
-      alert(err.message || t('clients.delete_error'));
+    } catch (err: unknown) {
+      showToast(err instanceof Error ? err.message : t('clients.delete_error'), 'error');
     }
   };
 
   return (
-    <div className="mb-8 rounded-lg bg-white p-6 shadow">
+    <div className="mb-8 rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-medium text-zinc-900">{t('clients.title')}</h3>
-          <p className="mt-2 text-sm text-zinc-800">{t('clients.subtitle')}</p>
+          <h3 className="text-lg font-medium text-slate-100">{t('clients.title')}</h3>
+          <p className="mt-2 text-sm text-slate-400">{t('clients.subtitle')}</p>
         </div>
         <button
           onClick={() => {
@@ -240,19 +241,19 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
               resetForm();
             }
           }}
-          className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800"
+          className="rounded-md bg-slate-800 px-4 py-2 text-sm font-medium text-slate-100 hover:bg-slate-700 transition-colors"
         >
           {showCreateForm ? t('common.cancel') : t('clients.new_client')}
         </button>
       </div>
 
       {role === "superadmin" && (
-        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-zinc-50 p-3">
-          <span className="text-xs font-medium text-zinc-700">{t('common.filter_by_tenant')}</span>
+        <div className="mt-6 flex flex-wrap items-center gap-3 rounded-md bg-slate-800/50 p-3">
+          <span className="text-xs font-medium text-slate-300">{t('common.filter_by_tenant')}</span>
           <select
             value={selectedTenantId ?? ""}
             onChange={(e) => onTenantChange(e.target.value)}
-            className="h-9 rounded-md border border-zinc-300 bg-white px-2 text-sm text-zinc-900 outline-none focus:border-zinc-900 focus:ring-1 focus:ring-zinc-900"
+            className="h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
           >
             <option value="">{t('common.all_tenants')}</option>
             {tenants.map((t) => (
@@ -264,37 +265,37 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
 
       <div className="mt-6 space-y-6">
         {showCreateForm && (
-          <form className="grid gap-4 rounded-md border border-zinc-200 p-4 md:grid-cols-2" onSubmit={handleSubmit}>
+          <form className="grid gap-4 rounded-md border border-slate-700 bg-slate-800/30 p-4 md:grid-cols-2" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_name')}</label>
-              <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} required className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_name')}</label>
+              <input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} required className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_lastname')}</label>
-              <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} required className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_lastname')}</label>
+              <input type="text" value={lastName} onChange={e => setLastName(e.target.value)} required className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_email')}</label>
-              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_email')}</label>
+              <input type="email" value={email} onChange={e => setEmail(e.target.value)} required className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_phone')}</label>
-              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_phone')}</label>
+              <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_address')}</label>
-              <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_address')}</label>
+              <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">{t('clients.form_password')} {editingUserId && <span className="font-normal text-xs">{t('clients.form_optional')}</span>}</label>
-              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required={!editingUserId} className="h-9 rounded-md border border-zinc-400 px-2 text-sm" />
+              <label className="text-sm font-semibold text-slate-200">{t('clients.form_password')} {editingUserId && <span className="font-normal text-xs text-slate-400">{t('clients.form_optional')}</span>}</label>
+              <input type="password" value={password} onChange={e => setPassword(e.target.value)} required={!editingUserId} className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100" />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-sm font-semibold text-zinc-900">Rol del usuario</label>
+              <label className="text-sm font-semibold text-slate-200">Rol del usuario</label>
               <select
                 value={userRole}
                 onChange={e => setUserRole(e.target.value)}
-                className="h-9 rounded-md border border-zinc-400 px-2 text-sm"
+                className="ds-input h-9 rounded-md border border-slate-600 bg-slate-800 px-2 text-sm text-slate-100"
               >
                 <option value="user">Cliente (Usuario del sistema)</option>
                 <option value="client">Cliente Externo</option>
@@ -303,46 +304,46 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
             </div>
 
             <div className="md:col-span-2 flex items-center justify-end gap-3">
-               <button type="button" onClick={resetForm} className="h-9 rounded-md border border-zinc-300 px-4 text-sm font-medium text-zinc-700 hover:bg-zinc-50">{t('clients.clean')}</button>
-               <button type="submit" disabled={submitting} className="h-9 rounded-md bg-zinc-900 px-4 text-sm font-medium text-white hover:bg-zinc-800 disabled:opacity-50">
+               <button type="button" onClick={resetForm} className="h-9 rounded-md border border-slate-600 px-4 text-sm font-medium text-slate-300 hover:bg-slate-700">{t('clients.clean')}</button>
+               <button type="submit" disabled={submitting} className="h-9 rounded-md bg-teal-600 px-4 text-sm font-medium text-white hover:bg-teal-500 disabled:opacity-50">
                  {submitting ? t('clients.saving') : editingUserId ? t('clients.save_changes') : t('clients.create_client')}
                </button>
             </div>
           </form>
         )}
 
-        {formError && <div className="p-3 bg-red-50 text-red-700 text-sm rounded-md">{formError}</div>}
-      {formSuccess && <div className="p-3 bg-emerald-50 text-emerald-700 text-sm rounded-md">{formSuccess}</div>}
+        {formError && <div className="p-3 bg-red-900/40 text-red-300 text-sm rounded-md border border-red-800">{formError}</div>}
+      {formSuccess && <div className="p-3 bg-emerald-900/40 text-emerald-300 text-sm rounded-md border border-emerald-800">{formSuccess}</div>}
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-zinc-200 text-sm">
-          <thead className="bg-zinc-50">
+      <div className="overflow-x-auto rounded-lg border border-slate-700">
+        <table className="min-w-full divide-y divide-slate-700 text-sm">
+          <thead className="bg-slate-800/80">
             <tr>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_client')}</th>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_email')}</th>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_phone')}</th>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_address')}</th>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_status')}</th>
-              <th className="px-3 py-2 text-left font-medium text-zinc-700">{t('clients.table_actions')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_client')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_email')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_phone')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_address')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_status')}</th>
+              <th className="px-3 py-2 text-left font-medium text-slate-300">{t('clients.table_actions')}</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-zinc-200">
+          <tbody className="divide-y divide-slate-700">
             {loading ? (
-              <tr><td colSpan={6} className="px-3 py-3 text-center">{t('common.loading')}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-3 text-center text-slate-400">{t('common.loading')}</td></tr>
             ) : clients.length === 0 ? (
-              <tr><td colSpan={6} className="px-3 py-3 text-center">{t('clients.no_clients')}</td></tr>
+              <tr><td colSpan={6} className="px-3 py-3 text-center text-slate-400">{t('clients.no_clients')}</td></tr>
             ) : (
               clients.map(client => (
-                <tr key={client.id}>
-                  <td className="px-3 py-2 text-zinc-900 font-medium">{client.firstName} {client.lastName}</td>
-                  <td className="px-3 py-2 text-zinc-700">{client.email}</td>
-                  <td className="px-3 py-2 text-zinc-700">{client.phone || '-'}</td>
-                  <td className="px-3 py-2 text-zinc-700">{client.address || '-'}</td>
-                  <td className="px-3 py-2"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${client.isActive ? "bg-emerald-100 text-emerald-800" : "bg-zinc-100 text-zinc-700"}`}>{client.isActive ? t('clients.status_active') : t('clients.status_inactive')}</span></td>
+                <tr key={client.id} className="hover:bg-slate-800/50 transition-colors">
+                  <td className="px-3 py-2 text-slate-100 font-medium">{client.firstName} {client.lastName}</td>
+                  <td className="px-3 py-2 text-slate-300">{client.email}</td>
+                  <td className="px-3 py-2 text-slate-300">{client.phone || '-'}</td>
+                  <td className="px-3 py-2 text-slate-300">{client.address || '-'}</td>
+                  <td className="px-3 py-2"><span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${client.isActive ? "bg-emerald-900/40 text-emerald-300" : "bg-slate-700 text-slate-400"}`}>{client.isActive ? t('clients.status_active') : t('clients.status_inactive')}</span></td>
                   <td className="px-3 py-2 flex items-center gap-2">
-                    <button onClick={() => handleViewDetails(client)} className="text-zinc-600 hover:text-zinc-900 font-medium">{t('clients.details')}</button>
-                    <button onClick={() => handleEdit(client)} className="text-blue-600 hover:text-blue-800 font-medium">{t('common.edit')}</button>
-                    <button onClick={() => handleDelete(client.id)} className="text-red-600 hover:text-red-800 font-medium">{t('common.delete')}</button>
+                    <button onClick={() => handleViewDetails(client)} className="text-slate-400 hover:text-slate-100 font-medium">{t('clients.details')}</button>
+                    <button onClick={() => handleEdit(client)} className="text-teal-400 hover:text-teal-300 font-medium">{t('common.edit')}</button>
+                    <button onClick={() => handleDelete(client.id)} className="text-red-400 hover:text-red-300 font-medium">{t('common.delete')}</button>
                   </td>
                 </tr>
               ))
@@ -354,44 +355,44 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
 
       {viewingClient && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-2xl rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <div className="w-full max-w-2xl rounded-lg bg-slate-900 border border-slate-700 p-6 shadow-xl max-h-[90vh] overflow-y-auto">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-zinc-900">
+              <h3 className="text-xl font-bold text-slate-100">
                 {viewingClient.firstName} {viewingClient.lastName}
               </h3>
               <button
                 onClick={() => setViewingClient(null)}
-                className="text-zinc-500 hover:text-zinc-700"
+                className="text-slate-400 hover:text-slate-100"
               >
                 ✕
               </button>
             </div>
 
-            <div className="mb-6 grid grid-cols-1 gap-4 rounded-md bg-zinc-50 p-4 md:grid-cols-2">
+            <div className="mb-6 grid grid-cols-1 gap-4 rounded-md bg-slate-800/50 p-4 md:grid-cols-2">
               <div>
-                <span className="block text-xs font-medium text-zinc-500">{t('clients.table_email')}</span>
-                <span className="text-sm text-zinc-900">{viewingClient.email}</span>
+                <span className="block text-xs font-medium text-slate-500">{t('clients.table_email')}</span>
+                <span className="text-sm text-slate-100">{viewingClient.email}</span>
               </div>
               <div>
-                <span className="block text-xs font-medium text-zinc-500">{t('clients.table_phone')}</span>
-                <span className="text-sm text-zinc-900">{viewingClient.phone || '-'}</span>
+                <span className="block text-xs font-medium text-slate-500">{t('clients.table_phone')}</span>
+                <span className="text-sm text-slate-100">{viewingClient.phone || '-'}</span>
               </div>
               <div className="md:col-span-2">
-                <span className="block text-xs font-medium text-zinc-500">{t('clients.table_address')}</span>
-                <span className="text-sm text-zinc-900">{viewingClient.address || '-'}</span>
+                <span className="block text-xs font-medium text-slate-500">{t('clients.table_address')}</span>
+                <span className="text-sm text-slate-100">{viewingClient.address || '-'}</span>
               </div>
             </div>
 
             <div>
-              <div className="mb-4 flex gap-4 border-b border-zinc-200">
+              <div className="mb-4 flex gap-4 border-b border-slate-700">
                 <button
-                  className={`pb-2 text-sm font-medium ${activeTab === 'orders' ? 'border-b-2 border-zinc-900 text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
+                  className={`pb-2 text-sm font-medium ${activeTab === 'orders' ? 'border-b-2 border-teal-500 text-teal-400' : 'text-slate-500 hover:text-slate-300'}`}
                   onClick={() => setActiveTab('orders')}
                 >
                   {t('clients.history_orders')}
                 </button>
                 <button
-                  className={`pb-2 text-sm font-medium ${activeTab === 'appointments' ? 'border-b-2 border-zinc-900 text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
+                  className={`pb-2 text-sm font-medium ${activeTab === 'appointments' ? 'border-b-2 border-teal-500 text-teal-400' : 'text-slate-500 hover:text-slate-300'}`}
                   onClick={() => setActiveTab('appointments')}
                 >
                   {t('clients.history_appointments')}
@@ -401,41 +402,41 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
               {activeTab === 'orders' && (
                 <>
                   {loadingOrders ? (
-                    <div className="py-4 text-center text-zinc-500">{t('clients.loading_orders')}</div>
+                    <div className="py-4 text-center text-slate-400">{t('clients.loading_orders')}</div>
                   ) : clientOrders.length === 0 ? (
-                    <div className="rounded-md border border-dashed border-zinc-300 py-8 text-center text-zinc-500">
+                    <div className="rounded-md border border-dashed border-slate-600 py-8 text-center text-slate-400">
                       {t('clients.no_orders_client')}
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-lg border border-zinc-200">
+                    <div className="overflow-hidden rounded-lg border border-slate-700">
                       <table className="min-w-full text-left text-sm">
-                        <thead className="bg-zinc-50">
+                        <thead className="bg-slate-800/80">
                           <tr>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('clients.order_id')}</th>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('clients.order_date')}</th>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('clients.order_status')}</th>
-                            <th className="px-4 py-2 font-medium text-zinc-700 text-right">{t('clients.order_total')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('clients.order_id')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('clients.order_date')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('clients.order_status')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300 text-right">{t('clients.order_total')}</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-100">
+                        <tbody className="divide-y divide-slate-700">
                           {clientOrders.map((order) => (
-                            <tr key={order.id}>
-                              <td className="px-4 py-2 font-medium text-zinc-900">#{order.id.slice(0, 8)}</td>
-                              <td className="px-4 py-2 text-zinc-600">
+                            <tr key={order.id} className="hover:bg-slate-800/30">
+                              <td className="px-4 py-2 font-medium text-slate-100">#{order.id.slice(0, 8)}</td>
+                              <td className="px-4 py-2 text-slate-400">
                                 {new Date(order.createdAt).toLocaleDateString()}
                               </td>
                               <td className="px-4 py-2">
                                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                  order.status === 'completed' ? 'bg-green-100 text-green-800' :
-                                  order.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                  'bg-yellow-100 text-yellow-800'
+                                  order.status === 'completed' ? 'bg-emerald-900/40 text-emerald-300' :
+                                  order.status === 'cancelled' ? 'bg-red-900/40 text-red-300' :
+                                  'bg-amber-900/40 text-amber-300'
                                 }`}>
                                   {order.status === 'completed' ? t('clients.status_completed') :
                                   order.status === 'cancelled' ? t('clients.status_cancelled') :
                                   t('clients.status_pending')}
                                 </span>
                               </td>
-                              <td className="px-4 py-2 text-right font-medium text-zinc-900">
+                              <td className="px-4 py-2 text-right font-medium text-slate-100">
                                 {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(order.total)}
                               </td>
                             </tr>
@@ -450,35 +451,35 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
               {activeTab === 'appointments' && (
                 <>
                   {loadingAppointments ? (
-                    <div className="py-4 text-center text-zinc-500">{t('clients.loading_appointments')}</div>
+                    <div className="py-4 text-center text-slate-400">{t('clients.loading_appointments')}</div>
                   ) : clientAppointments.length === 0 ? (
-                    <div className="rounded-md border border-dashed border-zinc-300 py-8 text-center text-zinc-500">
+                    <div className="rounded-md border border-dashed border-slate-600 py-8 text-center text-slate-400">
                       {t('clients.no_appointments_client')}
                     </div>
                   ) : (
-                    <div className="overflow-hidden rounded-lg border border-zinc-200">
+                    <div className="overflow-hidden rounded-lg border border-slate-700">
                       <table className="min-w-full text-left text-sm">
-                        <thead className="bg-zinc-50">
+                        <thead className="bg-slate-800/80">
                           <tr>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('clients.order_date')}</th>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('agenda.service')}</th>
-                            <th className="px-4 py-2 font-medium text-zinc-700">{t('clients.order_status')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('clients.order_date')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('agenda.service')}</th>
+                            <th className="px-4 py-2 font-medium text-slate-300">{t('clients.order_status')}</th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-zinc-100">
+                        <tbody className="divide-y divide-slate-700">
                           {clientAppointments.map((appt) => (
-                            <tr key={appt.id}>
-                              <td className="px-4 py-2 text-zinc-600">
+                            <tr key={appt.id} className="hover:bg-slate-800/30">
+                              <td className="px-4 py-2 text-slate-400">
                                 {new Date(appt.dateTime).toLocaleString()}
                               </td>
-                              <td className="px-4 py-2 font-medium text-zinc-900">
+                              <td className="px-4 py-2 font-medium text-slate-100">
                                 {appt.service?.name || t('agenda.general_service')}
                               </td>
                               <td className="px-4 py-2">
                                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                  appt.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                  appt.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                                  'bg-yellow-100 text-yellow-800'
+                                  appt.status === 'confirmed' ? 'bg-emerald-900/40 text-emerald-300' :
+                                  appt.status === 'cancelled' ? 'bg-red-900/40 text-red-300' :
+                                  'bg-amber-900/40 text-amber-300'
                                 }`}>
                                   {appt.status === 'confirmed' ? t('agenda.status_confirmed') :
                                    appt.status === 'cancelled' ? t('agenda.status_cancelled') :

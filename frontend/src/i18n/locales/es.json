@@ -203,6 +203,8 @@
     "success_create": "Cliente creado",
     "delete_confirm": "¿Eliminar este cliente?",
     "delete_error": "Error al eliminar",
+    "validation_name": "Nombre y apellido son obligatorios",
+    "validation_email": "El correo es obligatorio",
     "table_client": "Cliente",
     "table_email": "Email",
     "table_phone": "Teléfono",
@@ -594,7 +596,10 @@
     "back_to_login": "Volver a Iniciar Sesión",
     "error_title": "Error",
     "success_title": "¡Éxito!",
-    "redirecting": "Redirigiendo..."
+    "redirecting": "Redirigiendo...",
+    "validation_email_invalid": "Introduce un correo electrónico válido",
+    "validation_password_min": "La contraseña debe tener al menos 6 caracteres",
+    "validation_required": "Este campo es obligatorio"
   },
   "config": {
     "title": "Configuración",
@@ -626,6 +631,9 @@
     "select_date": "Seleccionar Fecha",
     "select_time": "Seleccionar Hora",
     "client_info": "Información del Cliente",
+    "validation_email_required": "El correo es obligatorio",
+    "validation_email_invalid": "Introduce un correo válido",
+    "validation_name_required": "Nombre y apellido son obligatorios",
     "book_button": "Confirmar Reserva",
     "booking_success": "¡Reserva Confirmada!",
     "booking_error": "Error al reservar",

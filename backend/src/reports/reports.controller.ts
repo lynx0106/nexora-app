@@ -29,7 +29,7 @@ export class ReportsController {
     @Query('from') from: string | undefined,
     @Query('to') to: string | undefined,
     @Query('format') format: string | undefined,
-    @Req() req: Request & { user?: any },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user;
@@ -38,13 +38,20 @@ export class ReportsController {
     }
 
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
-      throw new ForbiddenException('No tienes permiso para exportar este tenant');
+      throw new ForbiddenException(
+        'No tienes permiso para exportar este tenant',
+      );
     }
 
     const isUser = hasRole(user.role, [Role.User]);
-    const userId = isUser ? (user.userId || user.sub || user.id) : undefined;
+    const userId = isUser ? user.userId : undefined;
 
-    const report = await this.reportsService.getOrdersReport(tenantId, from, to, userId);
+    const report = await this.reportsService.getOrdersReport(
+      tenantId,
+      from,
+      to,
+      userId,
+    );
     return this.reportsService.respondWithFormat(
       res,
       report,
@@ -60,7 +67,7 @@ export class ReportsController {
     @Query('from') from: string | undefined,
     @Query('to') to: string | undefined,
     @Query('format') format: string | undefined,
-    @Req() req: Request & { user?: any },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user;
@@ -69,11 +76,13 @@ export class ReportsController {
     }
 
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
-      throw new ForbiddenException('No tienes permiso para exportar este tenant');
+      throw new ForbiddenException(
+        'No tienes permiso para exportar este tenant',
+      );
     }
 
     const isUser = hasRole(user.role, [Role.User]);
-    const userId = isUser ? (user.userId || user.sub || user.id) : undefined;
+    const userId = isUser ? user.userId : undefined;
 
     const report = await this.reportsService.getAppointmentsReport(
       tenantId,
@@ -96,7 +105,7 @@ export class ReportsController {
     @Query('from') from: string | undefined,
     @Query('to') to: string | undefined,
     @Query('format') format: string | undefined,
-    @Req() req: Request & { user?: any },
+    @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
     const user = req.user;
@@ -109,7 +118,9 @@ export class ReportsController {
     }
 
     if (!hasRole(user.role, [Role.Superadmin]) && user.tenantId !== tenantId) {
-      throw new ForbiddenException('No tienes permiso para exportar este tenant');
+      throw new ForbiddenException(
+        'No tienes permiso para exportar este tenant',
+      );
     }
 
     const report = await this.reportsService.getUsersReport(tenantId, from, to);
@@ -133,6 +144,8 @@ export class ReportsController {
 
   @Get('help')
   help() {
-    throw new BadRequestException('Usa /reports/tenant/:tenantId/{orders|appointments|users}');
+    throw new BadRequestException(
+      'Usa /reports/tenant/:tenantId/{orders|appointments|users}',
+    );
   }
 }

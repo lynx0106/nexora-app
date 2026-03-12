@@ -1,3 +1,4 @@
+/// <reference path="./common/types/express.d.ts" />
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import helmet from 'helmet';
@@ -20,20 +21,24 @@ async function bootstrap() {
     // Log database info at startup
     const dbConfig = getDatabaseConfig();
     if (dbConfig.url) {
-      const maskedUrl = dbConfig.url.replace(/:\/\/[^:]+:[^@]+@/, '://***:***@');
+      const maskedUrl = dbConfig.url.replace(
+        /:\/\/[^:]+:[^@]+@/,
+        '://***:***@',
+      );
       logger.log(`Database URL: ${maskedUrl}`);
     } else {
-      logger.log(`Database: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`);
+      logger.log(
+        `Database: ${dbConfig.host}:${dbConfig.port}/${dbConfig.database}`,
+      );
     }
-    
+
     const app = await NestFactory.create(AppModule);
-    
+
     // Valida configuracion critica al inicio.
     getJwtSecret();
 
     const corsOrigins = getCorsOrigins();
     logger.log(`CORS v2 - Origins: ${corsOrigins.join(', ')}`);
-    
 
     // Enable cookie parsing
     app.use(cookieParser());
@@ -44,8 +49,14 @@ async function bootstrap() {
         const origin = req.headers.origin;
         if (!origin || corsOrigins.includes(origin)) {
           res.header('Access-Control-Allow-Origin', origin || '*');
-          res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
-          res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, x-request-id, x-csrf-token');
+          res.header(
+            'Access-Control-Allow-Methods',
+            'GET,POST,PUT,PATCH,DELETE,OPTIONS',
+          );
+          res.header(
+            'Access-Control-Allow-Headers',
+            'Content-Type, Authorization, x-request-id',
+          );
           res.header('Access-Control-Allow-Credentials', 'true');
           return res.status(204).send();
         }
@@ -58,7 +69,7 @@ async function bootstrap() {
       origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, etc)
         if (!origin) return callback(null, true);
-        
+
         // Check if origin is allowed
         if (corsOrigins.includes(origin)) {
           callback(null, true);
@@ -68,7 +79,11 @@ async function bootstrap() {
       },
       credentials: true,
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization', 'x-request-id', 'x-csrf-token'],
+      allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'x-request-id',
+      ],
     });
 
     // Headers de seguridad basicos.
@@ -98,7 +113,7 @@ async function bootstrap() {
         const user = (req as any).user;
 
         logger.log(
-          `[${requestId}] ${req.method} ${req.originalUrl || req.url} ${res.statusCode} - ${durationMs}ms`
+          `[${requestId}] ${req.method} ${req.originalUrl || req.url} ${res.statusCode} - ${durationMs}ms`,
         );
       });
 

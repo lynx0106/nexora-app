@@ -35,7 +35,12 @@ describe('ReportsService', () => {
     const res: any = {
       setHeader: jest.fn(),
     };
-    const output = service.respondWithFormat(res, [{ id: '1' }], 'json', 'orders-tenant');
+    const output = service.respondWithFormat(
+      res,
+      [{ id: '1' }],
+      'json',
+      'orders-tenant',
+    );
     expect(output).toEqual({ count: 1, data: [{ id: '1' }] });
   });
 
@@ -58,7 +63,11 @@ describe('ReportsService', () => {
       ];
       ordersService.findForReport.mockResolvedValue(mockOrders);
 
-      const result = await service.getOrdersReport('tenant-1', '2026-02-01', '2026-02-28');
+      const result = await service.getOrdersReport(
+        'tenant-1',
+        '2026-02-01',
+        '2026-02-28',
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].id).toBe('order-1');
@@ -76,7 +85,12 @@ describe('ReportsService', () => {
     it('should filter by userId when provided', async () => {
       ordersService.findForReport.mockResolvedValue([]);
 
-      await service.getOrdersReport('tenant-1', '2026-02-01', '2026-02-28', 'user-1');
+      await service.getOrdersReport(
+        'tenant-1',
+        '2026-02-01',
+        '2026-02-28',
+        'user-1',
+      );
 
       expect(ordersService.findForReport).toHaveBeenCalledWith(
         'tenant-1',
@@ -96,13 +110,21 @@ describe('ReportsService', () => {
           status: 'confirmed',
           service: { name: 'Haircut' },
           doctor: { firstName: 'Dr.', lastName: 'Smith' },
-          client: { firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
+          client: {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+          },
           tenantId: 'tenant-1',
         },
       ];
       appointmentsService.findForReport.mockResolvedValue(mockAppointments);
 
-      const result = await service.getAppointmentsReport('tenant-1', '2026-02-01', '2026-02-28');
+      const result = await service.getAppointmentsReport(
+        'tenant-1',
+        '2026-02-01',
+        '2026-02-28',
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].serviceName).toBe('Haircut');
@@ -117,13 +139,21 @@ describe('ReportsService', () => {
           status: 'confirmed',
           service: { name: 'Service' },
           doctor: null,
-          client: { firstName: 'John', lastName: 'Doe', email: 'john@example.com' },
+          client: {
+            firstName: 'John',
+            lastName: 'Doe',
+            email: 'john@example.com',
+          },
           tenantId: 'tenant-1',
         },
       ];
       appointmentsService.findForReport.mockResolvedValue(mockAppointments);
 
-      const result = await service.getAppointmentsReport('tenant-1', '2026-02-01', '2026-02-28');
+      const result = await service.getAppointmentsReport(
+        'tenant-1',
+        '2026-02-01',
+        '2026-02-28',
+      );
 
       expect(result[0].doctorName).toBe('');
     });
@@ -146,7 +176,11 @@ describe('ReportsService', () => {
       ];
       usersService.findForReport.mockResolvedValue(mockUsers);
 
-      const result = await service.getUsersReport('tenant-1', '2026-02-01', '2026-02-28');
+      const result = await service.getUsersReport(
+        'tenant-1',
+        '2026-02-01',
+        '2026-02-28',
+      );
 
       expect(result).toHaveLength(1);
       expect(result[0].email).toBe('john@example.com');
@@ -157,9 +191,9 @@ describe('ReportsService', () => {
     it('should throw BadRequestException for unsupported format', () => {
       const res: any = { setHeader: jest.fn() };
 
-      expect(() => service.respondWithFormat(res, [{ id: '1' }], 'xml', 'orders')).toThrow(
-        BadRequestException,
-      );
+      expect(() =>
+        service.respondWithFormat(res, [{ id: '1' }], 'xml', 'orders'),
+      ).toThrow(BadRequestException);
     });
 
     it('should generate CSV with proper headers', () => {
@@ -168,7 +202,10 @@ describe('ReportsService', () => {
 
       const result = service.respondWithFormat(res, rows, 'csv', 'test-report');
 
-      expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv; charset=utf-8');
+      expect(res.setHeader).toHaveBeenCalledWith(
+        'Content-Type',
+        'text/csv; charset=utf-8',
+      );
       expect(res.setHeader).toHaveBeenCalledWith(
         'Content-Disposition',
         expect.stringContaining('test-report'),

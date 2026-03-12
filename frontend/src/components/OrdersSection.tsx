@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useTranslation } from 'react-i18next';
 import { fetchAPIWithAuth, API_URL } from '../lib/api';
+import { showToast } from '../lib/toast';
 import EmptyState from './ui/EmptyState';
 import Skeleton from './ui/Skeleton';
 
@@ -46,7 +48,7 @@ interface OrdersSectionProps {
   tenantId: string;
   selectedTenantId: string | null;
   onTenantChange: (id: string) => void;
-  tenants: any[]; // List of tenants for selector
+  tenants: { id: string; name: string }[];
   currency: string;
   currentUserId?: string | null;
 }
@@ -140,7 +142,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       if (selectedOrder?.id === id) setSelectedOrder(null);
     } catch (err) {
       console.error(err);
-      alert(t('orders.delete_error'));
+      showToast(t('orders.delete_error'), 'error');
     }
   };
 
@@ -229,7 +231,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       });
       setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
     } catch (err) {
-      alert(t('orders.update_status_error'));
+      showToast(t('orders.update_status_error'), 'error');
     }
   };
 
@@ -241,7 +243,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       });
       setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: newStatus } : o));
     } catch (err) {
-      alert(t('orders.update_payment_error'));
+      showToast(t('orders.update_payment_error'), 'error');
     }
   };
 
@@ -268,7 +270,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-900">{t('orders.title')}</h2>
+        <h2 className="text-2xl font-bold text-slate-100">{t('orders.title')}</h2>
         <div className="flex items-center gap-4">
           {role !== 'user' && (
           <button
@@ -280,7 +282,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
           )}
           {role === 'superadmin' && (
             <select
-              className="block w-64 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 border"
+              className="block w-64 rounded-md border-slate-600 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2 border"
               value={selectedTenantId || ''}
               onChange={(e) => onTenantChange(e.target.value)}
             >
@@ -306,8 +308,8 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       )}
 
       {/* Top Products / Recommendations */}
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('orders.top_products_title')}</h3>
+      <div className="bg-slate-900/70 border border-slate-800 p-6 rounded-lg shadow-sm">
+        <h3 className="text-lg font-medium text-slate-100 mb-4">{t('orders.top_products_title')}</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
           {loadingTopProducts && (
             <>
@@ -320,15 +322,15 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
           )}
           {!loadingTopProducts && topProducts.map((p) => (
             <div key={p.id} className="border rounded-lg p-4 flex flex-col items-center text-center">
-              <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center mb-2 overflow-hidden">
+              <div className="h-12 w-12 bg-indigo-100 rounded-full flex items-center justify-center mb-2 overflow-hidden relative">
                 {p.imageUrl ? (
-                   <img src={p.imageUrl.startsWith('http') ? p.imageUrl : `${API_URL}${p.imageUrl}`} alt={p.name} className="h-full w-full object-cover" />
+                   <Image src={p.imageUrl.startsWith('http') ? p.imageUrl : `${API_URL}${p.imageUrl}`} alt={p.name} fill className="object-cover" sizes="48px" />
                 ) : (
                    <span className="text-indigo-600 font-bold">★</span>
                 )}
               </div>
               <h4 className="font-semibold text-sm">{p.name}</h4>
-              <p className="text-xs text-gray-500">{formatPrice(p.price)}</p>
+              <p className="text-xs text-slate-400">{formatPrice(p.price)}</p>
               <p className="text-xs text-green-600 mt-1">{p.total_quantity} {t('orders.top_products_sold')}</p>
             </div>
           ))}
@@ -344,11 +346,11 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       </div>
 
       {/* Orders List */}
-      <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+      <div className="bg-slate-900/70 border border-slate-800 shadow-sm overflow-hidden sm:rounded-lg">
         <div className="px-4 py-5 sm:px-6">
-          <h3 className="text-lg leading-6 font-medium text-gray-900">{t('orders.history_title')}</h3>
+          <h3 className="text-lg leading-6 font-medium text-slate-100">{t('orders.history_title')}</h3>
         </div>
-        <div className="border-t border-gray-200">
+        <div className="border-t border-slate-700">
             {loading ? (
                 <div className="p-4 space-y-3">
                   <Skeleton className="h-6 w-3/4" />
@@ -363,38 +365,38 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                   />
                 </div>
             ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
+                <table className="min-w-full divide-y divide-slate-700">
+                    <thead className="bg-slate-800/80">
                         <tr>
                             {role === 'superadmin' && !selectedTenantId && (
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_company')}</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_company')}</th>
                             )}
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_id_date')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_user')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_items')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_total')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_payment')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_status')}</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('orders.table_actions')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_id_date')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_user')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_items')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_total')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_payment')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_status')}</th>
+                            <th className="px-6 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wider">{t('orders.table_actions')}</th>
                         </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-slate-700">
                         {orders.map((order) => (
-                            <tr key={order.id}>
+                            <tr key={order.id} className="hover:bg-slate-800/50">
                                 {role === 'superadmin' && !selectedTenantId && (
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-mono">
+                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400 font-mono">
                                         {order.tenantId}
                                     </td>
                                 )}
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-100">
                                     <div className="font-bold">{order.id.slice(0, 8)}...</div>
-                                    <div className="text-xs text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</div>
+                                    <div className="text-xs text-slate-400">{new Date(order.createdAt).toLocaleDateString()}</div>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                                     {order.user ? (
                                         <div className="flex flex-col">
-                                            <span className="font-medium text-gray-900">{order.user.firstName} {order.user.lastName}</span>
-                                            <span className="text-xs text-gray-500">{order.user.email}</span>
+                                            <span className="font-medium text-slate-100">{order.user.firstName} {order.user.lastName}</span>
+                                            <span className="text-xs text-slate-400">{order.user.email}</span>
                                         </div>
                                     ) : order.userId ? (
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -402,7 +404,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         </span>
                                     ) : '-'}
                                 </td>
-                                <td className="px-6 py-4 text-sm text-gray-500">
+                                <td className="px-6 py-4 text-sm text-slate-400">
                                     <ul className="list-disc pl-4">
                                         {order.items.map(item => (
                                             <li key={item.id}>
@@ -411,31 +413,31 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         ))}
                                     </ul>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-slate-100">
                                     {formatPrice(order.total)}
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                        order.paymentStatus === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        order.paymentStatus === 'paid' ? 'bg-emerald-900/40 text-emerald-300' : 'bg-amber-900/40 text-amber-300'
                                     }`}>
                                         {order.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
                                     </span>
                                 </td>
                                 <td className="px-6 py-4 whitespace-nowrap">
                                     <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                        ${order.status === 'completed' ? 'bg-green-100 text-green-800' : 
-                                          order.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-                                          order.status === 'cancelled' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'}`}>
+                                        ${order.status === 'completed' ? 'bg-emerald-900/40 text-emerald-300' : 
+                                          order.status === 'pending' ? 'bg-amber-900/40 text-amber-300' : 
+                                          order.status === 'cancelled' ? 'bg-red-900/40 text-red-300' : 'bg-gray-100 text-slate-300'}`}>
                                         {order.status === 'completed' ? t('orders.status_completed') : 
                                          order.status === 'pending' ? t('orders.status_pending') : 
                                          order.status === 'cancelled' ? t('orders.status_cancelled') : order.status}
                                     </span>
                                 </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                                     <div className="flex space-x-2 items-center">
                                         <button
                                             onClick={() => setSelectedOrder(order)}
-                                            className="text-indigo-600 hover:text-indigo-900 text-xs font-bold"
+                                            className="text-teal-400 hover:text-teal-300 text-xs font-bold"
                                         >
                                             {t('orders.view_detail')}
                                         </button>
@@ -444,7 +446,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         <select 
                                             value={order.status} 
                                             onChange={(e) => handleUpdateStatus(order.id, e.target.value)}
-                                            className="text-xs border-gray-300 rounded shadow-sm"
+                                            className="text-xs border-slate-600 rounded shadow-sm"
                                         >
                                             <option value="pending">{t('orders.status_pending')}</option>
                                             <option value="completed">{t('orders.status_completed')}</option>
@@ -452,7 +454,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         </select>
                                         <button 
                                             onClick={() => handleDelete(order.id)}
-                                            className="text-red-600 hover:text-red-900 text-xs font-bold"
+                                            className="text-red-400 hover:text-red-300 text-xs font-bold"
                                         >
                                             {t('common.delete')}
                                         </button>
@@ -472,19 +474,19 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       {selectedOrder && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/50" aria-labelledby="modal-title" role="dialog" aria-modal="true" onClick={() => setSelectedOrder(null)}>
           <div 
-            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-white shadow-xl transform transition-all" 
+            className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-lg bg-slate-900 border border-slate-800 shadow-xl transform transition-all" 
             onClick={(e) => e.stopPropagation()}
           >
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="bg-slate-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex sm:items-start">
                   <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                        <h3 className="text-lg leading-6 font-medium text-slate-100" id="modal-title">
                         {t('orders.detail_title')} #{selectedOrder.id.slice(0, 8)}
                         </h3>
                         <button
                             type="button"
-                            className="text-gray-400 hover:text-gray-500"
+                            className="text-slate-400 hover:text-slate-400"
                             onClick={() => setSelectedOrder(null)}
                         >
                             <span className="sr-only">{t('common.close')}</span>
@@ -496,8 +498,8 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500">Información del Cliente</h4>
-                            <p className="mt-1 text-sm text-gray-900">
+                            <h4 className="text-sm font-medium text-slate-400">Información del Cliente</h4>
+                            <p className="mt-1 text-sm text-slate-100">
                                 {selectedOrder.user 
                                   ? `${selectedOrder.user.firstName} ${selectedOrder.user.lastName} (${selectedOrder.user.email})`
                                   : selectedOrder.userId 
@@ -505,10 +507,10 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                       : 'Usuario Invitado'
                                 }
                             </p>
-                            <p className="text-sm text-gray-900 mt-1">
+                            <p className="text-sm text-slate-100 mt-1">
                                 Fecha: {new Date(selectedOrder.createdAt).toLocaleString()}
                             </p>
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-slate-400 mb-2">
                                 <strong>Estado de Pago:</strong>
                                 <select
                                     value={selectedOrder.paymentStatus || 'pending'}
@@ -517,23 +519,23 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         setSelectedOrder({...selectedOrder, paymentStatus: e.target.value});
                                     }}
                                     className={`ml-2 text-xs font-semibold rounded-full border-0 py-1 pl-2 pr-8 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6
-                                        ${selectedOrder.paymentStatus === 'paid' ? 'bg-green-50 text-green-700 ring-green-600/20' : 
+                                        ${selectedOrder.paymentStatus === 'paid' ? 'bg-emerald-900/30 text-emerald-300 ring-green-600/20' : 
                                           'bg-yellow-50 text-yellow-800 ring-yellow-600/20'}`}
                                 >
                                     <option value="pending">Pendiente</option>
                                     <option value="paid">Pagado</option>
                                 </select>
                             </p>
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-slate-400 mb-2">
                                  <strong>Método:</strong> {getPaymentMethodLabel(selectedOrder.paymentMethod || 'cash')}
                              </p>
                              {/* @ts-ignore - paymentLink might be missing in strict types but exists in backend */}
                              {selectedOrder.paymentLink && (
-                                <p className="text-sm text-gray-500 mb-2 break-all">
-                                    <strong>Link de Pago:</strong> <a href={selectedOrder.paymentLink} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">{selectedOrder.paymentLink}</a>
+                                <p className="text-sm text-slate-400 mb-2 break-all">
+                                    <strong>Link de Pago:</strong> <a href={selectedOrder.paymentLink} target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:underline">{selectedOrder.paymentLink}</a>
                                 </p>
                              )}
-                            <p className="text-sm text-gray-500 mb-2">
+                            <p className="text-sm text-slate-400 mb-2">
                                 <strong>Estado del Pedido:</strong>
                                 <select
                                     value={selectedOrder.status}
@@ -542,9 +544,9 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         setSelectedOrder({...selectedOrder, status: e.target.value});
                                     }}
                                     className={`ml-2 text-xs font-semibold rounded-full border-0 py-1 pl-2 pr-8 shadow-sm ring-1 ring-inset focus:ring-2 focus:ring-inset sm:text-sm sm:leading-6
-                                        ${selectedOrder.status === 'completed' ? 'bg-green-50 text-green-700 ring-green-600/20' : 
+                                        ${selectedOrder.status === 'completed' ? 'bg-emerald-900/30 text-emerald-300 ring-green-600/20' : 
                                           selectedOrder.status === 'pending' ? 'bg-yellow-50 text-yellow-800 ring-yellow-600/20' : 
-                                          selectedOrder.status === 'cancelled' ? 'bg-red-50 text-red-700 ring-red-600/20' : 'bg-gray-50 text-gray-600 ring-gray-500/10'}`}
+                                          selectedOrder.status === 'cancelled' ? 'bg-red-900/30 text-red-300 ring-red-600/20' : 'bg-slate-800/80 text-slate-300 ring-slate-500/20'}`}
                                 >
                                     <option value="pending">Pendiente</option>
                                     <option value="completed">Completado</option>
@@ -553,9 +555,9 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                             </p>
                         </div>
                         <div>
-                            <h4 className="text-sm font-medium text-gray-500">Dirección de Envío</h4>
+                            <h4 className="text-sm font-medium text-slate-400">Dirección de Envío</h4>
                             {selectedOrder.shippingAddress ? (
-                                <div className="mt-1 text-sm text-gray-900">
+                                <div className="mt-1 text-sm text-slate-100">
                                     <p>{selectedOrder.shippingAddress.street || 'Calle no especificada'}</p>
                                     <p>
                                         {selectedOrder.shippingAddress.city || ''} 
@@ -564,46 +566,50 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                     <p>{selectedOrder.shippingAddress.country || ''}</p>
                                 </div>
                             ) : (
-                                <p className="mt-1 text-sm text-gray-500 italic">No proporcionada</p>
+                                <p className="mt-1 text-sm text-slate-400 italic">No proporcionada</p>
                             )}
                         </div>
                     </div>
 
-                    <div className="border-t border-gray-200 pt-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-3">{t('orders.order_items_title')}</h4>
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                    <div className="border-t border-slate-700 pt-4">
+                        <h4 className="text-sm font-medium text-slate-100 mb-3">{t('orders.order_items_title')}</h4>
+                        <table className="min-w-full divide-y divide-slate-700">
+                            <thead className="bg-slate-800/80">
                                 <tr>
-                                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">{t('orders.table_product')}</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{t('orders.table_quantity_short')}</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{t('orders.table_unit_price')}</th>
-                                    <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase">{t('orders.table_total_short')}</th>
+                                    <th className="px-3 py-2 text-left text-xs font-medium text-slate-400 uppercase">{t('orders.table_product')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">{t('orders.table_quantity_short')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">{t('orders.table_unit_price')}</th>
+                                    <th className="px-3 py-2 text-right text-xs font-medium text-slate-400 uppercase">{t('orders.table_total_short')}</th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="divide-y divide-slate-700">
                                 {selectedOrder.items.map((item) => (
                                     <tr key={item.id}>
-                                        <td className="px-3 py-2 text-sm text-gray-900">
+                                        <td className="px-3 py-2 text-sm text-slate-100">
                                             <div className="flex items-center">
                                                 {item.product?.imageUrl ? (
-                                                      <img 
-                                                        src={item.product.imageUrl.startsWith('http') ? item.product.imageUrl : `${API_URL}${item.product.imageUrl}`} 
-                                                        alt={item.product.name} 
-                                                        className="h-8 w-8 rounded object-cover mr-2 bg-gray-100" 
-                                                      />
+                                                      <div className="relative h-8 w-8 rounded mr-2 overflow-hidden bg-gray-100 shrink-0">
+                                                        <Image 
+                                                          src={item.product.imageUrl.startsWith('http') ? item.product.imageUrl : `${API_URL}${item.product.imageUrl}`} 
+                                                          alt={item.product.name ?? 'Producto'} 
+                                                          fill 
+                                                          className="object-cover"
+                                                          sizes="32px"
+                                                        />
+                                                      </div>
                                                  ) : (
-                                                     <div className="h-8 w-8 rounded mr-2 bg-gray-200 flex items-center justify-center text-xs text-gray-500 font-bold">
+                                                     <div className="h-8 w-8 rounded mr-2 bg-slate-700 flex items-center justify-center text-xs text-slate-400 font-bold">
                                                         {item.product?.name?.charAt(0).toUpperCase() || '?'}
                                                      </div>
                                                 )}
                                                 <span>{item.product?.name || t('orders.unknown')}</span>
                                             </div>
                                         </td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 text-right">{item.quantity}</td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 text-right">
+                                        <td className="px-3 py-2 text-sm text-slate-100 text-right">{item.quantity}</td>
+                                        <td className="px-3 py-2 text-sm text-slate-100 text-right">
                                             {formatPrice(item.price)}
                                         </td>
-                                        <td className="px-3 py-2 text-sm text-gray-900 text-right font-medium">
+                                        <td className="px-3 py-2 text-sm text-slate-100 text-right font-medium">
                                             {formatPrice(item.price * item.quantity)}
                                         </td>
                                     </tr>
@@ -611,7 +617,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colSpan={3} className="px-3 py-2 text-sm font-bold text-gray-900 text-right">{t('orders.total_label')}</td>
+                                    <td colSpan={3} className="px-3 py-2 text-sm font-bold text-slate-100 text-right">{t('orders.total_label')}</td>
                                     <td className="px-3 py-2 text-sm font-bold text-indigo-600 text-right">
                                         {formatPrice(selectedOrder.total)}
                                     </td>
@@ -622,7 +628,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                   </div>
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
+              <div className="bg-slate-800/80 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
                 <button
                   type="button"
                   className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm"
@@ -632,7 +638,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                 </button>
                 <button
                   type="button"
-                  className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  className="w-full inline-flex justify-center rounded-md border border-slate-600 shadow-sm px-4 py-2 bg-slate-800 text-base font-medium text-slate-200 hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   onClick={() => handlePrintOrder(selectedOrder)}
                 >
                   {t('orders.print_receipt')}

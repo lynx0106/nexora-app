@@ -1,10 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { MailService } from './mail.service';
-import { MailerService } from '@nestjs-modules/mailer';
+import { ConfigService } from '@nestjs/config';
+import { MailService, MAIL_TRANSPORT } from './mail.service';
 
 describe('MailService', () => {
   let service: MailService;
-  let mailerService: jest.Mocked<MailerService>;
+  let mockTransport: { sendMail: jest.Mock };
 
   const mockTenant = {
     id: 'tenant-123',
@@ -15,19 +15,27 @@ describe('MailService', () => {
   };
 
   beforeEach(async () => {
-    const mockMailerService = {
-      sendMail: jest.fn().mockResolvedValue(undefined),
+    mockTransport = {
+      sendMail: jest.fn().mockResolvedValue({ messageId: 'test-id' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MailService,
-        { provide: MailerService, useValue: mockMailerService },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              if (key === 'SMTP_FROM') return 'noreply@test.com';
+              return undefined;
+            }),
+          },
+        },
+        { provide: MAIL_TRANSPORT, useValue: mockTransport },
       ],
     }).compile();
 
     service = module.get<MailService>(MailService);
-    mailerService = module.get(MailerService);
   });
 
   it('should be defined', () => {
@@ -56,47 +64,48 @@ describe('MailService', () => {
     };
 
     it('should send order confirmation email', async () => {
-      await service.sendOrderConfirmation(mockOrder, mockTenant as any);
+      await service.sendOrderConfirmation(mockOrder, mockTenant as never);
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'customer@test.com',
           subject: expect.stringContaining('Confirmación de Pedido'),
-          template: './order-confirmation',
         }),
       );
     });
 
     it('should not send email if customerEmail is missing', async () => {
-      const orderWithoutEmail = { ...mockOrder, customerEmail: null };
+      const orderWithoutEmail = { ...mockOrder, customerEmail: undefined };
 
-      await service.sendOrderConfirmation(orderWithoutEmail, mockTenant as any);
+      await service.sendOrderConfirmation(
+        orderWithoutEmail,
+        mockTenant as never,
+      );
 
-      expect(mailerService.sendMail).not.toHaveBeenCalled();
+      expect(mockTransport.sendMail).not.toHaveBeenCalled();
     });
 
-    it('should include order items in email context', async () => {
-      await service.sendOrderConfirmation(mockOrder, mockTenant as any);
+    it('should include order items in email html', async () => {
+      await service.sendOrderConfirmation(mockOrder, mockTenant as never);
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
-      expect(callArgs.context.items).toHaveLength(2);
-      expect(callArgs.context.items[0].productName).toBe('Product 1');
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain('Product 1');
+      expect(callArgs.html).toContain('Product 2');
     });
 
     it('should handle mailer errors gracefully', async () => {
-      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
+      mockTransport.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
 
-      // Should not throw
       await expect(
-        service.sendOrderConfirmation(mockOrder, mockTenant as any),
+        service.sendOrderConfirmation(mockOrder, mockTenant as never),
       ).resolves.not.toThrow();
     });
 
     it('should use tenant currency for formatting', async () => {
-      await service.sendOrderConfirmation(mockOrder, mockTenant as any);
+      await service.sendOrderConfirmation(mockOrder, mockTenant as never);
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
-      expect(callArgs.context.total).toBeDefined();
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain('$'); // or COP symbol depending on format
     });
   });
 
@@ -114,15 +123,14 @@ describe('MailService', () => {
 
     it('should send appointment confirmation email', async () => {
       await service.sendAppointmentConfirmation(
-        mockAppointment as any,
-        mockTenant as any,
+        mockAppointment as never,
+        mockTenant as never,
       );
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'client@test.com',
           subject: expect.stringContaining('Confirmación de Cita'),
-          template: './appointment-confirmation',
         }),
       );
     });
@@ -134,31 +142,30 @@ describe('MailService', () => {
       };
 
       await service.sendAppointmentConfirmation(
-        appointmentWithoutEmail as any,
-        mockTenant as any,
+        appointmentWithoutEmail as never,
+        mockTenant as never,
       );
 
-      expect(mailerService.sendMail).not.toHaveBeenCalled();
+      expect(mockTransport.sendMail).not.toHaveBeenCalled();
     });
 
     it('should format date and time in Spanish', async () => {
       await service.sendAppointmentConfirmation(
-        mockAppointment as any,
-        mockTenant as any,
+        mockAppointment as never,
+        mockTenant as never,
       );
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
-      expect(callArgs.context.date).toBeDefined();
-      expect(callArgs.context.time).toBeDefined();
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toMatch(/\d/); // contains date/time
     });
 
     it('should handle mailer errors gracefully', async () => {
-      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
+      mockTransport.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
 
       await expect(
         service.sendAppointmentConfirmation(
-          mockAppointment as any,
-          mockTenant as any,
+          mockAppointment as never,
+          mockTenant as never,
         ),
       ).resolves.not.toThrow();
     });
@@ -178,27 +185,26 @@ describe('MailService', () => {
 
     it('should send 24h reminder', async () => {
       await service.sendAppointmentReminder(
-        mockAppointment as any,
-        mockTenant as any,
+        mockAppointment as never,
+        mockTenant as never,
         '24h',
       );
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('mañana'),
-          template: './appointment-reminder',
         }),
       );
     });
 
     it('should send 2h reminder', async () => {
       await service.sendAppointmentReminder(
-        mockAppointment as any,
-        mockTenant as any,
+        mockAppointment as never,
+        mockTenant as never,
         '2h',
       );
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           subject: expect.stringContaining('2 horas'),
         }),
@@ -212,12 +218,12 @@ describe('MailService', () => {
       };
 
       await service.sendAppointmentReminder(
-        appointmentWithoutEmail as any,
-        mockTenant as any,
+        appointmentWithoutEmail as never,
+        mockTenant as never,
         '24h',
       );
 
-      expect(mailerService.sendMail).not.toHaveBeenCalled();
+      expect(mockTransport.sendMail).not.toHaveBeenCalled();
     });
   });
 
@@ -229,11 +235,10 @@ describe('MailService', () => {
         token: 'reset-token-123',
       });
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'user@test.com',
           subject: expect.stringContaining('contrasena'),
-          template: './password-reset',
         }),
       );
     });
@@ -244,12 +249,12 @@ describe('MailService', () => {
         token: 'reset-token-123',
       });
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
-      expect(callArgs.context.url).toContain('reset-token-123');
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain('reset-token-123');
     });
 
     it('should handle mailer errors gracefully', async () => {
-      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
+      mockTransport.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
 
       await expect(
         service.sendPasswordReset({
@@ -270,11 +275,10 @@ describe('MailService', () => {
         inviterName: 'John Admin',
       });
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
         expect.objectContaining({
           to: 'newuser@test.com',
           subject: expect.stringContaining('Invitacion'),
-          template: './invitation',
         }),
       );
     });
@@ -287,8 +291,8 @@ describe('MailService', () => {
         role: 'admin',
       });
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
-      expect(callArgs.context.url).toContain('invite-token-123');
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain('invite-token-123');
     });
 
     it('should include tenant name in subject', async () => {
@@ -299,12 +303,12 @@ describe('MailService', () => {
         role: 'admin',
       });
 
-      const callArgs = mailerService.sendMail.mock.calls[0][0] as any;
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
       expect(callArgs.subject).toContain('My Business');
     });
 
     it('should handle mailer errors gracefully', async () => {
-      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
+      mockTransport.sendMail.mockRejectedValueOnce(new Error('SMTP Error'));
 
       await expect(
         service.sendInvitation({
@@ -318,16 +322,44 @@ describe('MailService', () => {
   });
 
   describe('sendMail', () => {
-    it('should delegate to mailerService', async () => {
+    it('should delegate to transporter', async () => {
       const options = {
         to: 'test@test.com',
         subject: 'Test',
-        text: 'Test body',
+        html: '<p>Test body</p>',
       };
 
       await service.sendMail(options);
 
-      expect(mailerService.sendMail).toHaveBeenCalledWith(options);
+      expect(mockTransport.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'test@test.com',
+          subject: 'Test',
+          html: '<p>Test body</p>',
+        }),
+      );
+    });
+
+    it('should render template when template and context provided', async () => {
+      await service.sendMail({
+        to: 'test@test.com',
+        subject: 'Test',
+        template: './order-confirmation',
+        context: {
+          customerName: 'John',
+          orderId: '123',
+          total: '$100',
+          items: [],
+          tenantName: 'Test',
+          tenantAddress: 'Addr',
+          url: 'https://example.com',
+          year: 2025,
+        },
+      });
+
+      const callArgs = mockTransport.sendMail.mock.calls[0][0];
+      expect(callArgs.html).toContain('John');
+      expect(callArgs.html).toContain('Test');
     });
   });
 });

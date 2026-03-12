@@ -42,7 +42,7 @@ export function getCorsOrigins(): string[] {
   const allOrigins = [
     'http://localhost:3002',
     'http://localhost:3000',
-    ...productionOrigins
+    ...productionOrigins,
   ];
 
   // Remove duplicates

@@ -1,5 +1,15 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Get,
+  Param,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 import { PushService } from './push.service';
 
 @Controller('push')
@@ -10,9 +20,10 @@ export class PushController {
   @Post('register')
   async registerToken(
     @Body() body: { token: string; platform: 'ios' | 'android' | 'web' },
-    @Req() req: any,
+    @Req() req: Request,
   ) {
-    const userId = req.user.id;
+    const userId = req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Usuario no autenticado');
     await this.pushService.registerToken(userId, body.token, body.platform);
     return { success: true, message: 'Push token registered' };
   }
@@ -30,14 +41,18 @@ export class PushController {
   }
 
   @Post('test')
-  async sendTestNotification(@Req() req: any) {
-    const userId = req.user.id;
+  async sendTestNotification(@Req() req: Request) {
+    const userId = req.user?.userId;
+    if (!userId) throw new UnauthorizedException('Usuario no autenticado');
     const sent = await this.pushService.sendToUser(
       userId,
       'Notificación de Prueba',
       'Si ves esto, las notificaciones push funcionan correctamente!',
       { type: 'test' },
     );
-    return { success: sent, message: sent ? 'Notification sent' : 'No tokens registered' };
+    return {
+      success: sent,
+      message: sent ? 'Notification sent' : 'No tokens registered',
+    };
   }
 }

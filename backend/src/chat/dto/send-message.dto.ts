@@ -24,12 +24,18 @@ export class SendMessageDto {
   @IsNotEmpty()
   content: string;
 
-  @ApiPropertyOptional({ description: 'ID del tenant (opcional para superadmin)' })
+  @ApiPropertyOptional({
+    description: 'ID del tenant (opcional para superadmin)',
+  })
   @IsOptional()
   @IsUUID()
   tenantId?: string;
 
-  @ApiPropertyOptional({ description: 'Alcance del mensaje', enum: MessageScope, default: MessageScope.INTERNAL })
+  @ApiPropertyOptional({
+    description: 'Alcance del mensaje',
+    enum: MessageScope,
+    default: MessageScope.INTERNAL,
+  })
   @IsOptional()
   @IsEnum(MessageScope)
   scope?: MessageScope;
@@ -44,7 +50,11 @@ export class SendMessageDto {
   @IsString()
   mediaUrl?: string;
 
-  @ApiPropertyOptional({ description: 'Tipo de mensaje', enum: MessageType, default: MessageType.TEXT })
+  @ApiPropertyOptional({
+    description: 'Tipo de mensaje',
+    enum: MessageType,
+    default: MessageType.TEXT,
+  })
   @IsOptional()
   @IsEnum(MessageType)
   type?: MessageType;

@@ -19,10 +19,19 @@ export class Tenant {
   @Column({ nullable: true })
   sector: string;
 
-  @Column({ 
-    type: 'enum', 
-    enum: ['restaurant', 'hotel', 'clinic', 'retail', 'services', 'gym', 'salon', 'other'],
-    default: 'other'
+  @Column({
+    type: 'enum',
+    enum: [
+      'restaurant',
+      'hotel',
+      'clinic',
+      'retail',
+      'services',
+      'gym',
+      'salon',
+      'other',
+    ],
+    default: 'other',
   })
   businessType: string;
 

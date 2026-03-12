@@ -1,9 +1,11 @@
 import {
+  IsBoolean,
   IsEmail,
   IsIn,
   IsOptional,
   IsString,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Role } from '../../common/constants/roles';
@@ -17,16 +19,35 @@ export class CreateUserDto {
   @IsString()
   lastName: string;
 
-  @ApiProperty({ example: 'john@example.com', description: 'User email address' })
+  @ApiProperty({
+    example: 'john@example.com',
+    description: 'User email address',
+  })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', description: 'User password - minimum 6 characters', minLength: 6 })
+  @ValidateIf((o) => !o.generateTempPassword)
+  @ApiPropertyOptional({
+    example: 'password123',
+    description: 'User password (required unless generateTempPassword=true)',
+    minLength: 6,
+  })
+  @IsOptional()
   @IsString()
   @MinLength(6)
-  password: string;
+  password?: string;
 
-  @ApiPropertyOptional({ example: '+573001234567', description: 'User phone number' })
+  @ApiPropertyOptional({
+    description: 'When true, backend generates secure temp password and returns it in response',
+  })
+  @IsOptional()
+  @IsBoolean()
+  generateTempPassword?: boolean;
+
+  @ApiPropertyOptional({
+    example: '+573001234567',
+    description: 'User phone number',
+  })
   @IsOptional()
   @IsString()
   phone?: string;
@@ -36,17 +57,27 @@ export class CreateUserDto {
   @IsString()
   address?: string;
 
-  @ApiPropertyOptional({ example: 'https://example.com/avatar.jpg', description: 'User avatar URL' })
+  @ApiPropertyOptional({
+    example: 'https://example.com/avatar.jpg',
+    description: 'User avatar URL',
+  })
   @IsOptional()
   @IsString()
   avatarUrl?: string;
 
-  @ApiPropertyOptional({ enum: Role, description: 'User role', default: 'user' })
+  @ApiPropertyOptional({
+    enum: Role,
+    description: 'User role',
+    default: 'user',
+  })
   @IsOptional()
   @IsIn(Object.values(Role))
   role?: string;
 
-  @ApiPropertyOptional({ example: 'restaurante-demo', description: 'Tenant ID for multi-tenant organization' })
+  @ApiPropertyOptional({
+    example: 'restaurante-demo',
+    description: 'Tenant ID for multi-tenant organization',
+  })
   @IsOptional()
   @IsString()
   tenantId?: string;

@@ -1,5 +1,11 @@
-import { Injectable, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
+import type { Request } from 'express';
 
 /**
  * Extended ThrottlerGuard that provides specific rate limiting for auth endpoints
@@ -8,11 +14,14 @@ import { ThrottlerGuard } from '@nestjs/throttler';
 @Injectable()
 export class AuthThrottleGuard extends ThrottlerGuard {
   // Track failed attempts per IP
-  private failedAttempts = new Map<string, { count: number; lastAttempt: number }>();
-  
+  private failedAttempts = new Map<
+    string,
+    { count: number; lastAttempt: number }
+  >();
+
   // Maximum failed attempts before temporary block
   private readonly maxFailedAttempts = 5;
-  
+
   // Block duration in milliseconds (15 minutes)
   private readonly blockDuration = 15 * 60 * 1000;
 
@@ -20,11 +29,14 @@ export class AuthThrottleGuard extends ThrottlerGuard {
     const req = context.switchToHttp().getRequest();
     const res = context.switchToHttp().getResponse();
     const ip = this.getClientIp(req);
-    
+
     // Check if IP is currently blocked due to failed attempts
     const blockStatus = this.isBlocked(ip);
     if (blockStatus.blocked) {
-      res.header('Retry-After', Math.ceil(blockStatus.retryAfter / 1000).toString());
+      res.header(
+        'Retry-After',
+        Math.ceil(blockStatus.retryAfter / 1000).toString(),
+      );
       throw new HttpException(
         {
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
@@ -37,12 +49,12 @@ export class AuthThrottleGuard extends ThrottlerGuard {
 
     // Call parent method for standard rate limiting
     const allowed = await super.canActivate(context);
-    
+
     if (!allowed) {
       // Track this as a failed attempt
       this.trackFailedAttempt(ip);
     }
-    
+
     return allowed;
   }
 
@@ -58,9 +70,9 @@ export class AuthThrottleGuard extends ThrottlerGuard {
     if (attempt.count >= this.maxFailedAttempts) {
       const timeSinceLastAttempt = Date.now() - attempt.lastAttempt;
       if (timeSinceLastAttempt < this.blockDuration) {
-        return { 
-          blocked: true, 
-          retryAfter: this.blockDuration - timeSinceLastAttempt 
+        return {
+          blocked: true,
+          retryAfter: this.blockDuration - timeSinceLastAttempt,
         };
       } else {
         // Block expired, reset counter
@@ -95,18 +107,19 @@ export class AuthThrottleGuard extends ThrottlerGuard {
   /**
    * Get client IP from request
    */
-  private getClientIp(req: any): string {
+  private getClientIp(req: Request): string {
     // Try to get IP from various headers (useful when behind proxy)
     const forwarded = req.headers['x-forwarded-for'];
     if (forwarded) {
-      return forwarded.split(',')[0].trim();
+      const first = Array.isArray(forwarded) ? forwarded[0] : forwarded;
+      return (first ?? '').split(',')[0].trim() || 'unknown';
     }
-    
+
     const realIp = req.headers['x-real-ip'];
     if (realIp) {
-      return realIp;
+      return Array.isArray(realIp) ? realIp[0] : realIp;
     }
-    
+
     return req.ip || req.connection?.remoteAddress || 'unknown';
   }
 }
@@ -116,7 +129,11 @@ export class AuthThrottleGuard extends ThrottlerGuard {
  * Usage: @UseGuards(AuthThrottleGuard)
  */
 export function UseAuthThrottle() {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     // This is a marker decorator - the actual guard is applied via @UseGuards
     return descriptor;
   };

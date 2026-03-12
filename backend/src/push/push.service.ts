@@ -35,11 +35,15 @@ export class PushService {
   /**
    * Register a push token for a user
    */
-  async registerToken(userId: string, token: string, platform: 'ios' | 'android' | 'web'): Promise<void> {
+  async registerToken(
+    userId: string,
+    token: string,
+    platform: 'ios' | 'android' | 'web',
+  ): Promise<void> {
     const userTokens = this.pushTokens.get(userId) || [];
-    
+
     // Remove duplicate tokens
-    const existingIndex = userTokens.findIndex(t => t.token === token);
+    const existingIndex = userTokens.findIndex((t) => t.token === token);
     if (existingIndex >= 0) {
       userTokens[existingIndex].createdAt = new Date();
     } else {
@@ -50,7 +54,7 @@ export class PushService {
         createdAt: new Date(),
       });
     }
-    
+
     this.pushTokens.set(userId, userTokens);
     this.logger.log(`Push token registered for user ${userId} on ${platform}`);
   }
@@ -60,7 +64,7 @@ export class PushService {
    */
   async unregisterToken(token: string): Promise<void> {
     for (const [userId, tokens] of this.pushTokens.entries()) {
-      const index = tokens.findIndex(t => t.token === token);
+      const index = tokens.findIndex((t) => t.token === token);
       if (index >= 0) {
         tokens.splice(index, 1);
         this.pushTokens.set(userId, tokens);
@@ -75,7 +79,7 @@ export class PushService {
    */
   getTokensForUser(userId: string): string[] {
     const userTokens = this.pushTokens.get(userId) || [];
-    return userTokens.map(t => t.token);
+    return userTokens.map((t) => t.token);
   }
 
   /**
@@ -88,7 +92,7 @@ export class PushService {
     data?: Record<string, any>,
   ): Promise<boolean> {
     const tokens = this.getTokensForUser(userId);
-    
+
     if (tokens.length === 0) {
       this.logger.debug(`No push tokens found for user ${userId}`);
       return false;
@@ -133,7 +137,7 @@ export class PushService {
       ],
     });
 
-    const adminIds = admins.map(a => a.id);
+    const adminIds = admins.map((a) => a.id);
     await this.sendToUsers(adminIds, title, body, data);
   }
 
@@ -143,8 +147,8 @@ export class PushService {
   private async sendPushNotification(message: PushMessage): Promise<boolean> {
     try {
       const messages = Array.isArray(message.to) ? message.to : [message.to];
-      
-      const payload = messages.map(token => ({
+
+      const payload = messages.map((token) => ({
         to: token,
         title: message.title,
         body: message.body,
@@ -157,21 +161,31 @@ export class PushService {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
+          Accept: 'application/json',
         },
         body: JSON.stringify(payload),
       });
 
-      const result = await response.json() as { data?: Array<{ status: string; id?: string; message?: string }> };
-      
+      const result = (await response.json()) as {
+        data?: Array<{ status: string; id?: string; message?: string }>;
+      };
+
       if (result.data) {
-        const failedTokens = result.data.filter((ticket: any) => ticket.status === 'error');
+        const failedTokens = result.data.filter(
+          (ticket: any) => ticket.status === 'error',
+        );
         if (failedTokens.length > 0) {
-          this.logger.warn(`Some push notifications failed: ${JSON.stringify(failedTokens)}`);
+          this.logger.warn(
+            `Some push notifications failed: ${JSON.stringify(failedTokens)}`,
+          );
         }
-        
-        const successCount = result.data.filter((ticket: any) => ticket.status === 'ok').length;
-        this.logger.log(`Push notifications sent: ${successCount} successful, ${failedTokens.length} failed`);
+
+        const successCount = result.data.filter(
+          (ticket: any) => ticket.status === 'ok',
+        ).length;
+        this.logger.log(
+          `Push notifications sent: ${successCount} successful, ${failedTokens.length} failed`,
+        );
         return successCount > 0;
       }
 
@@ -185,7 +199,12 @@ export class PushService {
   /**
    * Send notification for new order
    */
-  async notifyNewOrder(tenantId: string, orderId: string, customerName: string, total: number): Promise<void> {
+  async notifyNewOrder(
+    tenantId: string,
+    orderId: string,
+    customerName: string,
+    total: number,
+  ): Promise<void> {
     await this.sendToTenantAdmins(
       tenantId,
       'Nuevo Pedido',
@@ -197,7 +216,12 @@ export class PushService {
   /**
    * Send notification for new appointment
    */
-  async notifyNewAppointment(tenantId: string, appointmentId: string, clientName: string, serviceName: string): Promise<void> {
+  async notifyNewAppointment(
+    tenantId: string,
+    appointmentId: string,
+    clientName: string,
+    serviceName: string,
+  ): Promise<void> {
     await this.sendToTenantAdmins(
       tenantId,
       'Nueva Cita',
@@ -209,7 +233,11 @@ export class PushService {
   /**
    * Send notification for low stock
    */
-  async notifyLowStock(tenantId: string, productName: string, currentStock: number): Promise<void> {
+  async notifyLowStock(
+    tenantId: string,
+    productName: string,
+    currentStock: number,
+  ): Promise<void> {
     await this.sendToTenantAdmins(
       tenantId,
       'Stock Bajo',
@@ -221,7 +249,11 @@ export class PushService {
   /**
    * Send notification for new message
    */
-  async notifyNewMessage(userId: string, senderName: string, messagePreview: string): Promise<void> {
+  async notifyNewMessage(
+    userId: string,
+    senderName: string,
+    messagePreview: string,
+  ): Promise<void> {
     await this.sendToUser(
       userId,
       `Mensaje de ${senderName}`,

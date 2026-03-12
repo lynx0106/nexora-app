@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
+import { Repository, Between } from 'typeorm';
 import { Appointment } from './entities/appointment.entity';
 import { MailService } from '../mail/mail.service';
-import { Tenant } from '../tenants/entities/tenant.entity';
 
 @Injectable()
 export class AppointmentsScheduler {
@@ -45,16 +44,25 @@ export class AppointmentsScheduler {
     });
 
     if (appointments.length > 0) {
-      this.logger.log(`Found ${appointments.length} appointments for 24h reminder.`);
+      this.logger.log(
+        `Found ${appointments.length} appointments for 24h reminder.`,
+      );
     }
 
     for (const appointment of appointments) {
       try {
-        await this.mailService.sendAppointmentReminder(appointment, appointment.tenant, '24h');
+        await this.mailService.sendAppointmentReminder(
+          appointment,
+          appointment.tenant,
+          '24h',
+        );
         appointment.reminderSent24h = true;
         await this.appointmentsRepository.save(appointment);
       } catch (error) {
-        this.logger.error(`Failed to send 24h reminder for appointment ${appointment.id}`, error);
+        this.logger.error(
+          `Failed to send 24h reminder for appointment ${appointment.id}`,
+          error,
+        );
       }
     }
   }
@@ -75,16 +83,25 @@ export class AppointmentsScheduler {
     });
 
     if (appointments.length > 0) {
-      this.logger.log(`Found ${appointments.length} appointments for 2h reminder.`);
+      this.logger.log(
+        `Found ${appointments.length} appointments for 2h reminder.`,
+      );
     }
 
     for (const appointment of appointments) {
       try {
-        await this.mailService.sendAppointmentReminder(appointment, appointment.tenant, '2h');
+        await this.mailService.sendAppointmentReminder(
+          appointment,
+          appointment.tenant,
+          '2h',
+        );
         appointment.reminderSent2h = true;
         await this.appointmentsRepository.save(appointment);
       } catch (error) {
-        this.logger.error(`Failed to send 2h reminder for appointment ${appointment.id}`, error);
+        this.logger.error(
+          `Failed to send 2h reminder for appointment ${appointment.id}`,
+          error,
+        );
       }
     }
   }

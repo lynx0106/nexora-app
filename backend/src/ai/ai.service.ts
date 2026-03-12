@@ -72,13 +72,7 @@ export class AiService {
       });
       try {
         return await breaker.execute(() =>
-          this.generateOpenAIReply(
-            client,
-            scope,
-            message,
-            tenantId,
-            context,
-          ),
+          this.generateOpenAIReply(client, scope, message, tenantId, context),
         );
       } catch (error) {
         this.logger.warn('OpenAI unavailable (circuit or API error):', error);
@@ -108,10 +102,16 @@ export class AiService {
     const model = tenant?.aiModel || 'gpt-3.5-turbo';
 
     // Build messages array with context if available
-    const messages: any[] = [{ role: 'system', content: systemMessage }];
+    type MessageParam = {
+      role: 'system' | 'user' | 'assistant';
+      content: string;
+    };
+    const messages: MessageParam[] = [
+      { role: 'system', content: systemMessage },
+    ];
 
     if (context && context.length > 0) {
-      messages.push(...context);
+      messages.push(...(context as MessageParam[]));
     }
 
     messages.push({ role: 'user', content: message });
@@ -221,20 +221,13 @@ Tus Instrucciones:
     const tenant = await this.tenantsService.findOne(tenantId);
     const businessName = tenant?.name || 'la tienda';
     const sector = tenant?.sector || 'comercio';
-    const country = tenant?.country || 'tu región';
 
     let reply: string | null = null;
-    const lower = message.toLowerCase();
 
     if (scope === 'CUSTOMER') {
-      reply = this.customerAgentResponse(
-        message,
-        businessName,
-        sector,
-        country,
-      );
+      reply = this.customerAgentResponse(message, businessName, sector);
     } else if (scope === 'SUPPORT') {
-      reply = this.supportAgentResponse(message);
+      reply = this.supportAgentResponse();
     } else if (scope === 'INTERNAL') {
       reply =
         '🤖 Soy tu asistente de equipo. (Funcionalidad de IA simulada. Conecta tu API Key para respuestas reales).';
@@ -247,7 +240,6 @@ Tus Instrucciones:
     message: string,
     businessName: string,
     sector: string,
-    country: string,
   ): string {
     const lower = message.toLowerCase();
 
@@ -297,7 +289,7 @@ Tus Instrucciones:
     return "Entendido. Si necesitas información específica sobre precios, horarios o reservas, no dudes en preguntar. También puedes pedir hablar con un 'asesor'.";
   }
 
-  private supportAgentResponse(message: string): string {
+  private supportAgentResponse(): string {
     return (
       '🛠️ [Soporte SaaS] He recibido tu solicitud de soporte. Un ingeniero revisará tu caso pronto. ID de Ticket: #' +
       Math.floor(Math.random() * 10000)

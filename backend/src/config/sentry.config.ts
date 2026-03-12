@@ -5,7 +5,7 @@ import { Logger } from '@nestjs/common';
 export function initSentry() {
   const dsn = process.env.SENTRY_DSN;
   const environment = process.env.NODE_ENV || 'development';
-  
+
   if (!dsn) {
     Logger.log('⚠️ SENTRY_DSN not configured, skipping Sentry initialization');
     return;
@@ -14,9 +14,7 @@ export function initSentry() {
   Sentry.init({
     dsn,
     environment,
-    integrations: [
-      nodeProfilingIntegration(),
-    ],
+    integrations: [nodeProfilingIntegration()],
     // Performance Monitoring
     tracesSampleRate: environment === 'production' ? 0.1 : 1.0,
     // Profiling
@@ -48,7 +46,12 @@ export function captureError(error: Error, context?: Record<string, any>) {
 }
 
 // Helper to set user context
-export function setSentryUser(user: { id: string; email?: string; tenantId?: string; role?: string }) {
+export function setSentryUser(user: {
+  id: string;
+  email?: string;
+  tenantId?: string;
+  role?: string;
+}) {
   Sentry.setUser({
     id: user.id,
     email: user.email,
@@ -67,7 +70,7 @@ export function addBreadcrumb(
   category: string,
   message: string,
   level: 'info' | 'warning' | 'error' = 'info',
-  data?: Record<string, any>
+  data?: Record<string, any>,
 ) {
   Sentry.addBreadcrumb({
     category,

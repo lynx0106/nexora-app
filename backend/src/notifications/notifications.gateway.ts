@@ -30,17 +30,17 @@ export class NotificationsGateway
     try {
       // Try to get token from multiple sources
       let token: string | undefined;
-      
+
       // 1. Try handshake.auth (for backward compatibility)
       if (client.handshake.auth.token) {
         token = client.handshake.auth.token;
       }
-      
+
       // 2. Try Authorization header
       if (!token && client.handshake.headers.authorization) {
         token = client.handshake.headers.authorization;
       }
-      
+
       // 3. Try cookies (new secure method)
       if (!token && client.handshake.headers.cookie) {
         const cookieString = client.handshake.headers.cookie;
@@ -49,7 +49,7 @@ export class NotificationsGateway
           token = accessTokenMatch[1];
         }
       }
-      
+
       if (!token) {
         client.disconnect();
         return;
@@ -70,7 +70,6 @@ export class NotificationsGateway
       if (role === 'admin' || role === 'superadmin' || role === 'staff') {
         client.join(`tenant-${tenantId}-admins`);
       }
-
     } catch (error) {
       void error;
       client.disconnect();

@@ -36,7 +36,10 @@ describe('NotificationsService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         NotificationsService,
-        { provide: getRepositoryToken(Notification), useValue: mockNotificationRepo },
+        {
+          provide: getRepositoryToken(Notification),
+          useValue: mockNotificationRepo,
+        },
         { provide: NotificationsGateway, useValue: mockNotificationsGateway },
       ],
     }).compile();

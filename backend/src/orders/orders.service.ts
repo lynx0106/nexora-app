@@ -53,11 +53,17 @@ export class OrdersService {
 
     try {
       if (!data.items || data.items.length === 0) {
-        throw new BadRequestException('El pedido debe incluir al menos un item');
+        throw new BadRequestException(
+          'El pedido debe incluir al menos un item',
+        );
       }
 
       let total = 0;
-      const orderItems: { productId: string; quantity: number; price: number }[] = [];
+      const orderItems: {
+        productId: string;
+        quantity: number;
+        price: number;
+      }[] = [];
 
       // Decrease stock
       for (const item of data.items) {
@@ -180,7 +186,10 @@ export class OrdersService {
                 link: `/dashboard/orders`,
               })
               .catch((err) =>
-                this.logger.error('⚠️ Failed to send notification (promise):', err),
+                this.logger.error(
+                  '⚠️ Failed to send notification (promise):',
+                  err,
+                ),
               );
           } catch (error) {
             this.logger.error('⚠️ Failed to initiate notification:', error);
@@ -210,7 +219,10 @@ export class OrdersService {
                     tenant,
                   )
                   .catch((err) =>
-                    this.logger.error('⚠️ Failed to send email (promise):', err),
+                    this.logger.error(
+                      '⚠️ Failed to send email (promise):',
+                      err,
+                    ),
                   );
               }
             } catch (error) {

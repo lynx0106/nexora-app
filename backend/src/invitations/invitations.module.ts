@@ -6,10 +6,7 @@ import { InvitationCode } from './entities/invitation-code.entity';
 import { TenantsModule } from '../tenants/tenants.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([InvitationCode]),
-    TenantsModule,
-  ],
+  imports: [TypeOrmModule.forFeature([InvitationCode]), TenantsModule],
   controllers: [InvitationsController],
   providers: [InvitationsService],
   exports: [InvitationsService],

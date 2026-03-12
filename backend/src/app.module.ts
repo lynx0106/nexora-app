@@ -61,7 +61,10 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
             ? explicitSync === 'true'
             : explicitSync !== 'false';
         if (shouldSync && process.env.NODE_ENV === 'production') {
-          Logger.warn('TYPEORM_SYNCHRONIZE=true en producción - riesgo de pérdida de datos', 'AppModule');
+          Logger.warn(
+            'TYPEORM_SYNCHRONIZE=true en producción - riesgo de pérdida de datos',
+            'AppModule',
+          );
         }
         return {
           ...config,
