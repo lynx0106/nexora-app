@@ -29,6 +29,7 @@ import { Role, hasRole } from '../common/constants/roles';
 import { Permission } from '../common/constants/permissions';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { SetupGuard } from '../common/guards/setup.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -111,7 +112,7 @@ export class UsersController {
     // Determine allowed fields based on role and sector
     let allowedUpdates: any = {};
 
-    if (role === 'user') {
+    if (role === 'client') {
       const tenant = await this.tenantsService.getTenantOrThrow(tenantId);
       const sector = tenant.sector || 'otros';
 
@@ -147,7 +148,7 @@ export class UsersController {
         if (dto.address !== undefined) allowedUpdates.address = dto.address;
       }
 
-      // Explicitly ignore firstName, lastName, email for 'user' role
+      // Explicitly ignore firstName, lastName, email for 'client' role
     } else {
       // Admin/Superadmin can update everything
       allowedUpdates = {
@@ -254,17 +255,16 @@ export class UsersController {
       throw new ForbiddenException('Tenant no asignado');
     }
 
-    // Si es user, permitimos ver solo el STAFF (no otros clientes)
-    if (!hasRole(role, [Role.Admin, Role.Superadmin, Role.User])) {
+    if (!hasRole(role, [Role.Admin, Role.Superadmin, Role.Employee, Role.Client])) {
       throw new ForbiddenException('No tienes permisos para listar usuarios');
     }
 
     const users = await this.usersService.findByTenant(tenantId);
 
-    // Filtro de privacidad para usuarios normales
-    if (hasRole(role, [Role.User])) {
+    // Filtro de privacidad: clientes ven solo el equipo (admins, empleados), no otros clientes
+    if (hasRole(role, [Role.Client])) {
       return users
-        .filter((u) => u.role !== 'user') // Solo mostrar staff
+        .filter((u) => u.role !== 'client') // Solo mostrar equipo
         .map(({ passwordHash: _, ...safeUser }) => {
           void _;
           return safeUser;
@@ -313,7 +313,8 @@ export class UsersController {
         lastName: body.lastName,
         email: body.email,
         password: passwordToUse,
-        role: body.role || 'user',
+        role: body.role || 'employee',
+        employeeType: body.employeeType,
         phone: body.phone,
         address: body.address,
       });
@@ -390,6 +391,7 @@ export class UsersController {
         phone: dto.phone,
         password: dto.password,
         role: dto.role,
+        employeeType: dto.employeeType,
       });
 
       const { passwordHash: _, ...safeUser } = user;
@@ -439,7 +441,9 @@ export class UsersController {
         email: dto.email,
         phone: dto.phone,
         address: dto.address,
+        avatarUrl: dto.avatarUrl,
         role: isAdmin ? dto.role : undefined,
+        employeeType: isAdmin ? dto.employeeType : undefined,
         password: dto.password,
       });
 
@@ -481,46 +485,49 @@ export class UsersController {
   }
 
   @Post('seed-superadmin')
+  @UseGuards(SetupGuard)
   async seedSuperAdmin() {
     const result = await this.usersService.seedSuperAdmin();
+    const pwd = result.password;
     return {
       ...result,
-      password: 'NexoraTemp2026!', // Temporary password - change after login!
-      message:
-        'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)',
+      password: pwd,
+      message: `Superadmin created/updated. Change password immediately after first login.`,
     };
   }
 
   @Post('public/seed-superadmin')
+  @UseGuards(SetupGuard)
   async publicSeedSuperAdmin() {
-    // TEMPORARY: Public endpoint for emergency superadmin seed
     const result = await this.usersService.seedSuperAdmin();
+    const pwd = result.password;
     return {
       ...result,
-      password: 'NexoraTemp2026!',
-      warning: 'THIS IS A TEMPORARY PUBLIC ENDPOINT - REMOVE AFTER SETUP!',
-      message:
-        'Superadmin created/updated. Use password: NexoraTemp2026! (CHANGE IMMEDIATELY!)',
+      password: pwd,
+      message: `Superadmin created/updated. Use provided password. Change immediately after first login.`,
     };
   }
 
   @Post('seed-demo-users')
+  @UseGuards(SetupGuard)
   async seedDemoUsers() {
     return this.usersService.seedDemoUsers();
   }
 
   @Post('seed-doctors/:tenantId')
+  @UseGuards(SetupGuard)
   async seedDoctors(@Param('tenantId') tenantId: string) {
     return this.usersService.seedDoctors(tenantId);
   }
 
   @Post('seed-clients/:tenantId')
+  @UseGuards(SetupGuard)
   async seedClients(@Param('tenantId') tenantId: string) {
     return this.usersService.seedClients(tenantId);
   }
 
-  // TEMPORARY: Diagnostic endpoint
   @Get('public/diagnostic')
+  @UseGuards(SetupGuard)
   async diagnostic() {
     const allUsers = await this.usersService.findAllGlobal();
     return {
@@ -537,11 +544,12 @@ export class UsersController {
     };
   }
 
-  // TEMPORARY: Fix superadmin password directly
   @Post('public/fix-superadmin')
+  @UseGuards(SetupGuard)
   async fixSuperadmin() {
-    const email = 'superadmin@saas.com';
-    const password = 'NexoraTemp2026!';
+    const email = process.env.SUPERADMIN_EMAIL || 'superadmin@saas.com';
+    const password =
+      process.env.SUPERADMIN_PASSWORD || this.getDefaultSetupPassword();
 
     // Check if user exists
     const existing = await this.usersService.findByEmail(email);
@@ -565,5 +573,15 @@ export class UsersController {
       // Create new superadmin
       return this.usersService.seedSuperAdmin();
     }
+  }
+
+  /** Solo en desarrollo cuando SUPERADMIN_PASSWORD no está definido */
+  private getDefaultSetupPassword(): string {
+    if (process.env.NODE_ENV === 'production') {
+      throw new ForbiddenException(
+        'SUPERADMIN_PASSWORD must be set in production',
+      );
+    }
+    return 'NexoraTemp2026!';
   }
 }

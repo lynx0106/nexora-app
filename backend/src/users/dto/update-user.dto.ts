@@ -40,4 +40,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsIn(Object.values(Role))
   role?: string;
+
+  @IsOptional()
+  @IsString()
+  employeeType?: string;
 }

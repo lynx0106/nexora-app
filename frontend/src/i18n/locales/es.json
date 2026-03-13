@@ -357,7 +357,13 @@
     "role_professional": "Profesional",
     "role_cashier": "Caja",
     "role_support": "Soporte",
-    "role_admin": "Admin"
+    "role_admin": "Admin",
+    "role_option_admin": "Administrador",
+    "role_option_doctor_restaurant": "Camarero / Staff",
+    "role_option_doctor_service": "Profesional / Empleado",
+    "role_option_support_service": "Recepcionista",
+    "form_employee_type": "Tipo de empleado",
+    "employee_type_select": "Seleccionar tipo..."
   },
   "settings": {
     "profile_title": "Tu perfil en NEXORA",
@@ -618,6 +624,20 @@
     "reset_password_mismatch": "Las contraseñas no coinciden."
   },
   "landing": {
+    "sidebar": {
+      "menu_title": "Menú principal",
+      "tagline": "El núcleo inteligente de tu negocio",
+      "inicio": "Inicio",
+      "features": "Características",
+      "plans": "Planes",
+      "comparison": "Comparativa",
+      "app_mobile": "App móvil",
+      "diagram": "Cómo funciona",
+      "social_proof": "Testimonios",
+      "faq": "FAQ",
+      "auth": "Iniciar sesión / Registro",
+      "back": "Volver"
+    },
     "nav": {
       "features": "Funcionalidades",
       "plans": "Planes",

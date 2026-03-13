@@ -286,7 +286,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
             </p>
           </div>
           <div className="flex gap-2">
-            {role !== 'user' && (
+            {role !== 'client' && (
               <>
             <button
               onClick={() => {
@@ -550,7 +550,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                     {t('common.tenant')}
                   </th>
                 )}
-                {role !== 'user' && (
+                {role !== 'client' && (
                 <th className="px-3 py-2 text-left font-medium text-slate-300">
                   {t('common.actions')}
                 </th>
@@ -625,9 +625,9 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                         />
                       ) : (
                         <span 
-                            onClick={() => role !== 'user' && handleStockClick(product)}
-                            className={role !== 'user' ? "cursor-pointer hover:bg-slate-700 px-2 py-1 rounded" : ""}
-                            title={role !== 'user' ? t('products.edit_stock_hint') : ""}
+                            onClick={() => role !== 'client' && handleStockClick(product)}
+                            className={role !== 'client' ? "cursor-pointer hover:bg-slate-700 px-2 py-1 rounded" : ""}
+                            title={role !== 'client' ? t('products.edit_stock_hint') : ""}
                         >
                             {product.stock}
                         </span>
@@ -641,7 +641,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
                         {product.tenantId}
                       </td>
                     )}
-                    {role !== 'user' && (
+                    {role !== 'client' && (
                     <td className="px-3 py-2 flex items-center gap-3">
                       <button
                         onClick={() => handleEditProductClick(product)}

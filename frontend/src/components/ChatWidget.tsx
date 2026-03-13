@@ -52,7 +52,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
   useEffect(() => { activeTabRef.current = activeTab; }, [activeTab]);
 
   // Determine available tabs based on role
-  // If user is 'user' (client), they only have 'CUSTOMER' (chat with business)
+  // If user is 'client', they only have 'CUSTOMER' (chat with business)
   // If user is 'admin', they have 'INTERNAL', 'SUPPORT', 'CUSTOMER'
   // If user is 'superadmin', they have 'SUPPORT' (Global) mainly.
   
@@ -63,7 +63,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
 
   // Initialize default tab
   useEffect(() => {
-    if (role === 'user') {
+    if (role === 'client') {
         setActiveTab('CUSTOMER');
     } else {
         setActiveTab('INTERNAL');
@@ -166,14 +166,14 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
         // If message is from a customer and we are admin, maybe auto-select context?
         // Or simply let the admin reply generally.
         // For AI Toggle feature, we need to know WHO sent it.
-        if (message.scope === 'CUSTOMER' && message.senderId && role !== 'user') {
+        if (message.scope === 'CUSTOMER' && message.senderId && role !== 'client') {
              // Optional: Update UI to show who is talking
              setActiveChatUserId(message.senderId);
         }
     });
     
     newSocket.on('aiStatusChanged', (payload: { userId: string, isAiActive: boolean }) => {
-        if (activeChatUserId === payload.userId || role === 'user') {
+        if (activeChatUserId === payload.userId || role === 'client') {
             setActiveCustomerAi(payload.isAiActive);
         }
     });
@@ -224,7 +224,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
 
   // Show welcome message for users if history is empty
   useEffect(() => {
-    if (role === 'user' && isOpen && messages.length === 0 && tenantInfo) {
+    if (role === 'client' && isOpen && messages.length === 0 && tenantInfo) {
         // Only show if we are sure history has loaded (simplified check: wait a bit or just show it)
         // For better UX, we could use a loading state. But for now, let's assume if it's empty after load.
         // Actually, we can't distinguish "loading" from "empty" easily without a state.
@@ -395,7 +395,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
           <div className="bg-indigo-600 p-3 flex flex-col text-white">
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold text-sm">
-                    {role === 'user' ? t('chat.widget.support_title') : t('chat.widget.messages_center_title')}
+                    {role === 'client' ? t('chat.widget.support_title') : t('chat.widget.messages_center_title')}
                 </h3>
                 <button 
                 onClick={() => setIsOpen(false)}
@@ -408,7 +408,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
             </div>
             
             {/* Tabs (Only for Admin/Superadmin) */}
-            {role !== 'user' && (
+            {role !== 'client' && (
                 <div className="flex space-x-2 text-xs">
                     <button 
                         onClick={() => setActiveTab('INTERNAL')}
@@ -435,7 +435,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
           {/* Messages Area */}
           <div className="flex-1 overflow-y-auto p-4 bg-slate-950 space-y-3 relative">
             {/* AI Status Banner for Admin */}
-            {role !== 'user' && activeChatUserId && activeTab === 'CUSTOMER' && (
+            {role !== 'client' && activeChatUserId && activeTab === 'CUSTOMER' && (
                 <div className="sticky top-0 z-10 flex justify-center mb-2">
                     <button 
                         onClick={toggleAi}
@@ -475,7 +475,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
                     {msg.type === 'image' && msg.mediaUrl && (
                         <div className="relative mt-2 w-full max-w-[200px] aspect-video">
                           <Image 
-                            src={msg.mediaUrl} 
+                            src={msg.mediaUrl.startsWith('http') ? msg.mediaUrl : `${API_URL}${msg.mediaUrl}`}
                             alt={t('chat.widget.image_attachment') || 'Imagen adjunta'} 
                             fill
                             className="object-cover rounded-md"
@@ -485,10 +485,10 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
                         </div>
                     )}
                     {msg.type === 'audio' && msg.mediaUrl && (
-                        <audio controls src={msg.mediaUrl} className="mt-2 w-full max-w-[200px]" />
+                        <audio controls src={msg.mediaUrl.startsWith('http') ? msg.mediaUrl : `${API_URL}${msg.mediaUrl}`} className="mt-2 w-full max-w-[200px]" />
                     )}
                     {msg.type === 'file' && msg.mediaUrl && (
-                        <a href={msg.mediaUrl} target="_blank" rel="noopener noreferrer" className="block mt-2 text-indigo-500 underline text-xs">
+                        <a href={msg.mediaUrl.startsWith('http') ? msg.mediaUrl : `${API_URL}${msg.mediaUrl}`} target="_blank" rel="noopener noreferrer" className="block mt-2 text-indigo-500 underline text-xs">
                             {t('chat.widget.download_file')}
                         </a>
                     )}

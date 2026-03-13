@@ -12,6 +12,7 @@
 | Variable | Valor Ejemplo | Descripción | Requerida |
 |----------|---------------|-------------|-----------|
 | `SUPERADMIN_PASSWORD` | `SuperSecureP@ssw0rd!2026` | Contraseña para superadmin (NO usar valor por defecto) | ✅ SÍ |
+| `SETUP_SECRET` | `secret-aleatorio-32-chars` | Protege /db-init y /users/public/*. Sin él, en prod están bloqueados. | ⚠️ Setup |
 | `LOG_LEVEL` | `log` | Nivel de logging: verbose, debug, log, warn, error, fatal | ✅ SÍ |
 | `NODE_ENV` | `production` | Entorno de ejecución | ✅ SÍ |
 

@@ -82,7 +82,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // Join Rooms based on Role
 
       // 1. Internal Team Room (Admins & Staff)
-      if (role === 'admin' || role === 'superadmin' || role === 'staff') {
+      if (role === 'admin' || role === 'superadmin' || role === 'employee') {
         client.join(`tenant-${tenantId}-INTERNAL`);
         client.join(`tenant-${tenantId}-SUPPORT`); // Admins receive support messages from Superadmin
       }
@@ -140,7 +140,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
     // Fix: If I am a customer, I am the target of this conversation
     let dbTargetUserId = payload.targetUserId;
-    if (scope === 'CUSTOMER' && !dbTargetUserId && user.role === 'user') {
+    if (scope === 'CUSTOMER' && !dbTargetUserId && user.role === 'client') {
       dbTargetUserId = user.sub;
     }
 
@@ -205,7 +205,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
       // AI Logic
       // Only trigger AI for CUSTOMER scope and when sender is a USER (Client)
-      if (scope !== 'CUSTOMER' || user.role !== 'user') {
+      if (scope !== 'CUSTOMER' || user.role !== 'client') {
         return;
       }
 
@@ -295,7 +295,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       !user ||
       (user.role !== 'admin' &&
         user.role !== 'superadmin' &&
-        user.role !== 'staff')
+        user.role !== 'employee')
     ) {
       return; // Only staff can toggle AI
     }

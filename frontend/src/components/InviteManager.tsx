@@ -127,7 +127,7 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
               <label className="block text-sm font-medium text-slate-300">
                 Tipo de Usuario a Invitar
               </label>
-              <div className="mt-2 grid grid-cols-3 gap-3">
+              <div className="mt-2 grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setSelectedRole("client")}
                   className={`flex flex-col items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all ${
@@ -149,17 +149,6 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
                 >
                   <span className="mb-1 text-lg">💼</span>
                   Empleado
-                </button>
-                <button
-                  onClick={() => setSelectedRole("admin")}
-                  className={`flex flex-col items-center justify-center rounded-lg border p-3 text-sm font-medium transition-all ${
-                    selectedRole === "admin"
-                      ? "border-indigo-500 bg-indigo-900/30 text-indigo-200"
-                      : "border-slate-700 bg-slate-900 text-slate-400 hover:bg-slate-800"
-                  }`}
-                >
-                  <span className="mb-1 text-lg">🏢</span>
-                  Dueño Empresa
                 </button>
               </div>
             </div>

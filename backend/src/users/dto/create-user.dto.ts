@@ -68,12 +68,20 @@ export class CreateUserDto {
 
   @ApiPropertyOptional({
     enum: Role,
-    description: 'User role',
-    default: 'user',
+    description: 'User role: admin, employee, client',
+    default: 'employee',
   })
   @IsOptional()
   @IsIn(Object.values(Role))
   role?: string;
+
+  @ApiPropertyOptional({
+    example: 'medico',
+    description: 'Clasificación del empleado: medico, recepcionista, auxiliar, etc. (solo si role=employee)',
+  })
+  @IsOptional()
+  @IsString()
+  employeeType?: string;
 
   @ApiPropertyOptional({
     example: 'restaurante-demo',

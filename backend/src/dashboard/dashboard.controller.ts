@@ -11,7 +11,7 @@ export class DashboardController {
   @Get('activity/:tenantId')
   async getActivity(@Param('tenantId') tenantId: string, @Req() req: Request) {
     const user = req.user!;
-    const userId = user.role === 'user' ? user.userId : undefined;
+    const userId = user.role === 'client' ? user.userId : undefined;
     return this.dashboardService.getRecentActivity(tenantId, userId);
   }
 

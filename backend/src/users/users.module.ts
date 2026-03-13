@@ -6,6 +6,7 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
 import { TenantsModule } from '../tenants/tenants.module';
+import { SetupGuard } from '../common/guards/setup.guard';
 
 @Module({
   imports: [
@@ -13,7 +14,7 @@ import { TenantsModule } from '../tenants/tenants.module';
     forwardRef(() => TenantsModule),
   ],
   controllers: [UsersController, UsersInitController],
-  providers: [UsersService],
+  providers: [UsersService, SetupGuard],
   exports: [UsersService],
 })
 export class UsersModule {}

@@ -30,7 +30,7 @@ export default function ConfiguracionPage() {
   const { t } = useTranslation();
   const user = useSyncExternalStore(subscribe, getClientSnapshot, getServerSnapshot);
 
-  const isAdmin = user?.role === 'admin' || user?.role === 'owner' || user?.role === 'superadmin';
+  const isAdmin = user?.role === 'admin' || false || user?.role === 'superadmin';
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">

@@ -59,7 +59,7 @@ export class OrdersController {
       );
     }
 
-    if (hasRole(user.role, [Role.User])) {
+    if (hasRole(user.role, [Role.Client])) {
       return this.ordersService.findAllByTenantAndUser(tenantId, user.userId);
     }
 
@@ -79,7 +79,7 @@ export class OrdersController {
       );
     }
 
-    const targetUserId = hasRole(user.role, [Role.User]) ? user.id : undefined;
+    const targetUserId = hasRole(user.role, [Role.Client]) ? user.id : undefined;
     return this.ordersService.getDashboardStats(tenantId, targetUserId);
   }
 
@@ -100,7 +100,7 @@ export class OrdersController {
     //    If user.role === 'admin' | 'superadmin', pass undefined (Admin viewing Global)
 
     let targetUserId = userId;
-    if (!targetUserId && hasRole(user.role, [Role.User])) {
+    if (!targetUserId && hasRole(user.role, [Role.Client])) {
       targetUserId = user.id;
     }
 
@@ -115,7 +115,7 @@ export class OrdersController {
   ) {
     const user = req.user!;
 
-    if (hasRole(user.role, [Role.User])) {
+    if (hasRole(user.role, [Role.Client])) {
       const order = await this.ordersService.findOne(id);
       if (!order) return null;
 
@@ -150,7 +150,7 @@ export class OrdersController {
   async remove(@Param('id') id: string, @Req() req: Request) {
     const user = req.user!;
 
-    if (hasRole(user.role, [Role.User])) {
+    if (hasRole(user.role, [Role.Client])) {
       const order = await this.ordersService.findOne(id);
       if (!order) return { deleted: false };
 

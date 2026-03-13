@@ -95,15 +95,35 @@ export class UsersService {
     });
     const plan = (tenant?.plan ?? 'starter') as PlanKey;
     const { maxUsersPerTenant } = getPlanLimits(plan);
-    // Solo contamos staff (excluimos client = clientes finales que reservan/compran)
+    // Contamos empleados + admins (excluimos clientes)
     const count = await this.usersRepository
       .createQueryBuilder('u')
       .where('u.tenantId = :tenantId', { tenantId })
-      .andWhere("u.role != 'client'")
+      .andWhere("u.role IN ('admin', 'employee')")
       .getCount();
     if (count >= maxUsersPerTenant) {
       throw new ForbiddenException(
         `Límite de usuarios alcanzado para tu plan (${maxUsersPerTenant}). Actualiza a Pro o Enterprise para añadir más.`,
+      );
+    }
+  }
+
+  async assertMaxAdminsPerTenant(tenantId: string, excludingUserId?: string): Promise<void> {
+    const tenant = await this.tenantsRepository.findOne({ where: { id: tenantId } });
+    const plan = (tenant?.plan ?? 'starter') as PlanKey;
+    const { maxAdminsPerTenant } = getPlanLimits(plan);
+
+    const qb = this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.tenantId = :tenantId', { tenantId })
+      .andWhere("u.role = 'admin'");
+    if (excludingUserId) {
+      qb.andWhere('u.id != :id', { id: excludingUserId });
+    }
+    const count = await qb.getCount();
+    if (count >= maxAdminsPerTenant) {
+      throw new ForbiddenException(
+        `Máximo ${maxAdminsPerTenant} administradores por empresa según tu plan.`,
       );
     }
   }
@@ -118,9 +138,14 @@ export class UsersService {
       address?: string;
       password: string;
       role?: string;
+      employeeType?: string;
     },
   ) {
     await this.assertPlanAllowsNewUser(tenantId);
+    const role = data.role ?? 'employee';
+    if (role === 'admin') {
+      await this.assertMaxAdminsPerTenant(tenantId);
+    }
     const existing = await this.findByEmail(data.email);
     if (existing) {
       throw new ConflictException('El correo ya está en uso');
@@ -135,7 +160,10 @@ export class UsersService {
       address: data.address,
       passwordHash,
       tenantId,
-      role: data.role ?? 'user',
+      role,
+      ...(role === 'employee' && data.employeeType
+        ? { employeeType: data.employeeType }
+        : {}),
       onboardingCompleted: false,
     });
     return this.usersRepository.save(user);
@@ -152,6 +180,7 @@ export class UsersService {
       address?: string;
       avatarUrl?: string;
       role?: string;
+      employeeType?: string;
       password?: string;
       isActive?: boolean;
       onboardingCompleted?: boolean;
@@ -163,6 +192,10 @@ export class UsersService {
 
     if (!user) {
       throw new Error('Usuario no encontrado');
+    }
+
+    if (data.role === 'admin' && user.role !== 'admin') {
+      await this.assertMaxAdminsPerTenant(tenantId, userId);
     }
 
     if (data.email && data.email !== user.email) {
@@ -179,6 +212,7 @@ export class UsersService {
     if (data.address) user.address = data.address;
     if (data.avatarUrl) user.avatarUrl = data.avatarUrl;
     if (data.role) user.role = data.role;
+    if (data.employeeType !== undefined) user.employeeType = data.employeeType;
     if (data.isActive !== undefined) user.isActive = data.isActive;
     if (data.onboardingCompleted !== undefined) user.onboardingCompleted = data.onboardingCompleted;
 
@@ -233,22 +267,20 @@ export class UsersService {
   }
 
   async seedSuperAdmin() {
-    const email = 'superadmin@saas.com';
+    const email = process.env.SUPERADMIN_EMAIL || 'superadmin@saas.com';
     const existing = await this.findByEmail(email);
 
-    // Get password from environment variable or use fixed temporary password
-    // IMPORTANT: Change this after first login!
-    const password = process.env.SUPERADMIN_PASSWORD || 'NexoraTemp2026!';
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // Log warning if using default password
-    if (!process.env.SUPERADMIN_PASSWORD) {
-      this.logger.warn(
-        'SUPERADMIN_PASSWORD environment variable not set. ' +
-          'Using fixed temporary password. Change it immediately after login!',
-      );
-      this.logger.log(`Superadmin password: ${password}`);
+    let password = process.env.SUPERADMIN_PASSWORD;
+    if (!password) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          'SUPERADMIN_PASSWORD must be set in production. Configure it in Railway/Vercel env vars.',
+        );
+      }
+      password = 'NexoraTemp2026!';
+      this.logger.warn('SUPERADMIN_PASSWORD not set. Using default for dev only.');
     }
+    const passwordHash = await bcrypt.hash(password, 10);
 
     if (existing) {
       // Always update password and ensure critical fields are set
@@ -257,7 +289,11 @@ export class UsersService {
       existing.tenantId = 'system';
       existing.isActive = true;
       await this.usersRepository.save(existing);
-      return { message: 'Superadmin updated (password reset)', user: existing };
+      return {
+        message: 'Superadmin updated (password reset)',
+        user: existing,
+        password,
+      };
     }
 
     const user = this.usersRepository.create({
@@ -271,7 +307,7 @@ export class UsersService {
     });
 
     await this.usersRepository.save(user);
-    return { message: 'Superadmin created successfully', user };
+    return { message: 'Superadmin created successfully', user, password };
   }
 
   async seedDoctors(tenantId: string) {
@@ -280,14 +316,12 @@ export class UsersService {
         firstName: 'Juan',
         lastName: 'Pérez',
         email: `juan.perez@${tenantId}.com`,
-        role: 'doctor',
         password: 'Doctor2026!',
       },
       {
         firstName: 'Ana',
         lastName: 'Gómez',
         email: `ana.gomez@${tenantId}.com`,
-        role: 'doctor',
         password: 'DoctorPassword123!',
       },
     ];
@@ -307,7 +341,8 @@ export class UsersService {
           lastName: doc.lastName,
           email: doc.email,
           passwordHash,
-          role: doc.role,
+          role: 'employee',
+          employeeType: 'medico',
           tenantId,
           isActive: true,
         });
@@ -390,7 +425,7 @@ export class UsersService {
         firstName: 'Luis',
         lastName: 'Lopez',
         email: 'luis.demo@miempresa.com',
-        role: 'user',
+        role: 'employee',
         tenantId: 'mi-empresa-saas',
       },
       {
@@ -404,7 +439,7 @@ export class UsersService {
         firstName: 'Pedro',
         lastName: 'Morales',
         email: 'pedro.demo@clinica.com',
-        role: 'user',
+        role: 'employee',
         tenantId: 'clinica-sonrisas',
       },
     ];

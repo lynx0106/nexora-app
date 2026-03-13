@@ -20,13 +20,13 @@ const ROLES = [
   { value: 'superadmin', label: 'Superadmin', description: 'Acceso total al sistema' },
   { value: 'admin', label: 'Admin', description: 'Gestión del negocio' },
   { value: 'employee', label: 'Employee', description: 'Empleado con acceso limitado' },
-  { value: 'user', label: 'Cliente', description: 'Usuario/cliente del negocio' },
+  { value: 'client', label: 'Cliente', description: 'Cliente del negocio' },
   { value: 'client', label: 'Cliente Externo', description: 'Cliente que compra productos' },
 ];
 
 export function GlobalUserRow({ user, onUpdate }: GlobalUserRowProps) {
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedRole, setSelectedRole] = useState(user.role || 'user');
+  const [selectedRole, setSelectedRole] = useState(user.role || 'client');
   const [isActive, setIsActive] = useState(user.isActive);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +52,7 @@ export function GlobalUserRow({ user, onUpdate }: GlobalUserRowProps) {
   };
 
   const handleCancel = () => {
-    setSelectedRole(user.role || 'user');
+    setSelectedRole(user.role || 'client');
     setIsActive(user.isActive);
     setIsEditing(false);
     setError(null);
@@ -125,7 +125,7 @@ export function GlobalUserRow({ user, onUpdate }: GlobalUserRowProps) {
           user.role === 'employee' ? 'bg-green-100 text-green-700' :
           'bg-gray-100 text-gray-700'
         }`}>
-          {(user.role || 'user').toUpperCase()}
+          {(user.role || 'client').toUpperCase()}
         </span>
       </td>
       <td className="py-2 pr-4">

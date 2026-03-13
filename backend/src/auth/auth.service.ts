@@ -79,9 +79,9 @@ export class AuthService {
     await this.usersService.assertPlanAllowsNewUser(tenantId);
 
     const passwordHash = await bcrypt.hash(data.password, 10);
-    // Roles privilegiados no se pueden auto-asignar via registro público
-    const SAFE_ROLES = ['user', 'client', 'employee', 'staff'];
-    const safeRole = role && SAFE_ROLES.includes(role) ? role : 'user';
+    // Solo client y employee se pueden registrar via invitación
+    const SAFE_ROLES = ['client', 'employee'];
+    const safeRole = role && SAFE_ROLES.includes(role) ? role : 'client';
 
     const user = await this.usersService.createUser({
       firstName: data.firstName,

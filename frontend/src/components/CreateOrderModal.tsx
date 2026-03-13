@@ -112,7 +112,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
     try {
       const payload = {
         ...newClient,
-        role: 'user',
+        role: 'client',
         tenantId,
         generateTempPassword: true,
       };

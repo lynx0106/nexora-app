@@ -26,13 +26,13 @@ const adminPermissions: Permission[] = [
   Permission.InvitationCreate,
 ];
 
-const staffPermissions: Permission[] = [
+const employeePermissions: Permission[] = [
   Permission.ProductRead,
   Permission.OrderRead,
   Permission.OrderManage,
 ];
 
-const userPermissions: Permission[] = [
+const clientPermissions: Permission[] = [
   Permission.ProductRead,
   Permission.OrderRead,
   Permission.OrderManage,
@@ -41,12 +41,8 @@ const userPermissions: Permission[] = [
 export const rolePermissions: Record<Role, Permission[]> = {
   [Role.Superadmin]: Object.values(Permission),
   [Role.Admin]: adminPermissions,
-  [Role.Staff]: staffPermissions,
-  [Role.Employee]: staffPermissions,
-  [Role.Support]: staffPermissions,
-  [Role.Doctor]: staffPermissions,
-  [Role.User]: userPermissions,
-  [Role.Client]: userPermissions,
+  [Role.Employee]: employeePermissions,
+  [Role.Client]: clientPermissions,
 };
 
 export function hasPermission(

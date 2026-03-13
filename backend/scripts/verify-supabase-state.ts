@@ -112,9 +112,9 @@ async function verifySupabaseState() {
     `);
     console.log(`   ✅ ${indexes.length} índices encontrados`);
 
-    // 5. Verificar storage buckets (requiere Supabase client)
+    // 5. Verificar storage buckets
     console.log('\n🪣 Verificando Storage Buckets...');
-    console.log('   💡 Verifica manualmente en Supabase Dashboard que exista el bucket "products"');
+    console.log('   💡 Bucket "uploads" (products, avatars, chat, tenants) creado vía MCP o SQL');
 
     // 6. Resumen de tablas
     console.log('\n📋 Resumen de tablas:');

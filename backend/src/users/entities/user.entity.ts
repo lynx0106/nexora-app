@@ -41,7 +41,10 @@ export class User {
   isActive: boolean;
 
   @Column({ nullable: true })
-  role: string; // 'superadmin', 'admin', 'user'
+  role: string; // 'superadmin', 'admin', 'employee', 'client'
+
+  @Column({ nullable: true, length: 80 })
+  employeeType: string | null; // Clasificación dentro de empleados: medico, recepcionista, auxiliar, etc.
 
   @Column({ nullable: true })
   tenantId: string; // ID del negocio al que pertenece

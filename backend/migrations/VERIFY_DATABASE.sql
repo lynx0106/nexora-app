@@ -94,9 +94,11 @@ LIMIT 5;
 -- =====================================================
 -- VERIFICACIÓN DE STORAGE BUCKETS
 -- =====================================================
--- Nota: Los buckets de storage se verifican en:
--- Supabase Dashboard > Storage
--- Debe existir el bucket "products" para imágenes
+-- Bucket único "uploads" con subcarpetas: products, avatars, chat, tenants
+-- Crear vía MCP user-supabase execute_sql o Dashboard:
+--   INSERT INTO storage.buckets (id, name, public, file_size_limit)
+--   VALUES ('uploads', 'uploads', true, 5242880)
+--   ON CONFLICT (id) DO NOTHING;
 
 -- =====================================================
 -- VERIFICACIÓN DE FUNCIONES

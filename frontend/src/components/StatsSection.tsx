@@ -97,7 +97,7 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
           title: t('stats.welcome_support_title'),
           description: t('stats.welcome_support_desc')
         };
-      case 'user':
+      case 'client':
         return {
           title: t('stats.welcome_user_title'),
           description: t('stats.welcome_user_desc')
@@ -234,29 +234,29 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
       {/* Stats Cards */}
       {stats && (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
-          {(role !== 'user' || isService) && (
+          {(role !== 'client' || isService) && (
             <>
               <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_appointments_today') : t('stats.appointments_today')}</h4>
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'client' ? t('stats.my_appointments_today') : t('stats.appointments_today')}</h4>
                  <p className="mt-2 text-3xl font-bold text-slate-100">{stats.todayApptCount}</p>
               </div>
               <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_pending_requests') : t('stats.pending_requests')}</h4>
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'client' ? t('stats.my_pending_requests') : t('stats.pending_requests')}</h4>
                  <p className="mt-2 text-3xl font-bold text-slate-100">{stats.pendingApptCount}</p>
               </div>
             </>
           )}
 
-          {(role !== 'user' || isRetail) && (
+          {(role !== 'client' || isRetail) && (
             <>
               <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_purchases_today') : t('stats.sales_today')}</h4>
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'client' ? t('stats.my_purchases_today') : t('stats.sales_today')}</h4>
                  <p className="mt-2 text-3xl font-bold text-slate-100">
                    {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(stats.todaySales)}
                  </p>
               </div>
               <div className="rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
-                 <h4 className="text-sm font-medium text-slate-400">{role === 'user' ? t('stats.my_orders_today') : t('stats.orders_today')}</h4>
+                 <h4 className="text-sm font-medium text-slate-400">{role === 'client' ? t('stats.my_orders_today') : t('stats.orders_today')}</h4>
                  <div className="mt-2 flex items-baseline gap-2">
                    <span className="text-3xl font-bold text-slate-100">{stats.todayOrdersCount}</span>
                    {stats.pendingOrdersCount > 0 && (

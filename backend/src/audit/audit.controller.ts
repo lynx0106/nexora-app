@@ -21,7 +21,7 @@ export class AuditController {
     @Query('limit') limit?: number,
   ) {
     const user = req.user!;
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       throw new ForbiddenException('Access denied to audit logs');
     }
     return this.auditService.findAll(user.tenantId ?? '', limit || 50);

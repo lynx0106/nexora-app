@@ -5,7 +5,8 @@ export interface User {
   email: string;
   phone?: string;
   avatarUrl?: string;
-  role: 'superadmin' | 'admin' | 'operative' | 'user';
+  role: 'superadmin' | 'admin' | 'employee' | 'client';
+  employeeType?: string;
   tenantId?: string;
   createdAt: string;
   updatedAt: string;

@@ -8,7 +8,8 @@ export type PlanKey = 'starter' | 'pro' | 'enterprise';
 export interface PlanConfig {
   key: PlanKey;
   maxTenants: number; // Negocios/empresas que puede gestionar la cuenta
-  maxUsersPerTenant: number; // Usuarios por negocio
+  maxUsersPerTenant: number; // Admins + empleados por negocio (excluye clientes)
+  maxAdminsPerTenant: number; // Máximo de admins por empresa
   priceUsd: number | null; // null = contacto/enterprise
   priceCop: number | null;
   features: {
@@ -28,9 +29,10 @@ export const PLANS: Record<PlanKey, PlanConfig> = {
   starter: {
     key: 'starter',
     maxTenants: 1,
-    maxUsersPerTenant: 3,
-    priceUsd: 29,
-    priceCop: 149000,
+    maxUsersPerTenant: 3, // 1 admin + 2 empleados
+    maxAdminsPerTenant: 1,
+    priceUsd: 67,
+    priceCop: 280000, // ~67 USD
     features: {
       products: true,
       orders: true,
@@ -46,9 +48,10 @@ export const PLANS: Record<PlanKey, PlanConfig> = {
   pro: {
     key: 'pro',
     maxTenants: 3,
-    maxUsersPerTenant: 15,
-    priceUsd: 79,
-    priceCop: 349000,
+    maxUsersPerTenant: 6, // 2 admins + 4 empleados
+    maxAdminsPerTenant: 2,
+    priceUsd: 97,
+    priceCop: 405000, // ~97 USD
     features: {
       products: true,
       orders: true,
@@ -65,6 +68,7 @@ export const PLANS: Record<PlanKey, PlanConfig> = {
     key: 'enterprise',
     maxTenants: 999,
     maxUsersPerTenant: 9999,
+    maxAdminsPerTenant: 10,
     priceUsd: null,
     priceCop: null,
     features: {
@@ -81,10 +85,15 @@ export const PLANS: Record<PlanKey, PlanConfig> = {
   },
 };
 
-export function getPlanLimits(plan: PlanKey): { maxTenants: number; maxUsersPerTenant: number } {
+export function getPlanLimits(plan: PlanKey): {
+  maxTenants: number;
+  maxUsersPerTenant: number;
+  maxAdminsPerTenant: number;
+} {
   const config = PLANS[plan] ?? PLANS.starter;
   return {
     maxTenants: config.maxTenants,
     maxUsersPerTenant: config.maxUsersPerTenant,
+    maxAdminsPerTenant: config.maxAdminsPerTenant ?? 3,
   };
 }

@@ -28,7 +28,7 @@ export class ChatController {
   ) {
     const user = req.user!;
     // Only admins/staff see conversations list
-    if (user.role === 'user') return [];
+    if (user.role === 'client') return [];
 
     let effectiveTenantId = user.tenantId;
     if (user.role === 'superadmin' && tenantId) {
@@ -52,7 +52,7 @@ export class ChatController {
 
   /**
    * Get all users in the tenant for internal chat
-   * This allows admin/staff to see all team members
+   * This allows admin/employee to see all team members
    */
   @Get('users')
   async getTenantUsers(
@@ -87,7 +87,7 @@ export class ChatController {
     const user = req.user!;
 
     // Security Check:
-    // If scope is INTERNAL, user must be admin or superadmin (or staff)
+    // If scope is INTERNAL, user must be admin or superadmin (or employee)
     // If scope is SUPPORT, user can be admin (talk to superadmin) or superadmin (talk to tenant)
     // If scope is CUSTOMER:
     //    - If user is 'user' (client), targetUserId must be themselves (or ignored and forced to themselves)
@@ -95,7 +95,7 @@ export class ChatController {
 
     let effectiveTargetUserId = targetUserId;
 
-    if (scope === 'CUSTOMER' && user.role === 'user') {
+    if (scope === 'CUSTOMER' && user.role === 'client') {
       effectiveTargetUserId = user.userId;
     }
 
@@ -165,7 +165,7 @@ export class ChatController {
     const count = await this.chatService.getUnreadCount(
       effectiveTenantId,
       user.userId,
-      user.role ?? 'user',
+      user.role ?? 'client',
     );
     return { count };
   }

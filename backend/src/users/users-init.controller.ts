@@ -1,12 +1,14 @@
-import { Controller, Post, Get, Logger } from '@nestjs/common';
+import { Controller, Post, Get, Logger, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { DataSource } from 'typeorm';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcrypt';
+import { SetupGuard } from '../common/guards/setup.guard';
 
 @ApiTags('Database Initialization')
 @Controller('db-init')
+@UseGuards(SetupGuard)
 export class UsersInitController {
   private readonly logger = new Logger(UsersInitController.name);
 
@@ -100,8 +102,15 @@ export class UsersInitController {
   @Post('create-superadmin')
   @ApiOperation({ summary: 'Create or reset superadmin user' })
   async createSuperadmin() {
-    const email = 'superadmin@saas.com';
-    const password = 'NexoraTemp2026!';
+    const email = process.env.SUPERADMIN_EMAIL || 'superadmin@saas.com';
+    const password =
+      process.env.SUPERADMIN_PASSWORD ||
+      (process.env.NODE_ENV === 'production' ? '' : 'NexoraTemp2026!');
+    if (!password) {
+      throw new Error(
+        'SUPERADMIN_PASSWORD must be set in production. Configure in env vars.',
+      );
+    }
     const passwordHash = await bcrypt.hash(password, 10);
 
     try {
@@ -148,8 +157,16 @@ export class UsersInitController {
   @Post('create-demo-users')
   @ApiOperation({ summary: 'Create demo users' })
   async createDemoUsers() {
-    const demoPassword = 'Demo2026!';
-    const passwordHash = await bcrypt.hash(demoPassword, 10);
+    const demoPassword =
+      process.env.DEMO_USERS_PASSWORD ||
+      (process.env.NODE_ENV === 'production' ? '' : 'Demo2026!');
+    if (!demoPassword && process.env.NODE_ENV === 'production') {
+      throw new Error(
+        'DEMO_USERS_PASSWORD must be set in production for demo users.',
+      );
+    }
+    const pwd = demoPassword || 'Demo2026!';
+    const passwordHash = await bcrypt.hash(pwd, 10);
 
     const demoUsers = [
       {
@@ -214,13 +231,13 @@ export class UsersInitController {
         results.push({
           email: user.email,
           action: 'ERROR',
-          error: error.message,
+          error: (error as Error).message,
         });
       }
     }
 
     return {
-      password: demoPassword,
+      password: pwd,
       users: results,
     };
   }

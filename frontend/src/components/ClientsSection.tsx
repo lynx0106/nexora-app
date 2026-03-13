@@ -126,7 +126,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
       }
       
       const data = await fetchAPIWithAuth(url);
-      // Filter out admins and superadmins (clients are regular users: 'user', 'client', or no admin role)
+      // Filter out admins and superadmins (clients are regular users: 'client' or no admin role)
       const filtered = (data || []).filter((u: User) => 
         u.role !== 'admin' && u.role !== 'superadmin'
       );

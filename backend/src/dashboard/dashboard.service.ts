@@ -212,9 +212,9 @@ export class DashboardService {
       (a) => a.status === 'cancelled',
     ).length;
 
-    // Doctors count
+    // Profesionales / empleados del sector salud
     const doctors = await this.usersRepository.count({
-      where: { tenantId, role: 'doctor' },
+      where: { tenantId, role: 'employee' },
     });
 
     return {
@@ -277,9 +277,9 @@ export class DashboardService {
       (a) => a.status === 'cancelled',
     ).length;
 
-    // Staff count
+    // Empleados count
     const staff = await this.usersRepository.count({
-      where: { tenantId, role: 'staff' },
+      where: { tenantId, role: 'employee' },
     });
 
     return {
@@ -295,14 +295,14 @@ export class DashboardService {
   }
 
   private async getGymMetrics(tenantId: string): Promise<Record<string, any>> {
-    // Active members
+    // Active members (clientes del gimnasio)
     const activeMembers = await this.usersRepository.count({
-      where: { tenantId, role: 'user', isActive: true },
+      where: { tenantId, role: 'client', isActive: true },
     });
 
     // Total members
     const totalMembers = await this.usersRepository.count({
-      where: { tenantId, role: 'user' },
+      where: { tenantId, role: 'client' },
     });
 
     // Today's check-ins (simulated with appointments)
@@ -343,9 +343,9 @@ export class DashboardService {
       .sort((a, b) => b.count - a.count)
       .slice(0, 5);
 
-    // Stylists count
+    // Estilistas / empleados
     const stylists = await this.usersRepository.count({
-      where: { tenantId, role: 'staff' },
+      where: { tenantId, role: 'employee' },
     });
 
     return {

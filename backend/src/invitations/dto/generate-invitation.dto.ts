@@ -7,16 +7,16 @@ import {
   MaxLength,
 } from 'class-validator';
 
-export type InvitationRole = 'client' | 'employee' | 'staff';
+export type InvitationRole = 'client' | 'employee';
 
 export class GenerateInvitationDto {
   @ApiProperty({
     description: 'Rol que tendrá el usuario invitado',
-    enum: ['client', 'employee', 'staff'],
+    enum: ['client', 'employee'],
     default: 'client',
     example: 'client',
   })
-  @IsEnum(['client', 'employee', 'staff'])
+  @IsEnum(['client', 'employee'])
   @IsOptional()
   role?: InvitationRole = 'client';
 

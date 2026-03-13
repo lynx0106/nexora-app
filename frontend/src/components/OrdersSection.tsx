@@ -273,7 +273,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-100">{t('orders.title')}</h2>
         <div className="flex items-center gap-4">
-          {role !== 'user' && (
+          {role !== 'client' && (
           <button
             onClick={() => setIsCreateModalOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
@@ -442,7 +442,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                                         >
                                             {t('orders.view_detail')}
                                         </button>
-                                        {role !== 'user' && (
+                                        {role !== 'client' && (
                                         <>
                                         <select 
                                             value={order.status} 

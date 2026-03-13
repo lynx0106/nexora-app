@@ -203,6 +203,20 @@
     "reset_password_mismatch": "Passwords do not match."
   },
   "landing": {
+    "sidebar": {
+      "menu_title": "Main menu",
+      "tagline": "The intelligent core of your business",
+      "inicio": "Home",
+      "features": "Features",
+      "plans": "Plans",
+      "comparison": "Comparison",
+      "app_mobile": "Mobile app",
+      "diagram": "How it works",
+      "social_proof": "Testimonials",
+      "faq": "FAQ",
+      "auth": "Log in / Sign up",
+      "back": "Back"
+    },
     "nav": {
       "features": "Features",
       "plans": "Plans",
@@ -800,7 +814,13 @@
     "role_professional": "Professional",
     "role_cashier": "Cashier",
     "role_support": "Support",
-    "role_admin": "Admin"
+    "role_admin": "Admin",
+    "role_option_admin": "Administrator",
+    "role_option_doctor_restaurant": "Waiter / Staff",
+    "role_option_doctor_service": "Professional / Employee",
+    "role_option_support_service": "Receptionist",
+    "form_employee_type": "Employee type",
+    "employee_type_select": "Select type..."
   },
   "settings": {
     "profile_title": "Your Profile in NEXORA",

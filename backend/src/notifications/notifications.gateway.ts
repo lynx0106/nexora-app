@@ -67,7 +67,7 @@ export class NotificationsGateway
       client.join(`user-${userId}`);
 
       // Tenant admin channel (for orders, appointments, etc.)
-      if (role === 'admin' || role === 'superadmin' || role === 'staff') {
+      if (role === 'admin' || role === 'superadmin' || role === 'employee') {
         client.join(`tenant-${tenantId}-admins`);
       }
     } catch (error) {

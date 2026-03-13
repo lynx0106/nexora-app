@@ -43,7 +43,7 @@ export class ReportsController {
       );
     }
 
-    const isUser = hasRole(user.role, [Role.User]);
+    const isUser = hasRole(user.role, [Role.Client]);
     const userId = isUser ? user.userId : undefined;
 
     const report = await this.reportsService.getOrdersReport(
@@ -81,7 +81,7 @@ export class ReportsController {
       );
     }
 
-    const isUser = hasRole(user.role, [Role.User]);
+    const isUser = hasRole(user.role, [Role.Client]);
     const userId = isUser ? user.userId : undefined;
 
     const report = await this.reportsService.getAppointmentsReport(

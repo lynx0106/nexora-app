@@ -11,7 +11,7 @@ import { User } from '../../users/entities/user.entity';
 import { Tenant } from '../../tenants/entities/tenant.entity';
 
 export type InvitationStatus = 'pending' | 'used' | 'expired';
-export type InvitationRole = 'client' | 'employee' | 'staff';
+export type InvitationRole = 'client' | 'employee';
 
 @Entity('invitation_codes')
 export class InvitationCode {
@@ -25,11 +25,7 @@ export class InvitationCode {
   @JoinColumn({ name: 'tenantId' })
   tenant: Tenant;
 
-  @Column({
-    type: 'enum',
-    enum: ['client', 'employee', 'staff'],
-    default: 'client',
-  })
+  @Column({ type: 'varchar', length: 20, default: 'client' })
   role: InvitationRole;
 
   @Column()

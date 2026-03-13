@@ -19,9 +19,10 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ### 📋 Siguiente
 - [x] Commit + push — ✅
-- [x] EAS build iniciado (ID: a7272505-9a2e-48a6-b9af-c05f53df3942)
-- [x] API /api/upload-apk creada (sube a Vercel Blob)
-- [ ] Cuando build termine: llamar API o usar script; configurar NEXT_PUBLIC_APP_APK_URL
+- [x] EAS build (ID: a7272505) — ✅ finished
+- [x] APK descargado y subido a frontend/public/ — ✅
+- [x] NEXT_PUBLIC_APP_APK_URL configurada en Vercel — ✅
+- [x] QR y descarga funcionando en landing — ✅
 
 ---
 

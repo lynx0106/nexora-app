@@ -299,8 +299,8 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     type="text"
                     value={profileFirstName}
                     onChange={(e) => setProfileFirstName(e.target.value)}
-                    disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
+                    disabled={role === 'client'}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'client' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -309,8 +309,8 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     type="text"
                     value={profileLastName}
                     onChange={(e) => setProfileLastName(e.target.value)}
-                    disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
+                    disabled={role === 'client'}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'client' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -319,8 +319,8 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     type="email"
                     value={profileEmail}
                     onChange={(e) => setProfileEmail(e.target.value)}
-                    disabled={role === 'user'}
-                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'user' ? 'bg-slate-700 text-zinc-500' : ''}`}
+                    disabled={role === 'client'}
+                    className={`h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 ${role === 'client' ? 'bg-slate-700 text-zinc-500' : ''}`}
                     />
                 </div>
                 <div className="flex flex-col gap-1">

@@ -141,9 +141,9 @@ export default function DashboardPage() {
   const isRetail = !tenantSector || ['retail', 'comercio', 'restaurante', 'belleza', 'otros'].includes(tenantSector);
   const isService = !tenantSector || ['salud', 'belleza', 'legal', 'educacion', 'servicios', 'restaurante', 'otros'].includes(tenantSector);
 
-  // Redirect 'user' role from 'resumen' to their first available section (deferred to avoid sync setState in effect)
+  // Redirect 'client' role from 'resumen' to their first available section (deferred to avoid sync setState in effect)
   useEffect(() => {
-    if (role === 'user' && activeSection === 'resumen') {
+    if (role === 'client' && activeSection === 'resumen') {
       const section = isService ? 'agenda' : isRetail ? 'pedidos' : 'ajustes';
       queueMicrotask(() => setActiveSection(section));
     }
@@ -264,9 +264,9 @@ export default function DashboardPage() {
           </button>
         )}
         
-        {(role === "admin" || role === "superadmin" || (role === "user" && isService)) && (
+        {(role === "admin" || role === "superadmin" || (role === "employee" && isService)) && (
           <button onClick={() => handleNavClick(role === 'superadmin' ? 'empresas' : 'usuarios')} className={getItemClass(role === 'superadmin' ? 'empresas' : 'usuarios')}>
-            <IconWrapper icon={Building2}><span>{role === 'superadmin' ? t('sidebar.companies') : role === 'user' ? t('sidebar.professionals') : t('sidebar.team')}</span></IconWrapper>
+            <IconWrapper icon={Building2}><span>{role === 'superadmin' ? t('sidebar.companies') : role === 'employee' ? t('sidebar.professionals') : t('sidebar.team')}</span></IconWrapper>
           </button>
         )}
 
@@ -276,27 +276,27 @@ export default function DashboardPage() {
           </button>
         )}
 
-        {(role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
+        {(role === "admin" || role === "superadmin" || (role === "client" && isRetail)) && (
           <button onClick={() => handleNavClick("catalogo")} className={getItemClass("catalogo")}>
-            <IconWrapper icon={Package}><span>{role === 'user' ? t('sidebar.products') : t('sidebar.catalog')}</span></IconWrapper>
+            <IconWrapper icon={Package}><span>{role === 'client' ? t('sidebar.products') : t('sidebar.catalog')}</span></IconWrapper>
           </button>
         )}
 
-        {(role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
+        {(role === "admin" || role === "superadmin" || (role === "client" && isRetail)) && (
           <button onClick={() => handleNavClick("pedidos")} className={getItemClass("pedidos")}>
-            <IconWrapper icon={ShoppingBag}><span>{role === 'user' ? t('sidebar.my_orders') : t('sidebar.orders')}</span></IconWrapper>
+            <IconWrapper icon={ShoppingBag}><span>{role === 'client' ? t('sidebar.my_orders') : t('sidebar.orders')}</span></IconWrapper>
           </button>
         )}
 
         {(isService || role === 'superadmin') && (
           <button onClick={() => handleNavClick("agenda")} className={getItemClass("agenda")}>
-            <IconWrapper icon={Calendar}><span>{role === 'user' ? t('sidebar.my_appointments') : t('sidebar.agenda')}</span></IconWrapper>
+            <IconWrapper icon={Calendar}><span>{role === 'client' ? t('sidebar.my_appointments') : t('sidebar.agenda')}</span></IconWrapper>
           </button>
         )}
 
         {((tenantSector === 'restaurante') || role === 'superadmin') && (
           <button onClick={() => handleNavClick("reservas")} className={getItemClass("reservas")}>
-            <IconWrapper icon={CalendarDays}><span>{role === 'user' ? t('sidebar.my_reservations') : t('sidebar.reservations')}</span></IconWrapper>
+            <IconWrapper icon={CalendarDays}><span>{role === 'client' ? t('sidebar.my_reservations') : t('sidebar.reservations')}</span></IconWrapper>
           </button>
         )}
 
@@ -495,7 +495,7 @@ export default function DashboardPage() {
               />
             )}
 
-        {activeSection === "usuarios" && (role === "admin" || role === "superadmin" || (role === "user" && isService)) && (
+        {activeSection === "usuarios" && (role === "admin" || role === "superadmin" || (role === "employee" && isService)) && (
           <TeamSection
             role={role}
             tenantId={tenantId}
@@ -516,7 +516,7 @@ export default function DashboardPage() {
           />
         )}
 
-        {activeSection === "catalogo" && (role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
+        {activeSection === "catalogo" && (role === "admin" || role === "superadmin" || (role === "client" && isRetail)) && (
           <ProductsSection
             role={role}
             tenantId={tenantId}
@@ -556,7 +556,7 @@ export default function DashboardPage() {
               />
             )}
 
-            {activeSection === "pedidos" && (role === "admin" || role === "superadmin" || (role === "user" && isRetail)) && (
+            {activeSection === "pedidos" && (role === "admin" || role === "superadmin" || (role === "client" && isRetail)) && (
               <OrdersSection
                 role={role}
                 tenantId={tenantId}

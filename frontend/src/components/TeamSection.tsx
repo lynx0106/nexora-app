@@ -9,6 +9,7 @@ interface User {
   lastName: string;
   email: string;
   role?: string;
+  employeeType?: string;
   isActive: boolean;
   phone?: string;
   address?: string;
@@ -41,7 +42,8 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
   const [newUserLastName, setNewUserLastName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserPassword, setNewUserPassword] = useState("");
-  const [newUserRole, setNewUserRole] = useState<"admin" | "doctor" | "support" | "user">("admin");
+  const [newUserRole, setNewUserRole] = useState<"admin" | "employee">("admin");
+  const [newUserEmployeeType, setNewUserEmployeeType] = useState("");
   const [newUserPhone, setNewUserPhone] = useState("");
   const [newUserAddress, setNewUserAddress] = useState("");
   
@@ -56,6 +58,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
     setNewUserEmail("");
     setNewUserPassword("");
     setNewUserRole("admin");
+    setNewUserEmployeeType("");
     setNewUserPhone("");
     setNewUserAddress("");
     setCreateUserError(null);
@@ -98,6 +101,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
         lastName: newUserLastName,
         email: newUserEmail,
         role: newUserRole,
+        employeeType: newUserRole === 'employee' && newUserEmployeeType ? newUserEmployeeType : undefined,
         phone: newUserPhone,
         address: newUserAddress,
       };
@@ -130,7 +134,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
       setNewUserLastName("");
       setNewUserEmail("");
       setNewUserPassword("");
-      setNewUserRole("user");
+      setNewUserRole("employee");
       setNewUserPhone("");
       setNewUserAddress("");
       setShowCreateForm(false);
@@ -160,10 +164,11 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
     setNewUserLastName(user.lastName);
     setNewUserEmail(user.email);
     // Default to admin if role is unknown or user
-    const role = (user.role === 'admin' || user.role === 'doctor' || user.role === 'support') 
+    const role = (user.role === 'admin' || user.role === 'employee') 
       ? user.role 
       : 'admin';
-    setNewUserRole(role as "admin" | "doctor" | "support");
+    setNewUserRole(user.role === 'admin' ? 'admin' : 'employee');
+    setNewUserEmployeeType((user as User & { employeeType?: string }).employeeType || "");
     setNewUserAddress(user.address || "");
     setNewUserPhone(user.phone || "");
     setNewUserPassword("");
@@ -173,7 +178,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
     setCreateUserSuccess(null);
   }
 
-  const teamMembers = users.filter(u => u.role !== 'user');
+  const teamMembers = users.filter(u => u.role !== 'client');
 
   return (
     <div className="mb-8 rounded-lg bg-slate-900/70 border border-slate-800 p-6 shadow-sm">
@@ -295,14 +300,28 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
               <label className="text-sm font-semibold text-slate-100">{t('team.form_role')}</label>
               <select
                 value={newUserRole}
-                onChange={(e) => setNewUserRole(e.target.value as "admin" | "doctor" | "support")}
+                onChange={(e) => setNewUserRole(e.target.value as "admin" | "employee")}
                 className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
               >
                 <option value="admin">{t('team.role_option_admin')}</option>
-                <option value="doctor">{isRestaurant ? t('team.role_option_doctor_restaurant') : t('team.role_option_doctor_service')}</option>
-                <option value="support">{isRestaurant ? t('team.role_option_support_restaurant') : t('team.role_option_support_service')}</option>
+                <option value="employee">{isRestaurant ? t('team.role_option_doctor_restaurant') : t('team.role_option_doctor_service')}</option>
               </select>
             </div>
+            {newUserRole === 'employee' && (
+            <div className="flex flex-col gap-1">
+              <label className="text-sm font-semibold text-slate-100">{t('team.form_employee_type')}</label>
+              <select
+                value={newUserEmployeeType}
+                onChange={(e) => setNewUserEmployeeType(e.target.value)}
+                className="h-9 rounded-md border border-slate-600 px-2 text-sm text-slate-100 outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500"
+              >
+                <option value="">{t('team.employee_type_select')}</option>
+                <option value="medico">{isRestaurant ? t('team.role_option_doctor_restaurant') : t('team.role_option_doctor_service')}</option>
+                <option value="recepcionista">{t('team.role_option_support_service')}</option>
+                <option value="auxiliar">Auxiliar</option>
+              </select>
+            </div>
+            )}
             <div className="md:col-span-2 flex items-center justify-end gap-3">
               <button
                 type="button"
@@ -312,6 +331,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
                   setNewUserEmail("");
                   setNewUserPassword("");
                   setNewUserRole("admin");
+                  setNewUserEmployeeType("");
                   setNewUserPhone("");
                   setNewUserAddress("");
                   setEditingUserId(null);
@@ -355,7 +375,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
                 <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_email')}</th>
                 <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_phone')}</th>
                 <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_permissions')}</th>
-                {role !== 'user' && (
+                {role !== 'client' && (
                   <>
                 <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_status')}</th>
                 <th className="px-3 py-2 text-left font-medium text-slate-300">{t('team.table_actions')}</th>
@@ -365,13 +385,13 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
             </thead>
             <tbody className="divide-y divide-slate-700">
               {loading && (
-                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.loading')}</td></tr>
+                <tr><td colSpan={role === 'client' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.loading')}</td></tr>
               )}
               {error && !loading && (
-                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-red-600">{error}</td></tr>
+                <tr><td colSpan={role === 'client' ? 4 : 6} className="px-3 py-3 text-center text-red-600">{error}</td></tr>
               )}
               {!loading && !error && teamMembers.length === 0 && (
-                <tr><td colSpan={role === 'user' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.no_members')}</td></tr>
+                <tr><td colSpan={role === 'client' ? 4 : 6} className="px-3 py-3 text-center text-slate-300">{t('team.no_members')}</td></tr>
               )}
               {!loading && !error && teamMembers.map((user) => (
                 <tr key={user.id} className="hover:bg-slate-800/50">
@@ -379,11 +399,9 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
                   <td className="px-3 py-2 text-slate-300">{user.email}</td>
                   <td className="px-3 py-2 text-slate-300">{user.phone || '-'}</td>
                   <td className="px-3 py-2 text-slate-300">
-                    {user.role === 'doctor' 
-                      ? (isRestaurant ? t('team.role_staff') : t('team.role_professional')) 
-                      : user.role === 'support' 
-                        ? (isRestaurant ? t('team.role_cashier') : t('team.role_support')) 
-                        : t('team.role_admin')}
+                    {user.role === 'admin' 
+                      ? t('team.role_admin') 
+                      : (user.employeeType || (isRestaurant ? t('team.role_staff') : t('team.role_professional')))}
                   </td>
                   {(role === 'admin' || role === 'superadmin') && (
                     <>

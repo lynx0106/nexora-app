@@ -39,6 +39,9 @@ docker-compose.yml
 *.ipa
 *.app
 
+# Railway CLI link (local, no commitear)
+.railway/
+
 # Credentials and sensitive files
 CREDENCIALES*.md
 *credenciales*.md

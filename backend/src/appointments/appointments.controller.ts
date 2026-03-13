@@ -36,7 +36,7 @@ export class AppointmentsController {
     }
 
     // Security: If user is normal user, force clientId to be their own ID
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       createAppointmentDto.clientId = user.userId;
     }
 
@@ -51,7 +51,7 @@ export class AppointmentsController {
         'No tienes permiso para ver estadísticas de otro tenant',
       );
     }
-    const targetUserId = user.role === 'user' ? user.userId : undefined;
+    const targetUserId = user.role === 'client' ? user.userId : undefined;
     return this.appointmentsService.getDashboardStats(tenantId, targetUserId);
   }
 
@@ -80,7 +80,7 @@ export class AppointmentsController {
     }
 
     // If user is not admin/superadmin, force filtering by their own ID
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       return this.appointmentsService.findAllByTenantAndUser(
         tenantId,
         user.userId,
@@ -107,7 +107,7 @@ export class AppointmentsController {
   ) {
     const user = req.user!;
     // Only admin/superadmin/staff can update status. Users cannot.
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       throw new ForbiddenException(
         'No tienes permiso para actualizar el estado de la cita',
       );
@@ -124,7 +124,7 @@ export class AppointmentsController {
     const user = req.user!;
 
     // Check ownership if user
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       const appointment = await this.appointmentsService.findOne(id);
       if (!appointment) return null;
 
@@ -148,7 +148,7 @@ export class AppointmentsController {
   async remove(@Param('id') id: string, @Req() req: Request) {
     const user = req.user!;
 
-    if (user.role === 'user') {
+    if (user.role === 'client') {
       const appointment = await this.appointmentsService.findOne(id);
       if (!appointment) return { deleted: false };
 

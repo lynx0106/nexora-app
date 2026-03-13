@@ -7,10 +7,10 @@ const plans = [
   {
     key: "starter",
     popular: false,
-    price: "$29",
+    price: "$67",
     period: "/mes",
     tenants: "1",
-    users: "3",
+    users: "1 admin + 2 empleados",
     features: [
       "products",
       "orders",
@@ -21,10 +21,10 @@ const plans = [
   {
     key: "pro",
     popular: true,
-    price: "$79",
+    price: "$97",
     period: "/mes",
     tenants: "3",
-    users: "15",
+    users: "2 admins + 4 empleados",
     features: [
       "products",
       "orders",

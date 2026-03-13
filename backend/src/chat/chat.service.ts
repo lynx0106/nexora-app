@@ -106,10 +106,10 @@ export class ChatService {
       .andWhere('message.isRead = :isRead', { isRead: false })
       .andWhere('message.senderId != :userId', { userId });
 
-    if (role === 'user') {
+    if (role === 'client') {
       query.andWhere("message.scope = 'CUSTOMER'");
       query.andWhere('message.targetUserId = :userId', { userId });
-    } else if (role === 'staff') {
+    } else if (role === 'employee') {
       query.andWhere("message.scope = 'INTERNAL'");
     }
 

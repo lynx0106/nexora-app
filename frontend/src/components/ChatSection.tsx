@@ -418,7 +418,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                             <h4 className="font-medium text-sm text-slate-100">{user.firstName} {user.lastName}</h4>
                             <p className="text-xs text-slate-400">{user.email}</p>
                             <span className="inline-block mt-1 text-[10px] bg-slate-700 text-slate-300 px-1.5 py-0.5 rounded">
-                                {(user.role || 'user').toUpperCase()}
+                                {(user.role || 'client').toUpperCase()}
                             </span>
                         </div>
                     ))}
@@ -538,7 +538,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                     {msg.type === 'image' && msg.mediaUrl && (
                         <div className="relative mt-2 w-full max-w-sm aspect-video">
                           <Image 
-                            src={msg.mediaUrl} 
+                            src={msg.mediaUrl.startsWith('http') ? msg.mediaUrl : `${API_URL}${msg.mediaUrl}`}
                             alt={t('chat.image_attachment') || 'Imagen adjunta'} 
                             fill
                             className="object-cover rounded-md"
@@ -550,7 +550,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
                     {/* Display file attachment */}
                     {msg.type === 'file' && msg.mediaUrl && (
                         <a 
-                            href={msg.mediaUrl} 
+                            href={msg.mediaUrl.startsWith('http') ? msg.mediaUrl : `${API_URL}${msg.mediaUrl}`}
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="flex items-center gap-2 mt-2 text-teal-400 hover:text-teal-300 underline text-xs"

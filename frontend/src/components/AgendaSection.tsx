@@ -131,7 +131,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
   }, [selectedTenantId, role]);
 
   useEffect(() => {
-    if (role === 'user' && currentUserId) {
+    if (role === 'client' && currentUserId) {
       setNewAppointment(prev => ({ ...prev, clientId: currentUserId }));
     }
   }, [role, currentUserId]);
@@ -157,7 +157,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
              });
          }
       } else {
-         appts = await appointmentsService.findAllByTenant(tid, role === 'user' ? currentUserId : undefined);
+         appts = await appointmentsService.findAllByTenant(tid, role === 'client' ? currentUserId : undefined);
       }
       setAppointments(appts);
 
@@ -168,7 +168,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
 
         // Only fetch resources if a tenant is selected
         if (tid) {
-            if (role === 'user') {
+            if (role === 'client') {
                 // Usuarios solo cargan productos (servicios), no lista de usuarios
                 productsData = await fetchAPIWithAuth(`/products/tenant/${tid}`);
             } else {
@@ -182,7 +182,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
         }
 
         const loadedDoctors = usersData.filter((u) => (u.role || '').toLowerCase() === 'doctor');
-        const loadedClients = usersData.filter((u) => (u.role || '').toLowerCase() === 'user');
+        const loadedClients = usersData.filter((u) => (u.role || '').toLowerCase() === 'client');
         
         setDoctors(loadedDoctors);
         setClients(loadedClients);
@@ -209,7 +209,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
         body: JSON.stringify({
            ...newClient,
            tenantId: selectedTenantId,
-           role: 'user',
+           role: 'client',
            generateTempPassword: true,
         })
       }) as { id: string; firstName: string; lastName: string; email: string; temporaryPassword?: string };
@@ -375,7 +375,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       {showCreateForm && (
         <form onSubmit={handleSubmit} className="rounded-lg border border-slate-700 bg-slate-800 p-6 shadow-sm space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {role !== 'user' && (
+            {role !== 'client' && (
             <div>
               <label className="block text-sm font-medium text-slate-300">{t('agenda.client')}</label>
               <div className="flex gap-2">
@@ -571,7 +571,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-400">
                       <div className="flex items-center gap-2">
-                        {role !== 'user' ? (
+                        {role !== 'client' ? (
                         <>
                         <button
                           type="button"

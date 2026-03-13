@@ -133,7 +133,7 @@ export class PushService {
     const admins = await this.usersRepository.find({
       where: [
         { tenantId, role: 'admin' },
-        { tenantId, role: 'owner' },
+        { tenantId, role: 'admin' },
       ],
     });
 
