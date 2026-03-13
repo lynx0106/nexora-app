@@ -43,7 +43,7 @@ export class User {
   @Column({ nullable: true })
   role: string; // 'superadmin', 'admin', 'employee', 'client'
 
-  @Column({ nullable: true, length: 80 })
+  @Column({ type: 'varchar', length: 80, nullable: true })
   employeeType: string | null; // Clasificación dentro de empleados: medico, recepcionista, auxiliar, etc.
 
   @Column({ nullable: true })
