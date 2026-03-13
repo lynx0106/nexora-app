@@ -18,7 +18,10 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - [x] Expo doctor 17/17 checks passed
 
 ### 📋 Siguiente
-- [ ] Deploy móvil + generar APK (ver sesión M para pasos)
+- [x] Commit + push — ✅
+- [x] EAS build iniciado (ID: a7272505-9a2e-48a6-b9af-c05f53df3942)
+- [x] API /api/upload-apk creada (sube a Vercel Blob)
+- [ ] Cuando build termine: llamar API o usar script; configurar NEXT_PUBLIC_APP_APK_URL
 
 ---
 
