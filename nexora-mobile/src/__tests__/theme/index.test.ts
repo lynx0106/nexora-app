@@ -3,7 +3,7 @@ import { colors, spacing, typography, borderRadius, shadows } from '../../theme'
 describe('Theme', () => {
   describe('colors', () => {
     it('should have primary color defined', () => {
-      expect(colors.primary).toBe('#6366f1');
+      expect(colors.primary).toBe('#14b8a6');
     });
 
     it('should have secondary color defined', () => {

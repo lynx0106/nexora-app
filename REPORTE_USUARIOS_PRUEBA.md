@@ -218,8 +218,8 @@
 - **URL:** https://nexora-app.online
 
 ### Backend API
-- **URL:** https://nexora-app-production-3199.up.railway.app
-- **Docs:** https://nexora-app-production-3199.up.railway.app/api/docs
+- **URL:** https://nexora-app-production-3104.up.railway.app
+- **Docs:** https://nexora-app-production-3104.up.railway.app/api/docs
 
 ### Flujos de Prueba
 

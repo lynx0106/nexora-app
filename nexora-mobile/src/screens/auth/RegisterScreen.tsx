@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
@@ -33,32 +33,32 @@ export default function RegisterScreen({ navigation }: Props) {
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      showToast('Por favor completa todos los campos', 'error');
       return;
     }
 
     if (!validateEmail(email)) {
-      Alert.alert('Error', 'Por favor ingresa un email válido');
+      showToast('Por favor ingresa un email válido', 'error');
       return;
     }
 
     if (firstName.length < 2) {
-      Alert.alert('Error', 'El nombre debe tener al menos 2 caracteres');
+      showToast('El nombre debe tener al menos 2 caracteres', 'error');
       return;
     }
 
     if (lastName.length < 2) {
-      Alert.alert('Error', 'El apellido debe tener al menos 2 caracteres');
+      showToast('El apellido debe tener al menos 2 caracteres', 'error');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      showToast('Las contraseñas no coinciden', 'error');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      showToast('La contraseña debe tener al menos 6 caracteres', 'error');
       return;
     }
 
@@ -66,7 +66,7 @@ export default function RegisterScreen({ navigation }: Props) {
     try {
       await register({ email, password, firstName, lastName });
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Error al registrarse');
+      showToast(error.response?.data?.message || 'Error al registrarse', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   buttonDisabled: {
-    backgroundColor: colors.textLight,
+    backgroundColor: colors.textMuted,
   },
   buttonText: {
     ...typography.button,

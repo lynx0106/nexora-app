@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import * as SecureStore from 'expo-secure-store';
 import authApi, { AuthResponse, LoginRequest, RegisterRequest } from '../api/auth.api';
 import apiClient from '../api/client';
+import { registerForPushNotifications, unregisterPushToken } from '../services/push.service';
 
 interface User {
   id: string;
@@ -49,14 +50,14 @@ export function AuthProvider({ children }: AuthProviderProps) {
         if (userJson) {
           const storedUser = JSON.parse(userJson);
           setUser(storedUser);
-          // Restaurar businessType desde el usuario almacenado
           if (storedUser.businessType) {
             setBusinessType(storedUser.businessType);
           }
+          registerForPushNotifications().catch(() => {});
         }
       }
     } catch (error) {
-      console.error('Error loading stored user:', error);
+      if (__DEV__) console.error('Error loading stored user:', error);
     } finally {
       setIsLoading(false);
     }
@@ -81,14 +82,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const login = async (data: LoginRequest) => {
     const response: AuthResponse = await authApi.login(data);
     await saveUser(response.user);
+    registerForPushNotifications().catch(() => {});
   };
 
   const register = async (data: RegisterRequest) => {
     const response: AuthResponse = await authApi.register(data);
     await saveUser(response.user);
+    registerForPushNotifications().catch(() => {});
   };
 
   const logout = async () => {
+    await unregisterPushToken();
     await authApi.logout();
     await SecureStore.deleteItemAsync(USER_STORAGE_KEY);
     setUser(null);

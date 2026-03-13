@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
 
@@ -146,7 +147,7 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
   },
   menuItemText: { ...typography.body },
-  menuItemArrow: { ...typography.body, color: colors.textLight },
+  menuItemArrow: { ...typography.body, color: colors.textSecondary },
   logoutButton: {
     margin: spacing.lg,
     padding: spacing.md,
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   logoutText: { ...typography.button, color: colors.textInverse },
   version: {
     ...typography.caption,
-    color: colors.textLight,
+    color: colors.textSecondary,
     textAlign: 'center',
     marginBottom: spacing.xl,
   },

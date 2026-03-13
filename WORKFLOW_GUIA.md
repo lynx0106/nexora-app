@@ -160,8 +160,8 @@ git checkout <branch-name>
 | Servicio | URL |
 |----------|-----|
 | Frontend | https://nexora-app.online |
-| Backend API | https://nexora-app-production-3199.up.railway.app |
-| API Docs | https://nexora-app-production-3199.up.railway.app/api/docs |
+| Backend API | https://nexora-app-production-3104.up.railway.app |
+| API Docs | https://nexora-app-production-3104.up.railway.app/api/docs |
 | GitHub Repo | https://github.com/lynx0106/nexora-app |
 
 ---

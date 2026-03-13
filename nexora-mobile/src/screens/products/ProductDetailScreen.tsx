@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, ActivityIndicator } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { productsApi, Product } from '../../api/products.api';
 import { useAuth } from '../../context/AuthContext';
@@ -28,8 +29,8 @@ export default function ProductDetailScreen({ route, navigation }: Props) {
       const data = await productsApi.getById(productId);
       setProduct(data);
     } catch (error) {
-      console.error('Error loading product:', error);
-      Alert.alert('Error', 'No se pudo cargar el producto');
+      if (__DEV__) console.error('Error loading product:', error);
+      showToast('No se pudo cargar el producto', 'error');
       navigation.goBack();
     } finally {
       setIsLoading(false);
@@ -49,16 +50,12 @@ export default function ProductDetailScreen({ route, navigation }: Props) {
     
     const currentInCart = getItemQuantity(product.id);
     if (product.stock < quantity + currentInCart) {
-      Alert.alert('Sin Stock', 'No hay suficiente stock disponible');
+      showToast('No hay suficiente stock disponible', 'error');
       return;
     }
 
     addItem(product, quantity);
-    Alert.alert(
-      'Agregado',
-      `${quantity} x ${product.name} agregado al carrito`,
-      [{ text: 'OK' }]
-    );
+    showToast(`${quantity} x ${product.name} agregado al carrito`, 'success');
   };
 
   const incrementQuantity = () => {

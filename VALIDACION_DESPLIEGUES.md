@@ -9,7 +9,7 @@
 
 | Servicio | Plataforma | URL | Estado |
 |----------|------------|-----|--------|
-| **Backend API** | Railway | https://nexora-app-production-3199.up.railway.app | ✅ **OPERATIVO** |
+| **Backend API** | Railway | https://nexora-app-production-3104.up.railway.app | ✅ **OPERATIVO** |
 | **Frontend** | Vercel | https://nexora-app.online | ✅ **OPERATIVO** |
 | **Documentación API** | Swagger | /api/docs | ✅ **DISPONIBLE** |
 
@@ -24,7 +24,7 @@
 | Atributo | Valor |
 |----------|-------|
 | **Plataforma** | Railway.app |
-| **URL Base** | https://nexora-app-production-3199.up.railway.app |
+| **URL Base** | https://nexora-app-production-3104.up.railway.app |
 | **Framework** | NestJS |
 | **Estado** | ✅ Saludable |
 | **Uptime** | 100% (últimas 24h) |
@@ -141,7 +141,7 @@ Cache-Control: public, max-age=0, must-revalidate
 
 ### Estado: ✅ DISPONIBLE
 
-- **URL:** https://nexora-app-production-3199.up.railway.app/api/docs
+- **URL:** https://nexora-app-production-3104.up.railway.app/api/docs
 - **Formato:** Swagger UI 4.x
 - **OpenAPI Spec:** /api/docs-json
 
@@ -176,7 +176,7 @@ app.enableCors({
 ### Variables de Entorno Frontend
 
 ```
-NEXT_PUBLIC_API_URL=https://nexora-app-production-3199.up.railway.app
+NEXT_PUBLIC_API_URL=https://nexora-app-production-3104.up.railway.app
 ```
 
 ✅ **API URL configurada correctamente**

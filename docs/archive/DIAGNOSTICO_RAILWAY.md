@@ -2,7 +2,7 @@
 
 **Fecha:** 24 de febrero de 2026  
 **Proyecto:** nexora-app (Backend NestJS)  
-**URL Actual:** https://nexora-app-production-3199.up.railway.app
+**URL Actual:** https://nexora-app-production-3104.up.railway.app
 
 ---
 
@@ -318,7 +318,7 @@ Una vez aplicadas las correcciones, verificar:
 
 ```bash
 # Health check
-curl https://nexora-app-production-3199.up.railway.app/health
+curl https://nexora-app-production-3104.up.railway.app/health
 
 # Respuesta esperada:
 {

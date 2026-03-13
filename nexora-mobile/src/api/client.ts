@@ -1,7 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
+import { API_URL } from '../config/api.config';
 
-// Configuración de la API
-const API_BASE_URL = 'https://nexora-app-production-3199.up.railway.app';
+// Usar URL centralizada de api.config (3104 en producción)
 
 // Claves de almacenamiento
 const TOKEN_KEY = 'auth_token';
@@ -17,7 +17,7 @@ class ApiClient {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = API_BASE_URL;
+    this.baseUrl = API_URL;
   }
 
   // Gestión de token

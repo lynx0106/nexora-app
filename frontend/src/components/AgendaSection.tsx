@@ -6,6 +6,28 @@ import { showToast } from "../lib/toast";
 import EmptyState from "./ui/EmptyState";
 import Skeleton from "./ui/Skeleton";
 
+interface TenantSummaryItem {
+  tenantId: string;
+  name?: string;
+  sector?: string;
+  totalUsers?: number;
+}
+
+interface ProductItem {
+  id: string;
+  name: string;
+  price: number;
+}
+
+/** Minimal shape for client/doctor dropdown options (API returns more fields including role) */
+interface UserOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string;
+}
+
 interface AgendaSectionProps {
   tenantId: string;
   role: string;
@@ -18,7 +40,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
   const { t } = useTranslation();
   // Estado para el tenant seleccionado (relevante para Superadmin)
   const [selectedTenantId, setSelectedTenantId] = useState(tenantId);
-  const [tenants, setTenants] = useState<any[]>([]);
+  const [tenants, setTenants] = useState<TenantSummaryItem[]>([]);
 
   // Calculate current sector based on selected tenant from the list, or fallback to prop
   const currentTenantData = tenants.find(t => t.tenantId === selectedTenantId);
@@ -30,9 +52,9 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [doctors, setDoctors] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
+  const [doctors, setDoctors] = useState<UserOption[]>([]);
+  const [clients, setClients] = useState<UserOption[]>([]);
+  const [services, setServices] = useState<ProductItem[]>([]);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [createLoading, setCreateLoading] = useState(false);
@@ -73,7 +95,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
            let filteredTenants = data;
            // Filter tenants dropdown based on sectorFilter if provided
            if (sectorFilter) {
-               filteredTenants = data.filter((t: any) => {
+               filteredTenants = (data as TenantSummaryItem[]).filter((t) => {
                    const s = (t.sector || '').toLowerCase();
                    if (sectorFilter === 'restaurante') return s.includes('restaurante');
                    return !s.includes('restaurante');
@@ -127,18 +149,11 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       if (role === 'superadmin' && !tid) {
          appts = await fetchAPIWithAuth('/appointments/all');
          
-         // Filter by sector if in global view
-         // @ts-ignore
-         if (typeof sectorFilter !== 'undefined' && sectorFilter) {
-             appts = appts.filter((a: any) => {
+         if (sectorFilter) {
+             appts = appts.filter((a) => {
                  const s = (a.tenant?.sector || '').toLowerCase();
-                 // @ts-ignore
-                 if (sectorFilter === 'restaurante') {
-                     return s.includes('restaurante');
-                 } else {
-                     // 'service' or default: exclude restaurants
-                     return !s.includes('restaurante');
-                 }
+                 if (sectorFilter === 'restaurante') return s.includes('restaurante');
+                 return !s.includes('restaurante');
              });
          }
       } else {
@@ -148,8 +163,8 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
 
       // 2. Cargar recursos para el formulario
       try {
-        let usersData: any[] = [];
-        let productsData: any[] = [];
+        let usersData: UserOption[] = [];
+        let productsData: ProductItem[] = [];
 
         // Only fetch resources if a tenant is selected
         if (tid) {
@@ -161,25 +176,25 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                     fetchAPIWithAuth(`/users/tenant/${tid}`),
                     fetchAPIWithAuth(`/products/tenant/${tid}`)
                 ]);
-                usersData = u;
-                productsData = p;
+                usersData = u as UserOption[];
+                productsData = p as ProductItem[];
             }
         }
 
-        const loadedDoctors = usersData.filter((u: any) => (u.role || '').toLowerCase() === 'doctor');
-        const loadedClients = usersData.filter((u: any) => (u.role || '').toLowerCase() === 'user');
+        const loadedDoctors = usersData.filter((u) => (u.role || '').toLowerCase() === 'doctor');
+        const loadedClients = usersData.filter((u) => (u.role || '').toLowerCase() === 'user');
         
         setDoctors(loadedDoctors);
         setClients(loadedClients);
         setServices(productsData);
 
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error("Error cargando recursos auxiliares", e);
-        setError(`Error cargando recursos: ${e.message}`);
+        setError(`Error cargando recursos: ${e instanceof Error ? e.message : String(e)}`);
       }
 
-    } catch (err: any) {
-      setError(err.message || "Error al cargar la agenda");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error al cargar la agenda");
     } finally {
       setLoading(false);
     }
@@ -197,9 +212,9 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
            role: 'user',
            generateTempPassword: true,
         })
-      }) as { id: string; firstName: string; lastName: string; temporaryPassword?: string };
+      }) as { id: string; firstName: string; lastName: string; email: string; temporaryPassword?: string };
       
-      setClients([...clients, createdUser]);
+      setClients([...clients, { id: createdUser.id, firstName: createdUser.firstName, lastName: createdUser.lastName, email: createdUser.email }]);
       setNewAppointment({ ...newAppointment, clientId: createdUser.id });
       setShowCreateClientForm(false);
       setNewClient({ firstName: "", lastName: "", email: "", phone: "" });
@@ -245,9 +260,9 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       // Reset form
       setNewAppointment({ dateTime: "", doctorId: "", clientId: "", serviceId: "", notes: "", pax: 1, occasion: "", tenantId: selectedTenantId || "" });
       loadData(selectedTenantId); 
-    } catch (err: any) {
+    } catch (err: unknown) {
       const actionError = editingId ? t('agenda.alerts.update_error') : t('agenda.alerts.create_error');
-      showToast(err.message || `${actionError} ${itemLabel}`, 'error');
+      showToast(err instanceof Error ? err.message : `${actionError} ${itemLabel}`, 'error');
     } finally {
       setCreateLoading(false);
     }
@@ -261,9 +276,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
       clientId: appt.clientId,
       serviceId: appt.serviceId,
       notes: appt.notes || "",
-      // @ts-ignore
-      pax: appt.pax || 1,
-      // @ts-ignore
+      pax: appt.pax ?? 1,
       occasion: appt.occasion || "",
       tenantId: appt.tenantId,
     });
@@ -274,8 +287,8 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
     try {
         await appointmentsService.updateStatus(id, newStatus);
         setAppointments(appointments.map(a => a.id === id ? { ...a, status: newStatus } : a));
-    } catch (err: any) {
-        showToast(err.message || t('agenda.alerts.status_update_error'), 'error');
+    } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : t('agenda.alerts.status_update_error'), 'error');
     }
   }
 
@@ -284,8 +297,8 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
     try {
         await appointmentsService.delete(id);
         setAppointments(appointments.filter(a => a.id !== id));
-    } catch (err: any) {
-        showToast(err.message || t('agenda.alerts.delete_error'), 'error');
+    } catch (err: unknown) {
+        showToast(err instanceof Error ? err.message : t('agenda.alerts.delete_error'), 'error');
     }
   }
 
@@ -534,12 +547,10 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                   {isRestaurant && (
                     <>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
-                        {/* @ts-ignore - pax exists in backend entity */}
-                        {(appt as any).pax || '-'}
+                        {appt.pax ?? '-'}
                       </td>
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-100">
-                        {/* @ts-ignore - occasion exists in backend entity */}
-                        {(appt as any).occasion || '-'}
+                        {appt.occasion ?? '-'}
                       </td>
                     </>
                   )}

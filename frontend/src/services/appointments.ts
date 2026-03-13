@@ -9,6 +9,8 @@ export interface Appointment {
   doctorId: string;
   clientId: string;
   serviceId: string;
+  pax?: number;
+  occasion?: string;
   doctor?: { firstName: string; lastName: string; email: string };
   client?: { firstName: string; lastName: string; email: string };
   service?: { name: string; price: number; duration: number };

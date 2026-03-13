@@ -9,8 +9,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useChat } from '../../context/ChatContext';
@@ -77,7 +77,7 @@ export default function ChatRoomScreen({ route, navigation }: Props) {
       // Use currentScope for internal team chat
       await sendMessage(messageContent);
     } catch (error) {
-      Alert.alert('Error', 'No se pudo enviar el mensaje');
+      showToast('No se pudo enviar el mensaje', 'error');
       setInputText(messageContent);
     } finally {
       setSending(false);

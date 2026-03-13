@@ -9,6 +9,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCart } from '../../context/CartContext';
@@ -40,12 +41,12 @@ export default function CheckoutScreen() {
 
   const handleCreateOrder = async () => {
     if (!customerName.trim()) {
-      Alert.alert('Error', 'Por favor ingresa tu nombre');
+      showToast('Por favor ingresa tu nombre', 'error');
       return;
     }
 
     if (items.length === 0) {
-      Alert.alert('Error', 'El carrito está vacío');
+      showToast('El carrito está vacío', 'error');
       return;
     }
 
@@ -82,11 +83,8 @@ export default function CheckoutScreen() {
         ]
       );
     } catch (error: any) {
-      console.error('Error creating order:', error);
-      Alert.alert(
-        'Error',
-        error.response?.data?.message || 'No se pudo crear el pedido. Intenta nuevamente.'
-      );
+      if (__DEV__) console.error('Error creating order:', error);
+      showToast(error.response?.data?.message || 'No se pudo crear el pedido', 'error');
     } finally {
       setLoading(false);
     }

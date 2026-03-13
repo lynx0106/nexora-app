@@ -12,6 +12,7 @@ import { useAuth } from '../../context/AuthContext';
 import { RoleGuard } from '../../components/RoleGuard';
 import dashboardApi, { ActivityItem, SalesChartData } from '../../api/dashboard.api';
 import { getBusinessFeatures, toBusinessType, BusinessType } from '../../config/menuConfig';
+import { colors } from '../../theme';
 
 const { width } = Dimensions.get('window');
 
@@ -111,7 +112,7 @@ export default function DashboardScreen() {
   if (isLoading && !refreshing) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Cargando dashboard...</Text>
       </View>
     );
@@ -132,11 +133,11 @@ export default function DashboardScreen() {
 
       {/* Metrics Cards */}
       <View style={styles.metricsContainer}>
-        <View style={[styles.metricCard, { backgroundColor: '#6366f1' }]}>
+        <View style={[styles.metricCard, { backgroundColor: colors.primary }]}>
           <Text style={styles.metricValue}>{formatCurrency(totalSales)}</Text>
           <Text style={styles.metricLabel}>Ventas Semana</Text>
         </View>
-        <View style={[styles.metricCard, { backgroundColor: '#22c55e' }]}>
+        <View style={[styles.metricCard, { backgroundColor: colors.success }]}>
           <Text style={styles.metricValue}>{formatCurrency(todaySales)}</Text>
           <Text style={styles.metricLabel}>Ventas Hoy</Text>
         </View>
@@ -144,13 +145,13 @@ export default function DashboardScreen() {
 
       <View style={styles.metricsContainer}>
         {features.hasOrders && (
-          <View style={[styles.metricCard, { backgroundColor: '#f59e0b' }]}>
+          <View style={[styles.metricCard, { backgroundColor: colors.warning }]}>
             <Text style={styles.metricValue}>{orderCount}</Text>
             <Text style={styles.metricLabel}>{features.orderLabel}</Text>
           </View>
         )}
         {features.hasAppointments && (
-          <View style={[styles.metricCard, { backgroundColor: '#3b82f6' }]}>
+          <View style={[styles.metricCard, { backgroundColor: colors.info }]}>
             <Text style={styles.metricValue}>{appointmentCount}</Text>
             <Text style={styles.metricLabel}>{features.appointmentLabel}</Text>
           </View>
@@ -169,7 +170,7 @@ export default function DashboardScreen() {
                     styles.bar,
                     {
                       height: Math.max((item.total / maxSales) * 100, 4),
-                      backgroundColor: item.total > 0 ? '#6366f1' : '#e5e5e5',
+                      backgroundColor: item.total > 0 ? colors.primary : colors.backgroundTertiary,
                     },
                   ]}
                 />
@@ -195,7 +196,7 @@ export default function DashboardScreen() {
                   styles.activityIcon,
                   {
                     backgroundColor:
-                      item.type === 'order' ? '#6366f1' : '#3b82f6',
+                      item.type === 'order' ? colors.primary : colors.info,
                   },
                 ]}
               >
@@ -233,27 +234,27 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 12,
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
   },
   errorBanner: {
-    backgroundColor: '#fef2f2',
+    backgroundColor: colors.errorSoft,
     padding: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#fecaca',
+    borderBottomColor: colors.error,
   },
   errorText: {
-    color: '#dc2626',
+    color: colors.error,
     textAlign: 'center',
   },
   metricsContainer: {
@@ -284,12 +285,12 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: colors.text,
     marginBottom: 12,
   },
   chartContainer: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 16,
     alignItems: 'flex-end',
@@ -311,22 +312,22 @@ const styles = StyleSheet.create({
   },
   barLabel: {
     fontSize: 10,
-    color: '#666',
+    color: colors.textMuted,
     marginTop: 4,
   },
   emptyActivity: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 32,
     alignItems: 'center',
   },
   emptyText: {
     fontSize: 14,
-    color: '#666',
+    color: colors.textMuted,
   },
   activityItem: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
@@ -350,16 +351,16 @@ const styles = StyleSheet.create({
   activityTitle: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: colors.text,
   },
   activityDescription: {
     fontSize: 12,
-    color: '#666',
+    color: colors.textSecondary,
     marginTop: 2,
   },
   activityTime: {
     fontSize: 11,
-    color: '#999',
+    color: colors.textMuted,
     marginTop: 4,
   },
   statusBadge: {
@@ -368,7 +369,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   statusText: {
-    color: '#fff',
+    color: '#ffffff',
     fontSize: 10,
     fontWeight: '600',
   },

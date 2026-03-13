@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { User, Briefcase, Store, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
@@ -375,6 +376,14 @@ function HomeContent() {
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
+                  </div>
+                  <div className="mt-1 text-right">
+                    <Link
+                      href="/auth/forgot-password"
+                      className="text-sm text-teal-400 hover:text-teal-300 transition-colors"
+                    >
+                      {t('auth.forgot_password')}
+                    </Link>
                   </div>
                 </div>
               </>

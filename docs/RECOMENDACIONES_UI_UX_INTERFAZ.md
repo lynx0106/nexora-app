@@ -187,7 +187,7 @@ className="border-t border-slate-800 px-4 py-3 text-center text-xs text-slate-50
 ### Fase 3 – Polish (prioridad media)
 
 1. Añadir iconos al sidebar.
-2. Transiciones suaves entre secciones.
+2. ~~Transiciones suaves entre secciones.~~ ✅ (ds-section-transition en dashboard)
 3. Mejorar estado activo y hover en la navegación.
 4. Unificar estilos de tablas y formularios.
 

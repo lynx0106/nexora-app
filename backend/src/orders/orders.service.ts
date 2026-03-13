@@ -135,6 +135,7 @@ export class OrdersService {
               const preference = await this.paymentsService.createPreference(
                 savedOrder,
                 tenant,
+                token,
               );
               if (preference) {
                 savedOrder.preferenceId = preference.preferenceId || '';

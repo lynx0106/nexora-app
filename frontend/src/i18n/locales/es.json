@@ -599,7 +599,20 @@
     "redirecting": "Redirigiendo...",
     "validation_email_invalid": "Introduce un correo electrónico válido",
     "validation_password_min": "La contraseña debe tener al menos 6 caracteres",
-    "validation_required": "Este campo es obligatorio"
+    "validation_required": "Este campo es obligatorio",
+    "forgot_password_title": "Recuperar contraseña",
+    "forgot_password_desc": "Introduce tu correo y te enviaremos un enlace para restablecer tu contraseña.",
+    "forgot_password_sent": "Si el correo existe en nuestro sistema, recibirás un enlace para restablecer tu contraseña. Revisa tu bandeja de entrada y spam.",
+    "forgot_password_submit": "Enviar enlace",
+    "reset_password_title": "Nueva contraseña",
+    "reset_password_desc": "Introduce tu nueva contraseña dos veces para confirmarla.",
+    "reset_new_password": "Nueva contraseña",
+    "reset_confirm_password": "Confirmar contraseña",
+    "reset_password_submit": "Restablecer contraseña",
+    "reset_success": "Contraseña actualizada. Ya puedes iniciar sesión.",
+    "reset_token_invalid": "El enlace ha expirado o no es válido. Solicita uno nuevo.",
+    "reset_token_missing": "Enlace inválido. Solicita un nuevo enlace de recuperación.",
+    "reset_password_mismatch": "Las contraseñas no coinciden."
   },
   "config": {
     "title": "Configuración",

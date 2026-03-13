@@ -3,6 +3,10 @@ import apiClient from '../../api/client';
 
 // Mocks
 jest.mock('expo-secure-store');
+jest.mock('../../services/push.service', () => ({
+  registerForPushNotifications: jest.fn().mockResolvedValue(null),
+  unregisterPushToken: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../../api/client', () => ({
   post: jest.fn(),
   get: jest.fn(),

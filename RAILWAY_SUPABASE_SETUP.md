@@ -62,7 +62,7 @@ Después del deploy, verifica que esté usando Supabase:
 
 ```bash
 # Ver usuarios en la base de datos actual
-curl https://nexora-app-production-3199.up.railway.app/users/public/diagnostic
+curl https://nexora-app-production-3104.up.railway.app/users/public/diagnostic
 ```
 
 Debería mostrar los mismos usuarios que ves en Supabase Dashboard.
@@ -83,12 +83,12 @@ Una vez configurado Supabase correctamente, las credenciales serán:
 
 1. Verifica que `DATABASE_URL` apunte a Supabase:
    ```bash
-   curl https://nexora-app-production-3199.up.railway.app/users/public/diagnostic
+   curl https://nexora-app-production-3104.up.railway.app/users/public/diagnostic
    ```
 
 2. Asegúrate de que el superadmin exista:
    ```bash
-   curl -X POST https://nexora-app-production-3199.up.railway.app/users/public/seed-superadmin
+   curl -X POST https://nexora-app-production-3104.up.railway.app/users/public/seed-superadmin
    ```
 
 3. Verifica en Supabase Dashboard que la tabla `users` tenga datos

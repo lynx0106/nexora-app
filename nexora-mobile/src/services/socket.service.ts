@@ -1,9 +1,9 @@
 import { io, Socket } from 'socket.io-client';
 import { Message } from '../api/chat.api';
 import apiClient from '../api/client';
+import { API_URL } from '../config/api.config';
 
-// WebSocket server URL (same as API base URL)
-const SOCKET_URL = 'https://nexora-app-production-3199.up.railway.app';
+// WebSocket usa la misma URL base que la API (3104 en producción)
 
 type MessageCallback = (message: Message) => void;
 type ConnectionCallback = (connected: boolean) => void;
@@ -25,11 +25,11 @@ class SocketService {
 
       const token = await apiClient.getToken();
       if (!token) {
-        console.warn('No token available for WebSocket connection');
+        if (__DEV__) console.warn('No token available for WebSocket connection');
         return;
       }
 
-      this.socket = io(SOCKET_URL, {
+      this.socket = io(API_URL, {
         auth: { token: `Bearer ${token}` },
         transports: ['websocket', 'polling'],
         reconnection: true,
@@ -40,7 +40,7 @@ class SocketService {
 
       this.setupListeners();
     } catch (error) {
-      console.error('Error initializing WebSocket connection:', error);
+      if (__DEV__) console.error('Error initializing WebSocket connection:', error);
       this.connected = false;
       this.notifyConnectionCallbacks(false);
     }
@@ -53,32 +53,32 @@ class SocketService {
     if (!this.socket) return;
 
     this.socket.on('connect', () => {
-      console.log('WebSocket connected');
+      if (__DEV__) console.log('WebSocket connected');
       this.connected = true;
       this.notifyConnectionCallbacks(true);
     });
 
     this.socket.on('disconnect', () => {
-      console.log('WebSocket disconnected');
+      if (__DEV__) console.log('WebSocket disconnected');
       this.connected = false;
       this.notifyConnectionCallbacks(false);
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error.message);
+      if (__DEV__) console.error('WebSocket connection error:', error.message);
       this.connected = false;
       this.notifyConnectionCallbacks(false);
     });
 
     // Listen for new messages
     this.socket.on('newMessage', (message: Message) => {
-      console.log('New message received:', message.id);
+      if (__DEV__) console.log('New message received:', message.id);
       this.messageCallbacks.forEach((callback) => callback(message));
     });
 
     // Listen for messages sent to customer room
     this.socket.on('message', (message: Message) => {
-      console.log('Message received:', message.id);
+      if (__DEV__) console.log('Message received:', message.id);
       this.messageCallbacks.forEach((callback) => callback(message));
     });
   }

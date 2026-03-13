@@ -58,7 +58,7 @@ export class PaymentsService {
     return new MercadoPagoConfig({ accessToken });
   }
 
-  async createPreference(order: Order, tenant: Tenant) {
+  async createPreference(order: Order, tenant: Tenant, publicToken?: string) {
     const breaker = getCircuitBreaker('mercadopago', {
       failureThreshold: 5,
       resetTimeout: 60000,
@@ -83,9 +83,9 @@ export class PaymentsService {
               email: order.customerEmail || 'test_user_123456@testuser.com',
             },
             back_urls: {
-              success: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=success`,
-              failure: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=failure`,
-              pending: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=pending`,
+              success: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=success${publicToken ? `&token=${encodeURIComponent(publicToken)}` : ''}`,
+              failure: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=failure${publicToken ? `&token=${encodeURIComponent(publicToken)}` : ''}`,
+              pending: `${this.getFrontendUrl()}/orders/thank-you?orderId=${order.id}&status=pending${publicToken ? `&token=${encodeURIComponent(publicToken)}` : ''}`,
             },
             auto_return: 'approved',
             external_reference: order.id,

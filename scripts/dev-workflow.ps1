@@ -147,5 +147,5 @@ git log -1 --stat
 
 Write-Host "`n🌐 URLs del proyecto:"
 Write-Host "   Frontend: https://nexora-app.online"
-Write-Host "   Backend:  https://nexora-app-production-3199.up.railway.app"
+Write-Host "   Backend:  https://nexora-app-production-3104.up.railway.app"
 Write-Host "   Repo:     https://github.com/lynx0106/nexora-app"

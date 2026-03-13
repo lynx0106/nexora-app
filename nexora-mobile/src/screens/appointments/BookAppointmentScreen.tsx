@@ -6,12 +6,13 @@ import {
   TouchableOpacity,
   TextInput,
   StyleSheet,
-  Alert,
   ActivityIndicator,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 import { useAuth } from '../../context/AuthContext';
+import { colors } from '../../theme';
 import appointmentsApi from '../../api/appointments.api';
 import productsApi, { Product } from '../../api/products.api';
 
@@ -77,12 +78,12 @@ export default function BookAppointmentScreen({ route, navigation }: Props) {
 
   const handleBook = async () => {
     if (!isRestaurant && !selectedService) {
-      Alert.alert('Error', 'Por favor selecciona un servicio');
+      showToast('Por favor selecciona un servicio', 'error');
       return;
     }
 
     if (!user?.tenantId || !user?.id) {
-      Alert.alert('Error', 'No se pudo obtener la información del usuario');
+      showToast('No se pudo obtener la información del usuario', 'error');
       return;
     }
 
@@ -102,19 +103,13 @@ export default function BookAppointmentScreen({ route, navigation }: Props) {
       };
 
       await appointmentsApi.create(appointmentData);
-      
-      Alert.alert(
-        isRestaurant ? 'Reserva Confirmada' : 'Cita Agendada',
-        isRestaurant ? 'Tu reserva ha sido confirmada exitosamente' : 'Tu cita ha sido agendada exitosamente',
-        [
-          {
-            text: 'OK',
-            onPress: () => navigation.goBack(),
-          },
-        ]
+      showToast(
+        isRestaurant ? 'Tu reserva ha sido confirmada' : 'Tu cita ha sido agendada',
+        'success'
       );
+      navigation.goBack();
     } catch (error: any) {
-      Alert.alert('Error', error.message || 'No se pudo agendar la cita');
+      showToast(error.message || 'No se pudo agendar la cita', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +120,7 @@ export default function BookAppointmentScreen({ route, navigation }: Props) {
   if (loadingServices) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>{isRestaurant ? 'Cargando...' : 'Cargando servicios...'}</Text>
       </View>
     );

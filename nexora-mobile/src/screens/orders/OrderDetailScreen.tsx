@@ -7,7 +7,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Linking,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { ordersApi, Order } from '../../api/orders.api';
@@ -51,8 +53,8 @@ export default function OrderDetailScreen() {
       const data = await ordersApi.getById(route.params.orderId);
       setOrder(data);
     } catch (error) {
-      console.error('Error loading order:', error);
-      Alert.alert('Error', 'No se pudo cargar el pedido');
+      if (__DEV__) console.error('Error loading order:', error);
+      showToast('No se pudo cargar el pedido', 'error');
       navigation.goBack();
     } finally {
       setLoading(false);
@@ -84,14 +86,15 @@ export default function OrderDetailScreen() {
     setPaymentLoading(true);
     try {
       const { paymentLink } = await ordersApi.getPaymentLink(order.id);
-      // En una app real, aquí abriríamos el navegador o un WebView con el link de pago
-      Alert.alert(
-        'Link de Pago',
-        `Se ha generado el link de pago. En una versión final se abriría el navegador.\n\nLink: ${paymentLink}`
-      );
+      if (paymentLink) {
+        await Linking.openURL(paymentLink);
+        showToast('Abriendo enlace de pago', 'success');
+      } else {
+        showToast('No se generó el link de pago', 'error');
+      }
     } catch (error: any) {
-      console.error('Error getting payment link:', error);
-      Alert.alert('Error', 'No se pudo generar el link de pago');
+      if (__DEV__) console.error('Error getting payment link:', error);
+      showToast('No se pudo generar el link de pago', 'error');
     } finally {
       setPaymentLoading(false);
     }

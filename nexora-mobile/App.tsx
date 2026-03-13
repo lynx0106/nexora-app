@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import * as Notifications from 'expo-notifications';
+import Toast from 'react-native-toast-message';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StyleSheet, Linking, AppState, AppStateStatus } from 'react-native';
@@ -40,6 +42,16 @@ export default function App() {
   };
 
   useEffect(() => {
+    Notifications.setNotificationHandler({
+      handleNotification: async () => ({
+        shouldShowAlert: true,
+        shouldPlaySound: true,
+        shouldSetBadge: true,
+      }),
+    });
+  }, []);
+
+  useEffect(() => {
     // Manejar deep link inicial (si la app se abrió desde un link)
     Linking.getInitialURL().then(handleDeepLink);
 
@@ -71,6 +83,7 @@ export default function App() {
             <FavoritesProvider>
               <CartProvider>
                 <AppNavigator ref={navigationRef} />
+                <Toast />
               </CartProvider>
             </FavoritesProvider>
           </ChatProvider>

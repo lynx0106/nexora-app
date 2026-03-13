@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
@@ -30,17 +30,17 @@ export default function LoginScreen({ navigation }: Props) {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      showToast('Por favor completa todos los campos', 'error');
       return;
     }
 
     if (!validateEmail(email)) {
-      Alert.alert('Error', 'Por favor ingresa un email válido');
+      showToast('Por favor ingresa un email válido', 'error');
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('Error', 'La contraseña debe tener al menos 6 caracteres');
+      showToast('La contraseña debe tener al menos 6 caracteres', 'error');
       return;
     }
 
@@ -48,7 +48,7 @@ export default function LoginScreen({ navigation }: Props) {
     try {
       await login({ email, password });
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Error al iniciar sesión');
+      showToast(error.response?.data?.message || 'Error al iniciar sesión', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   buttonDisabled: {
-    backgroundColor: colors.textLight,
+    backgroundColor: colors.textMuted,
   },
   buttonText: {
     ...typography.button,

@@ -436,6 +436,7 @@ export default function DashboardPage() {
           </header>
 
           <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col min-h-0 overflow-y-auto px-4 py-8 sm:px-6 lg:px-8">
+            <div key={activeSection} className="ds-section-transition">
             {activeSection === "resumen" && (
               <StatsSection
                 role={role}
@@ -597,6 +598,7 @@ export default function DashboardPage() {
             {activeSection === "auditoria" && role === "superadmin" && (
               <AuditSection />
             )}
+            </div>
           </main>
           <footer className="flex-shrink-0 mt-auto border-t border-slate-800 px-4 py-3 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
             Powered by Lynx IA

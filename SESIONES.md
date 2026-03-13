@@ -5,6 +5,59 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-12 (D) - Commit batch: AgendaSection tipado, builds, CI
+
+**Duración:** ~45 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **AgendaSection:** Tipado estricto — TenantSummaryItem, UserOption, ProductItem; eliminados `any`
+- [x] **Appointment:** Añadidos `pax` y `occasion` a la interface
+- [x] **npm audit backend:** 8 moderadas (ajv, file-type); fix seguro ya aplicado; resto requiere --force
+- [x] **Tests backend:** 306 pasando (ai.service, appointments.service OK)
+- [x] **Transiciones:** ds-section-transition ya implementado en dashboard
+- [x] Build backend y frontend OK
+
+### 📋 Pendiente
+- [ ] Revisar resultado CI en GitHub tras push
+- [ ] npm audit fix --force (evaluar breaking changes cuando haya ventana)
+
+---
+
+## 2026-03-12 (C) - Alineación app móvil con web (theme + toast)
+
+**Duración:** ~30 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **ChatListScreen:** Alert "Nueva Conversación" sustituido por `showToast` info
+- [x] **ProfileScreen:** `handleMenuItemPress` usa toast; se mantiene `Alert` solo en logout (confirmación)
+- [x] Paleta teal/slate, dark mode y toast integrados en todas las pantallas relevantes
+
+---
+
+## 2026-03-12 (B) - Gaps críticos: Thank-you MP, recuperación contraseña, URLs móvil
+
+**Duración:** ~1.5 horas  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **Fase 1 crítica (App Móvil):** URLs 3199→3104 en `client.ts` y `socket.service.ts` — Ahora usan `API_URL` de `api.config.ts`
+- [x] **Console.log** en api.config y socket.service envueltos en `__DEV__`
+- [x] **client.test.ts** reescrito para validar uso de fetch + API_URL (antes mockeaba axios)
+- [x] **Gap 1 Thank-you MercadoPago:** Página `/orders/thank-you`, back_urls con token, redirección a `/orders/status/[id]?token=`
+- [x] **Gap 2 Recuperación contraseña:** `/auth/forgot-password`, `/auth/reset-password`, link en login
+- [x] i18n es/en para forgot/reset password
+- [x] Build frontend OK, test nexora-mobile OK
+
+### 📋 Próximos pasos
+- [x] Gap 3: Push notifications — docs/PUSH_SETUP.md + expo-notifications en nexora-mobile
+- [x] Gap 4: Docs URLs 3199→3104 en 7 archivos
+- [x] Gap 5: Tests backend — 306 tests OK
+- [x] Fase 3: transiciones suaves — ds-section-transition en dashboard
+
+---
+
 ## 2026-03-12 - Unificación Dark Mode y Recomendaciones UI/UX
 
 **Duración:** ~1.5 horas  
@@ -27,12 +80,15 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - [x] Patrón aplicado: `bg-white`→`bg-slate-900/70`, `text-zinc-900`→`text-slate-100`, badges `bg-*-900/40 text-*-300`
 - [x] Build frontend OK
 
-### 📋 Para próxima sesión
+### 📋 Para próxima sesión (prioritario)
+- [x] **PLAN_SOLUCION_GAPS_NEXORA.md** — Gap 1 (thank-you MercadoPago) ✅ — Gap 2 (recuperación contraseña) ✅ — Pendiente: Gaps 3-5
+- [x] **DIAGNOSTICO_APP_MOVIL_SEGURIDAD_USABILIDAD_UX.md** — Fase 1 crítica: URLs 3199→3104 en client.ts y socket.service.ts ✅
 - [ ] Fase 3 refinamiento: transiciones suaves entre secciones (opcional)
-- [ ] Revisar estado activo sidebar con borde izquierdo más visible (opcional)
 
 ### 🔗 Referencias
 - docs/RECOMENDACIONES_UI_UX_INTERFAZ.md
+- docs/DIAGNOSTICO_APP_MOVIL_SEGURIDAD_USABILIDAD_UX.md
+- docs/PLAN_SOLUCION_GAPS_NEXORA.md
 - INFORME_SEGURIDAD_CALIDAD_UX.md
 
 ---

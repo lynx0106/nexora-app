@@ -7,6 +7,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList, DrawerC
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { getBusinessFeatures, toBusinessType, hasOrders, hasAppointments, BusinessType } from '../config/menuConfig';
+import { colors } from '../theme';
 
 // Importar pantallas
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -109,7 +110,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       {/* Header del Drawer */}
       <View style={styles.drawerHeader}>
         <View style={styles.avatarContainer}>
-          <Ionicons name="person-circle" size={70} color="#6366f1" />
+          <Ionicons name="person-circle" size={70} color={colors.primary} />
         </View>
         <Text style={styles.userName}>{fullName}</Text>
         <Text style={styles.userEmail}>{user?.email || 'usuario@nexora.com'}</Text>
@@ -126,7 +127,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       {/* Footer con Cerrar Sesión */}
       <View style={styles.drawerFooter}>
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
-          <Ionicons name="log-out-outline" size={22} color="#ef4444" />
+          <Ionicons name="log-out-outline" size={22} color={colors.error} />
           <Text style={styles.signOutText}>Cerrar Sesión</Text>
         </TouchableOpacity>
         <Text style={styles.versionText}>Nexora v1.0.0</Text>
@@ -220,14 +221,14 @@ function MainNavigator() {
         return {
           headerShown: true,
           headerStyle: {
-            backgroundColor: '#6366f1',
+            backgroundColor: colors.primary,
           },
           headerTintColor: '#ffffff',
           headerTitleStyle: {
             fontWeight: 'bold',
           },
-          drawerActiveTintColor: '#6366f1',
-          drawerInactiveTintColor: '#64748b',
+          drawerActiveTintColor: colors.primary,
+          drawerInactiveTintColor: colors.textMuted,
           drawerLabel: screen?.title || route.name,
           drawerIcon: ({ focused, color, size }) => {
             const iconName = focused ? screen?.icon : screen?.iconOutline;
@@ -258,7 +259,7 @@ export const AppNavigator = forwardRef<NavigationContainerRef<any>>((props, ref)
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6366f1" />
+        <ActivityIndicator size="large" color={colors.primary} />
         <Text style={styles.loadingText}>Cargando...</Text>
       </View>
     );
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   },
   drawerHeader: {
     padding: 20,
-    backgroundColor: '#6366f1',
+    backgroundColor: colors.primary,
     marginBottom: 10,
     alignItems: 'center',
   },
@@ -370,7 +371,7 @@ const styles = StyleSheet.create({
   },
   drawerFooter: {
     borderTopWidth: 1,
-    borderTopColor: '#e2e8f0',
+    borderTopColor: colors.border,
     padding: 16,
   },
   signOutButton: {
@@ -380,13 +381,13 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     fontSize: 16,
-    color: '#ef4444',
+    color: colors.error,
     marginLeft: 12,
     fontWeight: '600',
   },
   versionText: {
     fontSize: 12,
-    color: '#94a3b8',
+    color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 8,
   },
@@ -394,12 +395,12 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.background,
   },
   loadingText: {
     marginTop: 16,
     fontSize: 16,
-    color: '#6366f1',
+    color: colors.textSecondary,
   },
 });
 

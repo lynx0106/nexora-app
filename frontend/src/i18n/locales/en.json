@@ -186,7 +186,20 @@
     "redirecting": "Redirecting...",
     "validation_email_invalid": "Please enter a valid email address",
     "validation_password_min": "Password must be at least 6 characters",
-    "validation_required": "This field is required"
+    "validation_required": "This field is required",
+    "forgot_password_title": "Recover password",
+    "forgot_password_desc": "Enter your email and we will send you a link to reset your password.",
+    "forgot_password_sent": "If the email exists in our system, you will receive a link to reset your password. Check your inbox and spam folder.",
+    "forgot_password_submit": "Send link",
+    "reset_password_title": "New password",
+    "reset_password_desc": "Enter your new password twice to confirm it.",
+    "reset_new_password": "New password",
+    "reset_confirm_password": "Confirm password",
+    "reset_password_submit": "Reset password",
+    "reset_success": "Password updated. You can now log in.",
+    "reset_token_invalid": "The link has expired or is invalid. Request a new one.",
+    "reset_token_missing": "Invalid link. Request a new recovery link.",
+    "reset_password_mismatch": "Passwords do not match."
   },
   "config": {
     "title": "Configuration",

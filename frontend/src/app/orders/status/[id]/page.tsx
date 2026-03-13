@@ -7,10 +7,12 @@ const API_URL =
 
 interface PageProps {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ token?: string }>;
 }
 
-export default async function OrderStatusPage({ params }: PageProps) {
+export default async function OrderStatusPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { token } = await searchParams;
 
   if (!id) {
     return (
@@ -21,7 +23,9 @@ export default async function OrderStatusPage({ params }: PageProps) {
   }
 
   try {
-    const res = await fetch(`${API_URL}/public/orders/${id}`, {
+    const url = new URL(`${API_URL}/public/orders/${id}`);
+    if (token) url.searchParams.set("token", token);
+    const res = await fetch(url.toString(), {
       cache: "no-store",
       headers: { Accept: "application/json" },
     });

@@ -27,10 +27,10 @@ Una vez que el backend esté deployado en Railway, puedes ejecutar:
 
 ```bash
 # Verificar estado de la base de datos
-curl https://nexora-app-production-3199.up.railway.app/db-init/status
+curl https://nexora-app-production-3104.up.railway.app/db-init/status
 
 # Crear tablas y usuarios
-curl -X POST https://nexora-app-production-3199.up.railway.app/db-init/setup
+curl -X POST https://nexora-app-production-3104.up.railway.app/db-init/setup
 ```
 
 ---
@@ -70,13 +70,13 @@ Después del deploy:
 
 ```bash
 # Crear superadmin
-curl -X POST https://nexora-app-production-3199.up.railway.app/db-init/create-superadmin
+curl -X POST https://nexora-app-production-3104.up.railway.app/db-init/create-superadmin
 
 # Crear usuarios demo
-curl -X POST https://nexora-app-production-3199.up.railway.app/db-init/create-demo-users
+curl -X POST https://nexora-app-production-3104.up.railway.app/db-init/create-demo-users
 
 # O todo en uno:
-curl -X POST https://nexora-app-production-3199.up.railway.app/db-init/setup
+curl -X POST https://nexora-app-production-3104.up.railway.app/db-init/setup
 ```
 
 ### Opción B: Manual (usando SQL)
@@ -126,7 +126,7 @@ Para verificar que todo funciona:
 
 2. **Verificar conexión:**
    ```bash
-   curl https://nexora-app-production-3199.up.railway.app/db-init/status
+   curl https://nexora-app-production-3104.up.railway.app/db-init/status
    ```
 
 3. **Probar login:**

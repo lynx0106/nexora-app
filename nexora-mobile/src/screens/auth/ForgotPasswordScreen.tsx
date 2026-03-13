@@ -5,11 +5,11 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import authApi from '../../api/auth.api';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
@@ -24,13 +24,13 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
 
   const handleResetPassword = async () => {
     if (!email) {
-      Alert.alert('Error', 'Por favor ingresa tu email');
+      showToast('Por favor ingresa tu email', 'error');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert('Error', 'Por favor ingresa un email válido');
+      showToast('Por favor ingresa un email válido', 'error');
       return;
     }
 
@@ -38,8 +38,9 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     try {
       await authApi.requestPasswordReset({ email });
       setEmailSent(true);
+      showToast('Si el email existe, recibirás un enlace para restablecer tu contraseña', 'success');
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Error al enviar el email');
+      showToast(error.response?.data?.message || 'Error al enviar el email', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -192,7 +193,7 @@ const styles = StyleSheet.create({
     marginTop: spacing.md,
   },
   buttonDisabled: {
-    backgroundColor: colors.textLight,
+    backgroundColor: colors.textMuted,
   },
   buttonText: {
     ...typography.button,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, Alert } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useCart, CartItem } from '../../context/CartContext';
@@ -22,7 +23,7 @@ export default function CartScreen() {
 
   const handleCheckout = () => {
     if (items.length === 0) {
-      Alert.alert('Carrito Vacío', 'Agrega productos al carrito para continuar');
+      showToast('Agrega productos al carrito para continuar', 'error');
       return;
     }
     navigation.navigate('Checkout');
@@ -56,7 +57,7 @@ export default function CartScreen() {
               if (item.quantity < item.product.stock) {
                 updateQuantity(item.product.id, item.quantity + 1);
               } else {
-                Alert.alert('Sin Stock', 'No hay más stock disponible');
+                showToast('No hay más stock disponible', 'error');
               }
             }}
           >

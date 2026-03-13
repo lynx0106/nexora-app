@@ -7,8 +7,8 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useChat } from '../../context/ChatContext';
@@ -131,11 +131,7 @@ export default function ChatListScreen() {
       });
     } else {
       // For staff/admin, show a message or navigate to user selection
-      Alert.alert(
-        'Nueva Conversación',
-        'Aquí podrás seleccionar un usuario para iniciar una conversación.',
-        [{ text: 'OK' }]
-      );
+      showToast('Aquí podrás seleccionar un usuario para iniciar una conversación', 'info');
     }
   };
 

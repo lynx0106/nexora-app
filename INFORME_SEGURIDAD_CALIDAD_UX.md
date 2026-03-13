@@ -11,15 +11,12 @@
 ### Backend
 | Estado | Cantidad |
 |--------|----------|
-| **Total vulnerabilidades** | ~40 (tras `npm audit fix` parcial) |
-| Bajo | 3 |
+| **Total vulnerabilidades** | 8 (moderado, tras `npm audit fix`) |
 | Moderado | 8 |
-| Alto | 40 |
 
-**Paquetes críticos afectados:**
-- `ajv` (ReDoS) — NestJS schematics
-- `cookie` (csurf) — caracteres fuera de límites
-- `file-type` — bucle infinito en parser ASF
+**Paquetes afectados (fix requiere `npm audit fix --force` = breaking):**
+- `ajv` (ReDoS) — @nestjs/schematics (solo dev, no producción)
+- `file-type` — bucle infinito en parser ASF — @nestjs/common
 - `multer` — DoS por recurso
 - `serialize-javascript` — posible RCE
 - `liquidjs` — path traversal

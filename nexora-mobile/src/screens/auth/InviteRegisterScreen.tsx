@@ -5,12 +5,12 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
+import { showToast } from '../../lib/toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../../context/AuthContext';
 import invitationsApi, { InvitationValidationResponse } from '../../api/invitations.api';
@@ -100,18 +100,12 @@ export default function InviteRegisterScreen({ navigation, route }: Props) {
       setInvitationData(result);
       
       if (!result.valid) {
-        Alert.alert(
-          'Invitación Inválida',
-          'Esta invitación ha expirado o ya fue utilizada.',
-          [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-        );
+        showToast('Esta invitación ha expirado o ya fue utilizada', 'error');
+        navigation.navigate('Login');
       }
     } catch (error) {
-      Alert.alert(
-        'Error',
-        'No se pudo validar la invitación',
-        [{ text: 'OK', onPress: () => navigation.navigate('Login') }]
-      );
+      showToast('No se pudo validar la invitación', 'error');
+      navigation.navigate('Login');
     } finally {
       setIsValidating(false);
     }
@@ -124,37 +118,33 @@ export default function InviteRegisterScreen({ navigation, route }: Props) {
 
   const handleRegister = async () => {
     if (!firstName || !lastName || !email || !password || !confirmPassword) {
-      Alert.alert('Error', 'Por favor completa todos los campos');
+      showToast('Por favor completa todos los campos', 'error');
       return;
     }
 
     if (!validateEmail(email)) {
-      Alert.alert('Error', 'Por favor ingresa un email válido');
+      showToast('Por favor ingresa un email válido', 'error');
       return;
     }
 
     if (firstName.length < 2) {
-      Alert.alert('Error', 'El nombre debe tener al menos 2 caracteres');
+      showToast('El nombre debe tener al menos 2 caracteres', 'error');
       return;
     }
 
     if (lastName.length < 2) {
-      Alert.alert('Error', 'El apellido debe tener al menos 2 caracteres');
+      showToast('El apellido debe tener al menos 2 caracteres', 'error');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Las contraseñas no coinciden');
+      showToast('Las contraseñas no coinciden', 'error');
       return;
     }
 
-    // Validación robusta de contraseña
     const validation = validatePassword(password);
     if (!validation.isValid) {
-      Alert.alert(
-        'Contraseña Insegura',
-        `La contraseña no cumple con los siguientes requisitos:\n\n${validation.errors.join('\n')}`
-      );
+      showToast(validation.errors[0] || 'La contraseña no cumple los requisitos', 'error');
       return;
     }
 
@@ -168,8 +158,9 @@ export default function InviteRegisterScreen({ navigation, route }: Props) {
         phone,
         invitationId: invitationId || invitationData?.invitationId,
       });
+      showToast('Cuenta creada. Ya puedes iniciar sesión', 'success');
     } catch (error: any) {
-      Alert.alert('Error', error.response?.data?.message || 'Error al registrarse');
+      showToast(error.response?.data?.message || 'Error al registrarse', 'error');
     } finally {
       setIsLoading(false);
     }

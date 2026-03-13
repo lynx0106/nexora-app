@@ -1,38 +1,45 @@
+/**
+ * Tema Nexora — Alineado con la web (teal/slate, dark mode por defecto)
+ */
 export const colors = {
-  primary: '#6366f1',
-  primaryDark: '#4f46e5',
-  primaryLight: '#818cf8',
-  
-  secondary: '#10b981',
-  secondaryDark: '#059669',
-  secondaryLight: '#34d399',
-  
+  primary: '#14b8a6',
+  primaryDark: '#0d9488',
+  primaryLight: '#2dd4bf',
+
+  secondary: '#0d9488',
+  secondaryDark: '#0f766e',
+  secondaryLight: '#5eead4',
+
   accent: '#f59e0b',
   accentDark: '#d97706',
   accentLight: '#fbbf24',
-  
-  background: '#ffffff',
-  backgroundSecondary: '#f8fafc',
-  backgroundDark: '#1e293b',
-  
-  text: '#1e293b',
-  textSecondary: '#64748b',
-  textLight: '#94a3b8',
+
+  // Dark mode (default, alineado con web slate-950/900/800)
+  background: '#0f172a',
+  backgroundSecondary: '#1e293b',
+  backgroundTertiary: '#334155',
+
+  text: '#f1f5f9',
+  textSecondary: '#94a3b8',
+  textMuted: '#64748b',
   textInverse: '#ffffff',
-  
-  border: '#e2e8f0',
-  borderDark: '#334155',
-  
+
+  border: '#334155',
+  borderLight: '#475569',
+
   success: '#22c55e',
+  successSoft: 'rgba(34, 197, 94, 0.2)',
   warning: '#f59e0b',
+  warningSoft: 'rgba(245, 158, 11, 0.2)',
   error: '#ef4444',
+  errorSoft: 'rgba(239, 68, 68, 0.2)',
   info: '#3b82f6',
-  
-  card: '#ffffff',
-  cardDark: '#334155',
-  
-  input: '#f1f5f9',
-  inputBorder: '#cbd5e1',
+
+  card: '#1e293b',
+  cardElevated: '#334155',
+  textLight: '#94a3b8',
+  input: '#334155',
+  inputBorder: '#475569',
 };
 
 export const spacing = {
@@ -99,23 +106,23 @@ export const shadows = {
   sm: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.2,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 2,
   },
   md: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.25,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 4,
   },
   lg: {
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    elevation: 4,
+    elevation: 6,
   },
 };
 

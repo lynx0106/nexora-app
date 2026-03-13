@@ -22,7 +22,7 @@ export const API_RETRY_CONFIG = {
 
 // Validar que la URL esté configurada
 if (!API_URL) {
-  console.error('❌ ERROR: API_URL no está configurada');
+  if (__DEV__) console.error('❌ ERROR: API_URL no está configurada');
 }
 
-console.log('🔗 API_URL configurada:', API_URL);
+if (__DEV__) console.log('🔗 API_URL configurada:', API_URL);
