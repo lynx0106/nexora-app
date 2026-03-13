@@ -11,10 +11,12 @@ import {
   ForbiddenException,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { extname } from 'path';
 import {
   ApiTags,
   ApiOperation,
@@ -44,9 +46,24 @@ export class ProductsController {
   @Post('upload')
   @UseGuards(AuthGuard('jwt'), PermissionsGuard)
   @RequirePermissions(Permission.ProductManage)
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024 }, // 2MB max for CSV
+      fileFilter: (_, file, cb) => {
+        const ext = extname(file.originalname).toLowerCase();
+        const allowedMime = ['text/csv', 'application/csv', 'text/plain'];
+        if (ext !== '.csv') {
+          return cb(new BadRequestException('Solo archivos .csv permitidos'), false);
+        }
+        if (!allowedMime.includes(file.mimetype)) {
+          return cb(new BadRequestException('Tipo de archivo no permitido (solo CSV)'), false);
+        }
+        cb(null, true);
+      },
+    }),
+  )
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Upload product image' })
+  @ApiOperation({ summary: 'Upload CSV para importar productos' })
   @ApiResponse({ status: 201, description: 'Image uploaded successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({
@@ -58,7 +75,10 @@ export class ProductsController {
     @Req() req: Request,
     @Body() body: UploadProductDto,
   ) {
-    const user = (req as any).user;
+    if (!file) {
+      throw new BadRequestException('Archivo CSV requerido');
+    }
+    const user = (req as Request & { user?: { tenantId?: string; role?: string } }).user;
 
     if (!user) {
       throw new ForbiddenException('No tienes permiso para cargar productos');

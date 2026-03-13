@@ -17,6 +17,11 @@
 **Paquetes afectados (fix requiere `npm audit fix --force` = breaking):**
 - `ajv` (ReDoS) — @nestjs/schematics (solo dev, no producción)
 - `file-type` — bucle infinito en parser ASF — @nestjs/common
+
+**Mitigaciones implementadas (12 mar 2026):**
+- **file-type:** Timeout 3s en `fileTypeFromFile()` (uploads.controller) — evita DoS por bucle infinito
+- **Uploads:** Whitelist estricta extensiones + MIME + validación magic bytes; extensión debe coincidir con contenido
+- **Products/upload:** Solo .csv permitido; límite 2MB; validación extension + MIME antes de procesar
 - `multer` — DoS por recurso
 - `serialize-javascript` — posible RCE
 - `liquidjs` — path traversal

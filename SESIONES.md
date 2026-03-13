@@ -25,6 +25,19 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-12 (G) - Mitigaciones npm audit (file-type, uploads)
+
+**Duración:** ~20 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **file-type DoS:** Timeout 3s en `fileTypeFromFile()` — evita bucle infinito en ASF malformado
+- [x] **Products/upload:** Validación estricta — solo .csv, 2MB max, whitelist MIME (text/csv, application/csv)
+- [x] **Uploads:** Ya tenía whitelist extensión + MIME + magic bytes; timeout añadido
+- [x] INFORME_SEGURIDAD actualizado con mitigaciones
+
+---
+
 ## 2026-03-12 (E) - ESLint frontend y tipado
 
 **Duración:** ~30 min  

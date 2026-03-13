@@ -172,8 +172,15 @@ export class UploadsController {
     }
 
     // Validate file by magic bytes (content-based validation)
+    // Wrapped in timeout to mitigate file-type CVE (infinite loop on malformed ASF)
+    const FILE_TYPE_TIMEOUT_MS = 3000;
     try {
-      const fileType = await fileTypeFromFile(file.path);
+      const fileType = await Promise.race([
+        fileTypeFromFile(file.path),
+        new Promise<undefined>((_, reject) =>
+          setTimeout(() => reject(new Error('File type detection timeout')), FILE_TYPE_TIMEOUT_MS),
+        ),
+      ]);
 
       if (!fileType) {
         await unlink(file.path).catch(() => {});
