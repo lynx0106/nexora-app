@@ -33,8 +33,9 @@ docker-compose.yml
 # PATRONES AGREGADOS PARA PREVENIR PROBLEMAS
 # ============================================
 
-# Mobile build artifacts
+# Mobile build artifacts (excepción: APK en landing)
 *.apk
+!frontend/public/nexora-mobile.apk
 *.aab
 *.ipa
 *.app
