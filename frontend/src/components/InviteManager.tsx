@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import QRCode from "react-qr-code";
-import { Copy, Check, QrCode, Link as LinkIcon, Download, ArrowLeft, X } from "lucide-react";
+import { Copy, Check, QrCode, Link as LinkIcon, Download, Printer, ArrowLeft, X } from "lucide-react";
 
 interface Tenant {
   id: string;
@@ -212,7 +212,7 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
                 />
             </div>
 
-            {/* Print/Download Button (Placeholder functionality) */}
+            {/* Print/Download Buttons */}
             <div className="mt-6 flex gap-3">
                 <button 
                   onClick={() => window.open(generatedLink, '_blank')}
@@ -221,7 +221,13 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
                     <LinkIcon className="w-4 h-4" />
                     Probar Link
                 </button>
-                {/* Note: Real SVG download needs a bit more logic or a library, but browser print works */}
+                <button 
+                  onClick={downloadQR}
+                  className="inline-flex items-center gap-2 rounded-md bg-slate-700 px-3 py-2 text-sm font-medium text-slate-200 shadow-sm ring-1 ring-inset ring-slate-600 hover:bg-slate-600"
+                >
+                    <Download className="w-4 h-4" />
+                    Descargar PNG
+                </button>
                 <button 
                   className="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                   onClick={() => {
@@ -248,7 +254,7 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
                        }
                   }}
                 >
-                    <Download className="w-4 h-4" />
+                    <Printer className="w-4 h-4" />
                     Imprimir QR
                 </button>
             </div>

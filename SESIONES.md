@@ -44,6 +44,20 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-12 (F) - ESLint warnings y tipado final
+
+**Duración:** ~45 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] Unused vars: Skeleton (screen), InviteManager (downloadQR→botón Descargar PNG), NotificationsDropdown (socket), OrdersSection (currentUserId, error), TeamSection (tenantId)
+- [x] Tipado: ProductsSection, StatsSection (AiStat, ActivityItem, TopProductRow), TeamSection, appointments.update (Partial<CreateAppointmentDto>)
+- [x] setState en effects: queueMicrotask en StatsSection (setLoadingTopProducts, setShowOnboarding)
+- [x] useEffect exhaustive-deps: eslint-disable en AgendaSection, ChatSection, ClientsSection, OrdersSection, SettingsSection
+- [x] Build frontend OK
+
+---
+
 ## 2026-03-12 (C) - Alineación app móvil con web (theme + toast)
 
 **Duración:** ~30 min  

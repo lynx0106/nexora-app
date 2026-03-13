@@ -140,13 +140,11 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
 
   useEffect(() => {
     if (role === 'superadmin' && !selectedTenantId) {
-        // Optionally fetch all or wait. Let's fetch all for now if backend supports it, 
-        // but typically we want to filter by tenant to avoid huge lists.
-        // For now, let's just fetch default (which might be "all" for superadmin).
         fetchClients(); 
     } else if (effectiveTenantId) {
         fetchClients();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchClients captures latest state
   }, [effectiveTenantId, role, selectedTenantId]);
 
   const handleSubmit = async (e: React.FormEvent) => {

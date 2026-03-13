@@ -186,6 +186,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
         socketRef.current = null;
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- activeChatUserId, role in handlers; avoid socket reconnect
   }, [currentUserId]);
 
   // Toggle AI Function
@@ -250,6 +251,7 @@ export function ChatWidget({ currentUserId, role }: ChatWidgetProps) {
         }, 1000);
         return () => clearTimeout(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- t from i18n stable
   }, [role, isOpen, messages.length, tenantInfo]);
 
   // Auto-scroll to bottom

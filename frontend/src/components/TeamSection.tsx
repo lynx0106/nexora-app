@@ -24,7 +24,7 @@ interface TeamSectionProps {
   tenantSector?: string | null;
 }
 
-export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, tenants, tenantSector }: TeamSectionProps) {
+export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTenantChange, tenants, tenantSector }: TeamSectionProps) {
   const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,7 +91,7 @@ export function TeamSection({ role, tenantId, selectedTenantId, onTenantChange, 
     setCreateUserSuccess(null);
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         firstName: newUserFirstName,
         lastName: newUserLastName,
         email: newUserEmail,

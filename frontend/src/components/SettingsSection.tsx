@@ -74,6 +74,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
             })
             .finally(() => setProfileLoading(false));
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- t stable
   }, [currentUserId]);
 
   // Load Tenant Profile (for Admin/Superadmin)
@@ -117,6 +118,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
           setTenantProfileLoading(false);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- t stable
   }, [role]);
 
   async function handleUpdateProfile(e: React.FormEvent) {

@@ -55,13 +55,13 @@ interface OrdersSectionProps {
 
 import { CreateOrderModal } from './CreateOrderModal';
 
-export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange, tenants, currency, currentUserId }: OrdersSectionProps) {
+export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange, tenants, currency }: OrdersSectionProps) {
   const { t } = useTranslation();
   const [orders, setOrders] = useState<Order[]>([]);
   const [topProducts, setTopProducts] = useState<TopProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingTopProducts, setLoadingTopProducts] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -132,6 +132,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
     if (effectiveTenantId) {
       fetchTopProducts();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchOrders/fetchTopProducts stable
   }, [effectiveTenantId, role, selectedTenantId]);
 
   const handleDelete = async (id: string) => {
@@ -230,7 +231,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
         body: JSON.stringify({ status: newStatus }),
       });
       setOrders(orders.map(o => o.id === id ? { ...o, status: newStatus } : o));
-    } catch (err) {
+    } catch {
       showToast(t('orders.update_status_error'), 'error');
     }
   };
@@ -242,7 +243,7 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
         body: JSON.stringify({ paymentStatus: newStatus }),
       });
       setOrders(orders.map(o => o.id === id ? { ...o, paymentStatus: newStatus } : o));
-    } catch (err) {
+    } catch {
       showToast(t('orders.update_payment_error'), 'error');
     }
   };
@@ -529,7 +530,6 @@ export function OrdersSection({ role, tenantId, selectedTenantId, onTenantChange
                             <p className="text-sm text-slate-400 mb-2">
                                  <strong>Método:</strong> {getPaymentMethodLabel(selectedOrder.paymentMethod || 'cash')}
                              </p>
-                             {/* @ts-ignore - paymentLink might be missing in strict types but exists in backend */}
                              {selectedOrder.paymentLink && (
                                 <p className="text-sm text-slate-400 mb-2 break-all">
                                     <strong>Link de Pago:</strong> <a href={selectedOrder.paymentLink} target="_blank" rel="noopener noreferrer" className="text-teal-400 hover:underline">{selectedOrder.paymentLink}</a>

@@ -123,11 +123,10 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
   }, [role, tenantId]);
 
   useEffect(() => {
-    // If superadmin and empty selectedTenantId, we load global data.
-    // If regular user, we need tenantId.
     if (role === 'superadmin' || selectedTenantId) {
       loadData(selectedTenantId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadData recreated each render
   }, [selectedTenantId, role]);
 
   useEffect(() => {

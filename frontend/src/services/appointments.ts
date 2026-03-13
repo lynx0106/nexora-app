@@ -55,7 +55,7 @@ export const appointmentsService = {
     });
   },
 
-  update: async (id: string, data: any) => {
+  update: async (id: string, data: Partial<CreateAppointmentDto>) => {
     return fetchAPIWithAuth(`/appointments/${id}`, {
       method: "PATCH",
       body: JSON.stringify(data),

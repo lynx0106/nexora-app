@@ -1,7 +1,7 @@
 /**
  * Tests para Skeleton
  */
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import Skeleton from '@/components/ui/Skeleton';
 
 describe('Skeleton', () => {

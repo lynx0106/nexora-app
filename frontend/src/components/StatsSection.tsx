@@ -21,23 +21,25 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
     pendingOrdersCount: number;
   } | null>(null);
   
-  const [topProducts, setTopProducts] = useState<any[]>([]);
-  const [loadingTopProducts, setLoadingTopProducts] = useState(false);
+  interface AiStat { provider: string; totalTokens: number; model?: string; requestCount?: number }
+  interface ActivityItem { id: string; type: string; title: string; description?: string; date: string }
+  interface TopProductRow { id: string; name: string; imageUrl?: string; price?: number; total_quantity?: string }
+  const [topProducts, setTopProducts] = useState<TopProductRow[]>([]);
+  const [, setLoadingTopProducts] = useState(false);
   
-  const [activity, setActivity] = useState<any[]>([]);
+  const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [salesChart, setSalesChart] = useState<{ date: string; total: number }[]>([]);
-  const [aiStats, setAiStats] = useState<any[]>([]);
+  const [aiStats, setAiStats] = useState<AiStat[]>([]);
 
   // Sector-based logic
   const isRetail = !tenantSector || ['retail', 'comercio', 'restaurante', 'belleza', 'otros'].includes(tenantSector);
   const isService = !tenantSector || ['salud', 'belleza', 'legal', 'educacion', 'servicios', 'otros'].includes(tenantSector);
 
   useEffect(() => {
-    // Check onboarding status
     if (typeof window !== "undefined") {
       const hasSeen = window.localStorage.getItem("hasSeenDashboardOnboarding");
       if (!hasSeen) {
-        setShowOnboarding(true);
+        queueMicrotask(() => setShowOnboarding(true));
       }
     }
   }, []);
@@ -60,17 +62,17 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
         todayOrdersCount: orderStats.todayCount || 0,
         pendingOrdersCount: orderStats.pendingCount || 0
       });
-      setActivity(activityData || []);
+      setActivity((activityData as ActivityItem[]) || []);
       setSalesChart(salesData || []);
-      setAiStats(aiData || []);
+      setAiStats((aiData as AiStat[]) || []);
     }).catch(console.error);
 
     // Fetch Top Products
-    setLoadingTopProducts(true);
+    queueMicrotask(() => setLoadingTopProducts(true));
     fetchAPIWithAuth(`/orders/top-products/${tenantId}`)
-      .then(data => setTopProducts(data || []))
+      .then((data: TopProductRow[]) => setTopProducts(data || []))
       .catch(console.error)
-      .finally(() => setLoadingTopProducts(false));
+      .finally(() => queueMicrotask(() => setLoadingTopProducts(false)));
 
   }, [tenantId]);
 
@@ -156,7 +158,7 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
       {/* AI Consumption Stats (Superadmin/Admin) */}
       {(role === 'superadmin' || role === 'admin') && aiStats.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-             {aiStats.map((stat: { provider: string; totalTokens: number; model?: string; requestCount?: number }, idx: number) => (
+             {aiStats.map((stat, idx) => (
                 <div key={idx} className="rounded-lg border border-purple-100 bg-purple-50 p-6">
                     <div className="flex items-center justify-between">
                         <div>
@@ -342,7 +344,7 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {topProducts.map((p) => (
+                {topProducts.map((p: TopProductRow) => (
                   <tr key={p.id}>
                     <td className="px-4 py-3 font-medium text-slate-100 flex items-center gap-3">
                       {p.imageUrl && (
@@ -351,7 +353,7 @@ export function StatsSection({ role, tenantId, tenantSummary, onNavigate, tenant
                       {p.name}
                     </td>
                     <td className="px-4 py-3 text-right text-slate-400">
-                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(p.price)}
+                      {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(p.price ?? 0)}
                     </td>
                     <td className="px-4 py-3 text-right font-bold text-slate-100">
                       {p.total_quantity}

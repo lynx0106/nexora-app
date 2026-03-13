@@ -207,6 +207,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       } else if (activeTab === 'INTERNAL') {
           fetchInternalUsers();
       }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, selectedTenantId]);
 
   // Load History
@@ -235,8 +236,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         const user = conversations.find(c => c.id === selectedCustomerId);
         if (user) setIsAiActive(user.isAiChatActive);
     }
-
-  }, [activeTab, selectedCustomerId, conversations.length, selectedTenantId]); // Dependencies
+  }, [activeTab, selectedCustomerId, conversations.length, selectedTenantId]);
 
   // Auto-scroll
   useEffect(() => {

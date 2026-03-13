@@ -54,7 +54,6 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
   const productsError = error ? t('products.error_loading') : null;
 
   const isRestaurant = (tenantSector || '').toLowerCase().includes('restaurante');
-  const itemLabel = isRestaurant ? t('products.item_label_restaurant') : t('products.item_label');
   const descriptionLabel = isRestaurant ? t('products.description_restaurant') : t('products.description');
   const sectionTitle = isRestaurant ? t('products.menu_title') : t('products.title');
 
@@ -132,7 +131,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         imageUrl = newProductImageUrlInput;
       }
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         name: newProductName,
         description: newProductDescription,
         price: newProductPrice ? parseFloat(newProductPrice) : null,
@@ -177,8 +176,8 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
       // Reload products
       queryClient.invalidateQueries({ queryKey: ['products', effectiveTenantId] });
 
-    } catch (err: any) {
-      setCreateProductError(err.message || t('products.save_error'));
+    } catch (err: unknown) {
+      setCreateProductError(err instanceof Error ? err.message : t('products.save_error'));
     } finally {
       setCreatingProduct(false);
     }
@@ -193,7 +192,7 @@ export function ProductsSection({ role, tenantId, selectedTenantId, onTenantChan
         old ? old.filter(p => p.id !== id) : []
       );
       queryClient.invalidateQueries({ queryKey: ['products', effectiveTenantId] });
-    } catch (err) {
+    } catch {
       showToast(t('products.delete_error'), 'error');
     }
   }
