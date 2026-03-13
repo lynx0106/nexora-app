@@ -38,7 +38,8 @@ export class CreateUserDto {
   password?: string;
 
   @ApiPropertyOptional({
-    description: 'When true, backend generates secure temp password and returns it in response',
+    description:
+      'When true, backend generates secure temp password and returns it in response',
   })
   @IsOptional()
   @IsBoolean()

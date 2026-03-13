@@ -19,8 +19,28 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 - [x] Build backend y frontend OK
 
 ### 📋 Pendiente
-- [ ] Revisar resultado CI en GitHub tras push
+- [x] Revisar resultado CI en GitHub tras push — ✅ Verde, 43s
+- [x] Verificar deploy Railway y Vercel — ✅ Deployment successful, Ready
 - [ ] npm audit fix --force (evaluar breaking changes cuando haya ventana)
+
+---
+
+## 2026-03-12 (E) - ESLint frontend y tipado
+
+**Duración:** ~30 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **thank-you:** `<a>` → `<Link>` (@next/next/no-html-link-for-pages)
+- [x] **InviteManager:** setState en effect → queueMicrotask + `generatedLink` computado
+- [x] **NotificationsDropdown:** setSocket → queueMicrotask
+- [x] **ClientsSection:** any → ClientOrderSummary, ClientAppointmentSummary; err: unknown
+- [x] **CreateOrderModal:** err: unknown, eliminado createdOrder no usado
+- [x] **GlobalUserRow:** err: unknown, eliminado `updated` no usado
+- [x] **AgendaSection:** botón Editar para usar handleEdit
+- [x] **page.tsx:** eliminado showToast no usado
+- [x] **jest.config.js:** eslint-disable para require
+- [x] Build frontend OK
 
 ---
 

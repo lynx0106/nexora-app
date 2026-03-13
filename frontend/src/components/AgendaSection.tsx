@@ -570,9 +570,16 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
                     </span>
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-400">
-                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2">
                         {role !== 'user' ? (
                         <>
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(appt)}
+                          className="text-teal-400 hover:text-teal-300 text-xs font-medium"
+                        >
+                          Editar
+                        </button>
                         <select
                             value={appt.status}
                             onChange={(e) => handleStatusChange(appt.id, e.target.value)}

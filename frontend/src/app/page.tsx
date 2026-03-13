@@ -8,7 +8,6 @@ import { User, Briefcase, Store, Lock, ArrowRight, Eye, EyeOff } from "lucide-re
 import { useTranslation } from "react-i18next";
 import { API_URL } from "@/lib/api";
 import { isValidEmail, validatePassword } from "@/lib/validation";
-import { showToast } from "@/lib/toast";
 
 type ProfileType = 'client' | 'employee' | 'admin' | 'superadmin';
 

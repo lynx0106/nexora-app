@@ -148,10 +148,7 @@ export class ChatController {
   }
 
   @Get('unread')
-  async getUnread(
-    @Req() req: Request,
-    @Query('tenantId') tenantId?: string,
-  ) {
+  async getUnread(@Req() req: Request, @Query('tenantId') tenantId?: string) {
     const user = req.user!;
 
     // For superadmin, allow tenantId override

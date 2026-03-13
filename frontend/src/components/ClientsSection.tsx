@@ -15,6 +15,20 @@ interface User {
   tenantId?: string;
 }
 
+interface ClientOrderSummary {
+  id: string;
+  createdAt: string;
+  status?: string;
+  total?: number;
+}
+
+interface ClientAppointmentSummary {
+  id: string;
+  dateTime: string;
+  status?: string;
+  service?: { name: string };
+}
+
 interface ClientsSectionProps {
   role: string | null;
   tenantId: string;
@@ -59,8 +73,8 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
 
   // Client Details & Orders State
   const [viewingClient, setViewingClient] = useState<User | null>(null);
-  const [clientOrders, setClientOrders] = useState<any[]>([]);
-  const [clientAppointments, setClientAppointments] = useState<any[]>([]);
+  const [clientOrders, setClientOrders] = useState<ClientOrderSummary[]>([]);
+  const [clientAppointments, setClientAppointments] = useState<ClientAppointmentSummary[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [loadingAppointments, setLoadingAppointments] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'appointments'>('orders');
@@ -74,7 +88,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
     setLoadingOrders(true);
     setClientOrders([]);
     fetchAPIWithAuth(`/orders/tenant/${effectiveTenantId}?userId=${client.id}`)
-        .then(data => setClientOrders(data || []))
+        .then((data: ClientOrderSummary[]) => setClientOrders(data || []))
         .catch(err => console.error(err))
         .finally(() => setLoadingOrders(false));
 
@@ -82,7 +96,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
     setLoadingAppointments(true);
     setClientAppointments([]);
     fetchAPIWithAuth(`/appointments/tenant/${effectiveTenantId}?userId=${client.id}`)
-        .then(data => setClientAppointments(data || []))
+        .then((data: ClientAppointmentSummary[]) => setClientAppointments(data || []))
         .catch(err => console.error(err))
         .finally(() => setLoadingAppointments(false));
   };
@@ -117,8 +131,8 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
         u.role !== 'admin' && u.role !== 'superadmin'
       );
       setClients(filtered);
-    } catch (err: any) {
-      setError(err.message || t('common.error'));
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('common.error'));
     } finally {
       setLoading(false);
     }
@@ -170,7 +184,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
       // Does POST /users accept tenantId?
       // I'll check `UsersController` later. For now, sending what we have.
 
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         firstName,
         lastName,
         email,
@@ -199,8 +213,8 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
       setShowCreateForm(false);
       resetForm();
       fetchClients();
-    } catch (err: any) {
-      setFormError(err.message || 'Error al guardar');
+    } catch (err: unknown) {
+      setFormError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
       setSubmitting(false);
     }
@@ -437,7 +451,7 @@ export function ClientsSection({ role, tenantId, selectedTenantId, onTenantChang
                                 </span>
                               </td>
                               <td className="px-4 py-2 text-right font-medium text-slate-100">
-                                {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(order.total)}
+                                {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(order.total ?? 0)}
                               </td>
                             </tr>
                           ))}

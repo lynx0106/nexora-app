@@ -56,7 +56,10 @@ export class AutomationsController {
   }
 
   @Post()
-  create(@Body() createAutomationDto: CreateAutomationDto, @Req() req: Request) {
+  create(
+    @Body() createAutomationDto: CreateAutomationDto,
+    @Req() req: Request,
+  ) {
     const user = req.user!;
 
     if (!['admin', 'owner', 'superadmin'].includes(user.role ?? '')) {

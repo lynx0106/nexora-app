@@ -34,7 +34,6 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
   const [submitting, setSubmitting] = useState(false);
   const [items, setItems] = useState<OrderItem[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [createdOrder, setCreatedOrder] = useState<unknown | null>(null);
 
   // Form states
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -70,7 +69,6 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
     setShippingAddress({ street: '', city: '', zip: '', country: '' });
     setItems([]);
     setSelectedClientId('');
-    setCreatedOrder(null);
     setNewClient({ firstName: "", lastName: "", email: "", phone: "" });
     setShowCreateClientForm(false);
   }, []); // Run once on mount
@@ -212,9 +210,9 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
       
       onSuccess();
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Order Creation Error:", err);
-      const msg = err.message || t('orders.create_modal.create_error');
+      const msg = err instanceof Error ? err.message : t('orders.create_modal.create_error');
       setError(msg);
     } finally {
       setSubmitting(false);
@@ -230,7 +228,7 @@ export function CreateOrderModal({ tenantId, currency, onClose, onSuccess }: Cre
         maximumFractionDigits: currency === 'COP' ? 0 : 2,
         minimumFractionDigits: currency === 'COP' ? 0 : 2
       }).format(amount || 0);
-    } catch (e) {
+    } catch {
       return `${amount || 0}`;
     }
   };

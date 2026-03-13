@@ -76,7 +76,7 @@ export default function NotificationsDropdown() {
       setUnreadCount((prev) => prev + 1);
     });
 
-    setSocket(newSocket);
+    queueMicrotask(() => setSocket(newSocket));
 
     return () => {
       newSocket.disconnect();

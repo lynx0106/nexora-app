@@ -35,7 +35,7 @@ export function GlobalUserRow({ user, onUpdate }: GlobalUserRowProps) {
     setIsSaving(true);
     setError(null);
     try {
-      const updated = await fetchAPIWithAuth(`/users/${user.id}`, {
+      await fetchAPIWithAuth(`/users/${user.id}`, {
         method: 'PUT',
         body: JSON.stringify({
           role: selectedRole,
@@ -44,8 +44,8 @@ export function GlobalUserRow({ user, onUpdate }: GlobalUserRowProps) {
       });
       onUpdate({ ...user, role: selectedRole, isActive });
       setIsEditing(false);
-    } catch (err: any) {
-      setError(err.message || 'Error al guardar');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al guardar');
     } finally {
       setIsSaving(false);
     }

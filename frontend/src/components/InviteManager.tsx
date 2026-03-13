@@ -20,23 +20,18 @@ export function InviteManager({ role, tenantId, tenants, onClose }: InviteManage
   // States
   const [selectedRole, setSelectedRole] = useState<string>("client");
   const [targetTenantId, setTargetTenantId] = useState<string>(tenantId);
-  const [generatedLink, setGeneratedLink] = useState<string>("");
   const [copied, setCopied] = useState(false);
 
   // Initialize targetTenantId when tenantId prop changes
   useEffect(() => {
-    if (tenantId) setTargetTenantId(tenantId);
+    if (tenantId) queueMicrotask(() => setTargetTenantId(tenantId));
   }, [tenantId]);
 
-  // Generate Link Logic
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const baseUrl = window.location.origin;
-      // Format: /?action=register&tenant=XYZ&role=client
-      const link = `${baseUrl}/?action=register&tenant=${targetTenantId}&role=${selectedRole}`;
-      setGeneratedLink(link);
-    }
-  }, [selectedRole, targetTenantId]);
+  // Compute link during render (avoids setState in effect)
+  const generatedLink =
+    typeof window !== "undefined"
+      ? `${window.location.origin}/?action=register&tenant=${targetTenantId}&role=${selectedRole}`
+      : "";
 
   // Copy to clipboard
   const copyToClipboard = () => {

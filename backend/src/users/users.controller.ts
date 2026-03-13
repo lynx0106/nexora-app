@@ -301,8 +301,7 @@ export class UsersController {
 
       if (body.generateTempPassword || !passwordToUse) {
         const { randomBytes } = await import('crypto');
-        temporaryPassword =
-          'Nx' + randomBytes(8).toString('base64url') + '!';
+        temporaryPassword = 'Nx' + randomBytes(8).toString('base64url') + '!';
         passwordToUse = temporaryPassword;
       }
 
@@ -317,9 +316,7 @@ export class UsersController {
       });
       const { passwordHash: _, ...safeUser } = user;
       void _;
-      return temporaryPassword
-        ? { ...safeUser, temporaryPassword }
-        : safeUser;
+      return temporaryPassword ? { ...safeUser, temporaryPassword } : safeUser;
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : 'Error creando usuario';
       throw new BadRequestException(message);
