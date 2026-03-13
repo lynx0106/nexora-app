@@ -27,6 +27,7 @@ import { InventoryModule } from './inventory/inventory.module';
 import { PushModule } from './push/push.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AutomationsModule } from './automations/automations.module';
+import { PlansModule } from './plans/plans.module';
 import { AuditInterceptor } from './audit/audit.interceptor';
 import { APP_INTERCEPTOR, APP_GUARD } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -94,6 +95,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
     PushModule,
     TasksModule,
     AutomationsModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [

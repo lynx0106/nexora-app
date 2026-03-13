@@ -118,6 +118,7 @@ export class UsersController {
       // Common allowed fields
       if (dto.avatarUrl !== undefined) allowedUpdates.avatarUrl = dto.avatarUrl;
       if (dto.password) allowedUpdates.password = dto.password;
+      if (dto.onboardingCompleted !== undefined) allowedUpdates.onboardingCompleted = dto.onboardingCompleted;
 
       // Sector-specific allowed fields
       // Service/Health: Phone
@@ -157,8 +158,10 @@ export class UsersController {
         address: dto.address,
         avatarUrl: dto.avatarUrl,
         password: dto.password,
+        onboardingCompleted: dto.onboardingCompleted,
       };
     }
+    if (dto.onboardingCompleted !== undefined) allowedUpdates.onboardingCompleted = dto.onboardingCompleted;
 
     try {
       const user = await this.usersService.updateUser(

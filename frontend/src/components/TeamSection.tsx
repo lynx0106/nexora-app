@@ -24,6 +24,7 @@ interface TeamSectionProps {
   tenantSector?: string | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- tenantId reservado para scope por tenant en roles no-superadmin
 export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTenantChange, tenants, tenantSector }: TeamSectionProps) {
   const { t } = useTranslation();
   const [users, setUsers] = useState<User[]>([]);
@@ -63,6 +64,7 @@ export function TeamSection({ role, tenantId: _tenantId, selectedTenantId, onTen
 
   useEffect(() => {
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchUsers captures role/selectedTenantId; stable
   }, [role, selectedTenantId]);
 
   function fetchUsers() {

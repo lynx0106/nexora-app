@@ -49,6 +49,9 @@ export class User {
   @Column({ default: true })
   isAiChatActive: boolean; // Controls if AI responds to this user
 
+  @Column({ type: 'boolean', default: true })
+  onboardingCompleted: boolean; // Wizard guiado primera vez (perfil no técnico)
+
   @Column({ type: 'text', nullable: true })
   passwordResetTokenHash: string | null;
 

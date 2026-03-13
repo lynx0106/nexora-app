@@ -59,6 +59,9 @@ export class Tenant {
   @Column({ default: 60 })
   appointmentDuration: number = 60;
 
+  @Column({ type: 'text', default: 'starter' })
+  plan: string = 'starter';
+
   @Column({ nullable: true })
   language: string;
 

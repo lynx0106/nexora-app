@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UsersService } from './users.service';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
+import { Tenant } from '../tenants/entities/tenant.entity';
 import { Repository } from 'typeorm';
 import { ConflictException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -15,6 +16,7 @@ jest.mock('bcrypt', () => ({
 describe('UsersService', () => {
   let service: UsersService;
   let userRepo: jest.Mocked<Repository<User>>;
+  let tenantRepo: jest.Mocked<Repository<Tenant>>;
 
   const mockUser = {
     id: 'user-123',
@@ -47,6 +49,7 @@ describe('UsersService', () => {
         groupBy: jest.fn().mockReturnThis(),
         addGroupBy: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
+        getCount: jest.fn().mockResolvedValue(1),
         getRawMany: jest.fn().mockResolvedValue([
           {
             tenantId: 'tenant-123',
@@ -59,15 +62,21 @@ describe('UsersService', () => {
       })),
     };
 
+    const mockTenantRepo = {
+      findOne: jest.fn().mockResolvedValue({ id: 'tenant-123', plan: 'starter' }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UsersService,
         { provide: getRepositoryToken(User), useValue: mockUserRepo },
+        { provide: getRepositoryToken(Tenant), useValue: mockTenantRepo },
       ],
     }).compile();
 
     service = module.get<UsersService>(UsersService);
     userRepo = module.get(getRepositoryToken(User));
+    tenantRepo = module.get(getRepositoryToken(Tenant));
   });
 
   it('should be defined', () => {

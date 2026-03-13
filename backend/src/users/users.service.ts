@@ -1,6 +1,7 @@
 import {
   Injectable,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
   Logger,
 } from '@nestjs/common';
@@ -8,6 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between } from 'typeorm';
 import { User } from './entities/user.entity';
 import { Tenant } from '../tenants/entities/tenant.entity';
+import { getPlanLimits, PlanKey } from '../common/constants/plans';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -17,6 +19,8 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly usersRepository: Repository<User>,
+    @InjectRepository(Tenant)
+    private readonly tenantsRepository: Repository<Tenant>,
   ) {}
 
   findByEmail(email: string) {
@@ -77,6 +81,33 @@ export class UsersService {
     });
   }
 
+  async getStaffCount(tenantId: string): Promise<number> {
+    return this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.tenantId = :tenantId', { tenantId })
+      .andWhere("u.role != 'client'")
+      .getCount();
+  }
+
+  async assertPlanAllowsNewUser(tenantId: string): Promise<void> {
+    const tenant = await this.tenantsRepository.findOne({
+      where: { id: tenantId },
+    });
+    const plan = (tenant?.plan ?? 'starter') as PlanKey;
+    const { maxUsersPerTenant } = getPlanLimits(plan);
+    // Solo contamos staff (excluimos client = clientes finales que reservan/compran)
+    const count = await this.usersRepository
+      .createQueryBuilder('u')
+      .where('u.tenantId = :tenantId', { tenantId })
+      .andWhere("u.role != 'client'")
+      .getCount();
+    if (count >= maxUsersPerTenant) {
+      throw new ForbiddenException(
+        `Límite de usuarios alcanzado para tu plan (${maxUsersPerTenant}). Actualiza a Pro o Enterprise para añadir más.`,
+      );
+    }
+  }
+
   async createUserForTenant(
     tenantId: string,
     data: {
@@ -89,6 +120,7 @@ export class UsersService {
       role?: string;
     },
   ) {
+    await this.assertPlanAllowsNewUser(tenantId);
     const existing = await this.findByEmail(data.email);
     if (existing) {
       throw new ConflictException('El correo ya está en uso');
@@ -104,6 +136,7 @@ export class UsersService {
       passwordHash,
       tenantId,
       role: data.role ?? 'user',
+      onboardingCompleted: false,
     });
     return this.usersRepository.save(user);
   }
@@ -121,6 +154,7 @@ export class UsersService {
       role?: string;
       password?: string;
       isActive?: boolean;
+      onboardingCompleted?: boolean;
     },
   ) {
     const user = await this.usersRepository.findOne({
@@ -146,6 +180,7 @@ export class UsersService {
     if (data.avatarUrl) user.avatarUrl = data.avatarUrl;
     if (data.role) user.role = data.role;
     if (data.isActive !== undefined) user.isActive = data.isActive;
+    if (data.onboardingCompleted !== undefined) user.onboardingCompleted = data.onboardingCompleted;
 
     if (data.password) {
       user.passwordHash = await bcrypt.hash(data.password, 10);

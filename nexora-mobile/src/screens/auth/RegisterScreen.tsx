@@ -65,8 +65,9 @@ export default function RegisterScreen({ navigation }: Props) {
     setIsLoading(true);
     try {
       await register({ email, password, firstName, lastName });
-    } catch (error: any) {
-      showToast(error.response?.data?.message || 'Error al registrarse', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al registrarse';
+      showToast(message, 'error');
     } finally {
       setIsLoading(false);
     }

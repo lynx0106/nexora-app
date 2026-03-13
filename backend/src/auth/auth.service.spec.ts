@@ -44,6 +44,7 @@ describe('AuthService', () => {
     const mockUsersService = {
       findByEmail: jest.fn(),
       createUser: jest.fn(),
+      assertPlanAllowsNewUser: jest.fn().mockResolvedValue(undefined),
       findById: jest.fn(),
       setPasswordResetToken: jest.fn(),
       findByPasswordResetTokenHash: jest.fn(),
@@ -60,7 +61,10 @@ describe('AuthService', () => {
       sendPasswordReset: jest.fn(),
     };
 
-    const mockTenantsService = { findById: jest.fn() };
+    const mockTenantsService = {
+      findById: jest.fn(),
+      findOne: jest.fn().mockResolvedValue({ businessType: 'restaurant' }),
+    };
     const mockInvitationsService = { findById: jest.fn() };
     const mockRefreshTokenRepo = {
       create: jest.fn(),

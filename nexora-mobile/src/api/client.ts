@@ -1,7 +1,27 @@
 import * as SecureStore from 'expo-secure-store';
 import { API_URL } from '../config/api.config';
 
-// Usar URL centralizada de api.config (3104 en producción)
+/** Error de API con statusCode para manejo específico (ej. 403 plan limit) */
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
+
+/** Detecta si el error es de límite de plan (403 con mensaje de límite) */
+export function isPlanLimitError(error: unknown): boolean {
+  if (error instanceof ApiError) {
+    return error.statusCode === 403;
+  }
+  if (error instanceof Error) {
+    return error.message?.toLowerCase().includes('límite') ?? false;
+  }
+  return false;
+}
 
 // Claves de almacenamiento
 const TOKEN_KEY = 'auth_token';
@@ -69,7 +89,8 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+      const msg = errorData.message || `HTTP Error: ${response.status}`;
+      throw new ApiError(msg, response.status);
     }
 
     // Manejar respuestas vacías
@@ -128,7 +149,8 @@ class ApiClient {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.message || `HTTP Error: ${response.status}`);
+      const msg = errorData.message || `HTTP Error: ${response.status}`;
+      throw new ApiError(msg, response.status);
     }
 
     const text = await response.text();

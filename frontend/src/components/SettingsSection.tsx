@@ -44,6 +44,9 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
   const [tenantProfileMessage, setTenantProfileMessage] = useState<{type: 'success' | 'error', text: string} | null>(null);
   const [tenantProfileSaving, setTenantProfileSaving] = useState(false);
   const [tenantLogoFile, setTenantLogoFile] = useState<File | null>(null);
+  const [tenantPlan, setTenantPlan] = useState<string>("starter");
+  const [tenantUsersCount, setTenantUsersCount] = useState<number>(0);
+  const [tenantMaxUsers, setTenantMaxUsers] = useState<number>(3);
 
   // AI Prompts State
   const [aiPromptCustomer, setAiPromptCustomer] = useState("");
@@ -100,6 +103,9 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
           setTenantCoverUrl(data.coverUrl || "");
           setTenantTablesCount(data.tablesCount || 0);
           setTenantCapacity(data.capacity || 0);
+          setTenantPlan(data.plan || "starter");
+          setTenantUsersCount(data.usersCount ?? 0);
+          setTenantMaxUsers(data.maxUsersPerTenant ?? 3);
           setAiPromptCustomer(data.aiPromptCustomer || "");
           setAiPromptSupport(data.aiPromptSupport || "");
           setAiPromptInternal(data.aiPromptInternal || "");
@@ -373,6 +379,21 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
             {tenantProfileLoading ? (
                 <div className="mt-6 text-sm text-slate-300">{t('settings.loading_tenant')}</div>
             ) : (
+                <>
+                {/* Plan & Usage Card */}
+                <div className="mt-6 rounded-lg border border-slate-700 bg-slate-800/50 px-4 py-3 flex items-center justify-between">
+                  <div>
+                    <span className="text-sm font-medium text-slate-200 capitalize">{tenantPlan}</span>
+                    <span className="text-slate-400 mx-2">·</span>
+                    <span className="text-sm text-slate-400">
+                      {t('settings.plan_users_usage', { current: tenantUsersCount, max: tenantMaxUsers })}
+                    </span>
+                  </div>
+                  {tenantUsersCount >= tenantMaxUsers && (
+                    <span className="text-xs text-amber-400">{t('settings.plan_limit_reached')}</span>
+                  )}
+                </div>
+
                 <form onSubmit={handleUpdateTenantProfile} className="mt-6 space-y-6">
                 {tenantProfileMessage && (
                     <div className={`p-4 rounded-md ${tenantProfileMessage.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
@@ -658,6 +679,7 @@ export function SettingsSection({ role, currentUserId, tenantSector: initialTena
                     </button>
                 </div>
                 </form>
+                </>
             )}
             </div>
         )}

@@ -1,4 +1,4 @@
-import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class UpdateTenantProfileDto {
   @IsOptional()
@@ -8,6 +8,10 @@ export class UpdateTenantProfileDto {
   @IsOptional()
   @IsString()
   sector?: string;
+
+  @IsOptional()
+  @IsIn(['starter', 'pro', 'enterprise'])
+  plan?: 'starter' | 'pro' | 'enterprise';
 
   @IsOptional()
   @IsString()

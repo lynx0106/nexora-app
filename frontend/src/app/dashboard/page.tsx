@@ -33,11 +33,20 @@ import {
   Settings,
   SlidersHorizontal,
   LogOut,
+  HelpCircle,
 } from "lucide-react";
 
 const SettingsSection = dynamic(() => import("../../components/SettingsSection").then((m) => ({ default: m.SettingsSection })), {
   loading: () => <div className="animate-pulse h-32 rounded-lg bg-slate-800/50" />,
 });
+const LegalFooter = dynamic(
+  () => import("../../components/LegalFooter").then((m) => ({ default: m.default })),
+  { ssr: false },
+);
+const OnboardingWizard = dynamic(
+  () => import("../../components/onboarding/OnboardingWizard").then((m) => ({ default: m.default })),
+  { ssr: false, loading: () => null },
+);
 const ChatWidget = dynamic(() => import("../../components/ChatWidget").then((m) => ({ default: m.ChatWidget })), { ssr: false });
 const ChatSection = dynamic(() => import("../../components/ChatSection").then((m) => ({ default: m.ChatSection })), {
   ssr: false,
@@ -51,12 +60,14 @@ const AuditSection = dynamic(() => import("../../components/AuditSection").then(
  * Get user info from localStorage (stored during login)
  * The JWT token is now stored in httpOnly cookie and managed by the browser
  */
-function getUserFromStorage() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-  
-  // Try to get user data from localStorage (stored during login)
+function getUserFromStorage(): {
+  userId: string;
+  role: string;
+  tenantId: string;
+  onboardingCompleted: boolean;
+} | null {
+  if (typeof window === "undefined") return null;
+
   const userJson = window.localStorage.getItem("user");
   if (userJson) {
     try {
@@ -65,19 +76,25 @@ function getUserFromStorage() {
         userId: user.id as string,
         role: (user.role as string | undefined) ?? "user",
         tenantId: (user.tenantId as string | undefined) ?? "",
+        onboardingCompleted: user.onboardingCompleted !== false,
       };
     } catch {
-      // Fall through to null
+      // Fall through
     }
   }
-  
   return null;
 }
 
 export default function DashboardPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [userInfo, setUserInfo] = useState<{ userId: string; role: string; tenantId: string } | null>(null);
+  const [userInfo, setUserInfo] = useState<{
+    userId: string;
+    role: string;
+    tenantId: string;
+    onboardingCompleted: boolean;
+  } | null>(null);
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
   useEffect(() => {
@@ -85,13 +102,14 @@ export default function DashboardPage() {
       const user = getUserFromStorage();
       setUserInfo(user);
       setIsAuthChecking(false);
-      
+
       if (!user) {
         router.push("/");
+      } else if (user.onboardingCompleted === false) {
+        setShowOnboardingWizard(true);
       }
     };
 
-    // Small delay to ensure localStorage is ready and avoid race conditions
     const timer = setTimeout(checkAuth, 100);
     return () => clearTimeout(timer);
   }, [router]);
@@ -340,6 +358,17 @@ export default function DashboardPage() {
   }
 
   return (
+    <>
+      {showOnboardingWizard && (
+        <OnboardingWizard
+          role={role}
+          tenantId={tenantId || "system"}
+          onComplete={(opts) => {
+            setShowOnboardingWizard(false);
+            if (opts?.navigateTo === "invitaciones") setActiveSection("invitaciones");
+          }}
+        />
+      )}
     <div className="h-screen bg-slate-950 text-slate-100 overflow-hidden">
       <div className="flex h-screen">
         <aside className="hidden md:flex flex-col flex-shrink-0 w-64 h-screen overflow-y-auto border-r border-slate-800 bg-slate-950/95 sticky top-0 px-4 py-6">
@@ -398,6 +427,15 @@ export default function DashboardPage() {
 
               {/* Right Side Actions */}
               <div className="flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setShowOnboardingWizard(true)}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1.5 text-xs text-slate-400 hover:text-teal-400 hover:bg-slate-800/60 transition-colors"
+                  title={t("onboarding.view_guide")}
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  <span className="hidden sm:inline">{t("onboarding.view_guide")}</span>
+                </button>
                 <LanguageSwitcher />
                 <NotificationsDropdown />
                 
@@ -601,7 +639,7 @@ export default function DashboardPage() {
             </div>
           </main>
           <footer className="flex-shrink-0 mt-auto border-t border-slate-800 px-4 py-3 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
-            Powered by Lynx IA
+            <LegalFooter /> · Powered by Lynx IA
           </footer>
         </div>
       </div>
@@ -610,5 +648,6 @@ export default function DashboardPage() {
         <ChatWidget currentUserId={currentUserId} role={role} />
       )}
     </div>
+    </>
   );
 }

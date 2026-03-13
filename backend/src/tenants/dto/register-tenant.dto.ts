@@ -1,8 +1,12 @@
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsIn, IsOptional, IsString, MinLength } from 'class-validator';
 
 export class RegisterTenantDto {
   @IsString()
   name: string;
+
+  @IsOptional()
+  @IsIn(['starter', 'pro'])
+  plan?: 'starter' | 'pro';
 
   @IsOptional()
   @IsString()

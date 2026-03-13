@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import '@/i18n/config';
 import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import Image from 'next/image';
 import { fetchAPI, API_URL } from '@/lib/api';
 import { showToast } from '@/lib/toast';
@@ -660,6 +661,12 @@ export default function BookingPage() {
         )}
 
       </main>
+
+      <footer className="border-t border-slate-800 py-4 text-center text-[11px] text-slate-500 max-w-3xl mx-auto px-4">
+        <Link href="/privacy" className="hover:text-emerald-400 transition-colors">{t("landing.footer.privacy")}</Link>
+        {" · "}
+        <Link href="/terms" className="hover:text-emerald-400 transition-colors">{t("landing.footer.terms")}</Link>
+      </footer>
     </div>
   );
 }

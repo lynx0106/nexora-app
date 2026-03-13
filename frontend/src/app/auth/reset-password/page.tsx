@@ -189,6 +189,11 @@ function ResetPasswordContent() {
           </div>
         </div>
       </div>
+      <footer className="mt-auto pt-8 pb-4 text-center text-[11px] text-slate-500">
+        <Link href="/privacy" className="hover:text-teal-400 transition-colors">{t("landing.footer.privacy")}</Link>
+        {" · "}
+        <Link href="/terms" className="hover:text-teal-400 transition-colors">{t("landing.footer.terms")}</Link>
+      </footer>
     </div>
   );
 }

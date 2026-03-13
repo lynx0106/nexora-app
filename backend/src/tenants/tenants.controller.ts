@@ -58,6 +58,7 @@ export class TenantsController {
     return this.tenantsService.createTenantWithAdmin({
       tenantId: tenantId,
       name: body.name,
+      plan: body.plan,
       sector: body.sector,
       country: body.country,
       currency: body.currency,
@@ -114,7 +115,7 @@ export class TenantsController {
       );
     }
 
-    return this.tenantsService.getTenantOrThrow(tenantId);
+    return this.tenantsService.getTenantWithUsage(tenantId);
   }
 
   @Put('me')
@@ -140,6 +141,7 @@ export class TenantsController {
     return this.tenantsService.updateTenantProfile(tenantId, {
       name: dto.name,
       sector: dto.sector,
+      plan: dto.plan,
       country: dto.country,
       city: dto.city,
       address: dto.address,

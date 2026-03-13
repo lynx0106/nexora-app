@@ -61,6 +61,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
     } else if (!role || role !== 'superadmin') {
         setSelectedTenantId(tenantId || '');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- selectedTenantId used to sync; adding it causes init loop
   }, [role, tenants, tenantId]);
 
   // Handle tenant switch for superadmin - emit switchTenant event
@@ -170,7 +171,8 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         socketRef.current = null;
       }
     };
-  }, [selectedTenantId, activeTab, selectedCustomerId, role]); // Re-bind if tenant changes? Actually socket is global, filtering is local.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchConversations in newMessage callback; adding causes socket reconnect each render
+  }, [selectedTenantId, activeTab, selectedCustomerId, role]);
 
   // Load Conversations when on Customer Tab
   const fetchConversations = () => {
@@ -207,7 +209,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
       } else if (activeTab === 'INTERNAL') {
           fetchInternalUsers();
       }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      // eslint-disable-next-line react-hooks/exhaustive-deps -- fetchConversations/fetchInternalUsers stable; adding causes extra fetches
   }, [activeTab, selectedTenantId]);
 
   // Load History
@@ -236,6 +238,7 @@ export function ChatSection({ role, currentUserId, tenantId, tenants = [] }: Cha
         const user = conversations.find(c => c.id === selectedCustomerId);
         if (user) setIsAiActive(user.isAiChatActive);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- conversations/role used in conditional; adding causes history refetch loops
   }, [activeTab, selectedCustomerId, conversations.length, selectedTenantId]);
 
   // Auto-scroll

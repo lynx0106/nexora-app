@@ -120,6 +120,7 @@ export function AgendaSection({ tenantId, role, currentUserId, tenantSector: ini
     } else {
       setSelectedTenantId(tenantId);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- sectorFilter/selectedTenantId used in async callback; adding them can cause init loops
   }, [role, tenantId]);
 
   useEffect(() => {

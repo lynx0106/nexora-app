@@ -158,6 +158,7 @@
     "register_link": "Register",
     "login_link": "Login",
     "tenant_name": "Company Name",
+    "plan_label": "Plan",
     "sector_label": "Sector",
     "country_label": "Country",
     "role_descs": {
@@ -200,6 +201,246 @@
     "reset_token_invalid": "The link has expired or is invalid. Request a new one.",
     "reset_token_missing": "Invalid link. Request a new recovery link.",
     "reset_password_mismatch": "Passwords do not match."
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "plans": "Plans",
+      "faq": "FAQ",
+      "login": "Log in",
+      "cta": "Get started free"
+    },
+    "hero": {
+      "headline": "The intelligent core of your business",
+      "subtitle": "Products, orders, calendar, chat and AI in one platform. Manage your business with ease.",
+      "cta_primary": "Get started free",
+      "cta_secondary": "Log in",
+      "badge": "Products · Orders · Calendar · Chat · AI"
+    },
+    "features": {
+      "title": "Everything your business needs",
+      "subtitle": "Integrated modules to manage sales, appointments, clients and more.",
+      "products": {
+        "title": "Products & Catalog",
+        "desc": "Manage your inventory, prices and product or service images."
+      },
+      "orders": {
+        "title": "Orders",
+        "desc": "Receive and process orders with real-time status and tracking."
+      },
+      "agenda": {
+        "title": "Calendar & Appointments",
+        "desc": "Bookings, appointments and synced calendar for your team."
+      },
+      "chat": {
+        "title": "Real-time Chat",
+        "desc": "Direct communication with clients and internal team."
+      },
+      "ai": {
+        "title": "Conversational AI",
+        "desc": "Intelligent assistant that responds and sells for you."
+      },
+      "payments": {
+        "title": "MercadoPago",
+        "desc": "Secure online payments with payment links and checkout."
+      },
+      "automations": {
+        "title": "Automations",
+        "desc": "Automated rules and flows to save time."
+      },
+      "audit": {
+        "title": "Audit",
+        "desc": "Complete action log for traceability."
+      }
+    },
+    "plans": {
+      "title": "Plans for every stage",
+      "subtitle": "Choose the plan that best fits your business. No commitments.",
+      "popular": "Popular",
+      "tenants": "Businesses",
+      "users": "Users",
+      "cta": "Get started",
+      "contact": "Contact",
+      "starter": { "name": "Starter" },
+      "pro": { "name": "Pro" },
+      "enterprise": { "name": "Enterprise" },
+      "features": {
+        "products": "Products & catalog",
+        "orders": "Orders",
+        "agenda": "Calendar/Appointments",
+        "chat": "Real-time chat",
+        "ai": "Conversational AI",
+        "payments": "MercadoPago",
+        "automations": "Automations",
+        "audit": "Advanced audit",
+        "api": "API & integrations"
+      }
+    },
+    "comparison": {
+      "title": "Plan comparison",
+      "subtitle": "Details of features included in each plan.",
+      "feature": "Feature",
+      "rows": {
+        "tenants": "Businesses (tenants)",
+        "users": "Users",
+        "products": "Products & catalog",
+        "orders": "Orders",
+        "agenda": "Calendar/Appointments",
+        "chat": "Real-time chat",
+        "ai": "Conversational AI",
+        "payments": "MercadoPago",
+        "automations": "Automations",
+        "audit": "Advanced audit",
+        "api": "API & integrations",
+        "support": "Dedicated support"
+      }
+    },
+    "footer": {
+      "tagline": "The intelligent core of your business. Multi-tenant SaaS platform.",
+      "links": "Links",
+      "legal": "Legal",
+      "demo": "View demo",
+      "privacy": "Privacy",
+      "terms": "Terms",
+      "copyright": "© {{year}} NEXORA. All rights reserved."
+    },
+    "app_mobile": {
+      "title": "Manage your business from anywhere",
+      "subtitle": "Download the Nexora app on your Android phone and access orders, calendar and chat instantly.",
+      "download_btn": "Download app for Android",
+      "coming_soon": "The app will be available soon.",
+      "qr_placeholder": "Set NEXT_PUBLIC_APP_APK_URL",
+      "how_install": "How do I install the app?",
+      "steps": {
+        "1": {
+          "title": "Open the link",
+          "text": "Tap the 'Download app' button or scan the QR code with your phone's camera."
+        },
+        "2": {
+          "title": "Allow the download",
+          "text": "Your phone will download a file. If it asks if you want to download, tap 'Accept' or 'Download'."
+        },
+        "3": {
+          "title": "Enable installation",
+          "text": "Android may show a message like 'Apps from unknown sources'. Tap 'Settings' and enable 'Allow from this browser' (or Chrome). This tells Android you trust this download."
+        },
+        "4": {
+          "title": "Install the app",
+          "text": "When the download finishes, tap 'Open' or find the file in your 'Downloads' folder. Tap the file and then 'Install'."
+        },
+        "5": {
+          "title": "Done!",
+          "text": "When it finishes, you'll see the Nexora icon on your phone. Open the app and sign in with your account."
+        }
+      },
+      "safety_notice": "The Nexora app is safe. Only download it from this official site."
+    },
+    "diagram": {
+      "title": "Your path by role",
+      "subtitle": "Each user has an adapted flow. We guide you step by step.",
+      "register": "Register",
+      "choose_role": "What's your role?",
+      "admin": "Owner / Admin",
+      "admin_1": "Set up your business",
+      "admin_2": "Upload logo and invite team",
+      "admin_3": "Ready to sell!",
+      "employee": "Employee",
+      "employee_1": "Orders, calendar and chat",
+      "employee_2": "Go to dashboard",
+      "client": "Client",
+      "client_1": "View orders and bookings"
+    },
+    "faq": {
+      "title": "Frequently asked questions",
+      "subtitle": "Answers to the most common questions about NEXORA.",
+      "q1": {
+        "question": "How do I install the app on my phone?",
+        "answer": "In the 'Nexora on your phone' section above, you'll find a 'Download app' button and a QR code. Scan the QR with your phone's camera or tap the button to download. Follow the step-by-step guide that appears when you click 'How do I install the app?'"
+      },
+      "q2": {
+        "question": "Can I try NEXORA before paying?",
+        "answer": "Yes. The Starter plan includes a trial period. Sign up with 'Get started free' and you can explore the platform with all basic features."
+      },
+      "q3": {
+        "question": "What payment methods do you accept?",
+        "answer": "NEXORA integrates with MercadoPago, allowing your customers to pay with card, transfer, PSE and other options depending on your country."
+      },
+      "q4": {
+        "question": "Can I manage more than one business?",
+        "answer": "Yes. Pro and Enterprise plans allow you to manage multiple businesses (tenants) from a single account. The Starter plan includes one business."
+      },
+      "q5": {
+        "question": "Does the AI respond to customers automatically?",
+        "answer": "Yes. On Pro and Enterprise plans, the AI assistant can answer questions about products, schedules and bookings. You can always pause the AI and respond manually when you prefer."
+      }
+    },
+    "social_proof": {
+      "title": "For every type of business",
+      "subtitle": "Restaurants, practices, stores and more trust NEXORA to manage their day-to-day.",
+      "restaurant": {
+        "title": "Restaurants",
+        "desc": "Menu, reservations, orders and payments in one place."
+      },
+      "health": {
+        "title": "Healthcare",
+        "desc": "Appointment scheduling, patient history and billing."
+      },
+      "retail": {
+        "title": "Retail & Stores",
+        "desc": "Catalog, orders, inventory and sales."
+      },
+      "testimonials_placeholder": "Coming soon: testimonials from our customers."
+    }
+  },
+  "onboarding": {
+    "view_guide": "View guide",
+    "skip": "Skip for now",
+    "skip_confirm": "Need help later? Look for 'View guide' in the menu.",
+    "progress": "Step {{current}} of {{total}}",
+    "next": "Next",
+    "back": "Back",
+    "finish": "View my panel",
+    "admin": {
+      "1_title": "Welcome!",
+      "1_text": "Let's set up your business in a few minutes. It's very easy.",
+      "2_title": "What's your business called?",
+      "2_text": "This is how your customers will see your business when they book or buy.",
+      "2_placeholder": "E.g. My Restaurant",
+      "3_title": "What do you do?",
+      "3_text": "Select the type of business that best describes you.",
+      "3_options": { "restaurant": "Restaurant", "store": "Store", "clinic": "Clinic", "spa": "Spa", "other": "Other" },
+      "4_title": "Your logo (optional)",
+      "4_text": "Do you have a logo? You can upload it here. If not, we'll do it later.",
+      "4_upload": "Upload logo",
+      "4_change": "Change",
+      "4_remove": "Remove logo",
+      "4_preview": "Logo preview",
+      "5_title": "Invite your team",
+      "5_text": "Want someone else to manage the business? Send them an invitation link by email.",
+      "5_later": "Do it later",
+      "5_invite_now": "Go to Invitations",
+      "6_title": "All set!",
+      "6_text": "You can now see your panel. Here you'll manage orders, appointments and more. Let's go!"
+    },
+    "employee": {
+      "1_title": "Your account is ready!",
+      "1_text": "Your manager has given you access. Here you'll see orders, the calendar and chat.",
+      "2_title": "A quick tour",
+      "2_text": "Here are the orders, here's the day's calendar and here's the chat with customers.",
+      "2_orders": "Orders",
+      "2_agenda": "Calendar",
+      "2_chat": "Chat",
+      "3_title": "Go to panel",
+      "3_text": "Enter and start working.",
+      "3_cta": "Enter panel"
+    },
+    "client": {
+      "1_title": "Hello!",
+      "1_text": "Here you can see your orders and reservations.",
+      "2_title": "Your business",
+      "2_text": "You can also book or buy from the business page.",
+      "3_cta": "View my orders"
+    }
   },
   "config": {
     "title": "Configuration",
@@ -581,6 +822,8 @@
     "update_profile": "Update Profile",
     "success_profile": "Profile updated successfully",
     "error_profile": "Error updating profile",
+    "plan_users_usage": "{{current}}/{{max}} users",
+    "plan_limit_reached": "Limit reached",
     "tenant_title": "Business Identity",
     "tenant_subtitle": "Configure how clients see your business on the platform.",
     "loading_tenant": "Loading business data...",
@@ -765,6 +1008,7 @@
     "register_link": "Sign Up",
     "login_link": "Log In",
     "tenant_name": "Company Name",
+    "plan_label": "Plan",
     "sector_label": "Sector",
     "country_label": "Country",
     "role_descs": {

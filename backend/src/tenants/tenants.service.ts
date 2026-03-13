@@ -11,11 +11,13 @@ import { Repository, DataSource } from 'typeorm';
 import { Tenant } from './entities/tenant.entity';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
+import { getPlanLimits, PlanKey } from '../common/constants/plans';
 import * as bcrypt from 'bcrypt';
 
 interface CreateTenantWithAdminInput {
   tenantId?: string;
   name: string;
+  plan?: 'starter' | 'pro';
   sector?: string;
   country?: string;
   city?: string;
@@ -30,6 +32,7 @@ interface CreateTenantWithAdminInput {
 interface UpdateTenantProfileInput {
   name?: string;
   sector?: string;
+  plan?: 'starter' | 'pro' | 'enterprise';
   country?: string;
   city?: string;
   address?: string;
@@ -112,6 +115,7 @@ export class TenantsService {
         openingTime: '09:00',
         closingTime: '18:00',
         appointmentDuration: 60,
+        plan: input.plan ?? 'starter',
       });
       const savedTenant = await queryRunner.manager.save(tenant);
 
@@ -133,6 +137,7 @@ export class TenantsService {
         passwordHash,
         role: 'admin',
         tenantId: finalTenantId,
+        onboardingCompleted: false,
       });
       const savedAdmin = await queryRunner.manager.save(adminUser);
 
@@ -194,6 +199,18 @@ export class TenantsService {
     return tenant;
   }
 
+  async getTenantWithUsage(tenantId: string) {
+    const tenant = await this.getTenantOrThrow(tenantId);
+    const usersCount = await this.usersService.getStaffCount(tenantId);
+    const plan = (tenant.plan ?? 'starter') as PlanKey;
+    const { maxUsersPerTenant } = getPlanLimits(plan);
+    return {
+      ...tenant,
+      usersCount,
+      maxUsersPerTenant,
+    };
+  }
+
   async updateTenantProfile(tenantId: string, input: UpdateTenantProfileInput) {
     // Actualizar perfil del tenant
     const tenant = await this.getOrCreateTenant(tenantId);
@@ -203,6 +220,9 @@ export class TenantsService {
     }
     if (input.sector !== undefined) {
       tenant.sector = input.sector;
+    }
+    if (input.plan !== undefined) {
+      tenant.plan = input.plan;
     }
     if (input.country !== undefined) {
       tenant.country = input.country;

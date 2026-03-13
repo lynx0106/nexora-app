@@ -5,6 +5,126 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-12 (N) - App móvil: manejo error límite de plan
+
+**Duración:** ~15 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **ApiError:** Clase en `api/client.ts` con `statusCode` para detección de 403
+- [x] **isPlanLimitError():** Helper para detectar error de límite de plan
+- [x] **InviteRegisterScreen:** Cuando falla registro por límite de plan, Alert con botón "Abrir Nexora" (Linking.openURL)
+- [x] **RegisterScreen:** Corrección extracción error.message (api usa fetch, no axios)
+- [x] Expo doctor 17/17 checks passed
+
+### 📋 Siguiente
+- [ ] Deploy móvil + generar APK (ver sesión M para pasos)
+
+---
+
+## 2026-03-12 (M) - Planes, límites, ESLint y pendientes pre-deploy
+
+**Duración:** ~40 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **Planes y precios:** `backend/.../plans.ts` — Starter/Pro/Enterprise (límites, USD/COP)
+- [x] **Migración:** `20260312100000-add-tenant-plan` — columna `plan` en `tenants`, default `starter`
+- [x] **Límites usuarios:** `getStaffCount()`, `assertPlanAllowsNewUser()`; validación en create/invite
+- [x] **API:** `GET /plans` público; `getTenantWithUsage()` en `GET /tenants/me`
+- [x] **UI Settings:** Card plan actual + uso usuarios (p.ej. 2/3) + aviso límite alcanzado
+- [x] **Selector plan al registro:** Starter ($29) / Pro ($79) en LandingAuthForm
+- [x] **Diagrama:** `LandingOnboardingDiagram.tsx` — flujo por rol
+- [x] **ESLint:** Corregidos page.tsx (set-state-in-effect), AgendaSection, OnboardingWizard, ChatSection, TeamSection — 0 errores
+- [x] Build frontend OK
+
+### 📋 Pendiente (último paso pre-deploy)
+- [ ] **Hospedar APK** en CDN/Storage; configurar `NEXT_PUBLIC_APP_APK_URL` (dejar para último deploy)
+
+### ⚠️ Nota npm audit
+- Backend: 8 moderadas (ajv ReDoS, file-type ASF). `npm audit fix --force` implica breaking changes; no aplicar sin evaluar.
+
+---
+
+## 2026-03-12 (L) - Completar pendientes: Ver guía, Invitaciones, Privacy/Terms
+
+**Duración:** ~25 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **Reabrir guía:** Enlace "Ver guía" con ícono HelpCircle en header del dashboard
+- [x] **Paso 5 Admin:** Botón "Ir a Invitaciones" que cierra wizard y navega a sección invitaciones
+- [x] **Páginas /privacy y /terms:** Placeholders con branding (ds-*, layout consistente)
+- [x] i18n: onboarding.view_guide, onboarding.admin.5_invite_now
+- [x] Build frontend OK (rutas /privacy, /terms incluidas)
+
+### 📋 Pendiente
+- [ ] Gráficos (opcional), hospedar APK, paso 4 logo (opcional)
+
+---
+
+## 2026-03-12 (J) - Fase 2 Landing: App Móvil, FAQ, Social Proof
+
+**Duración:** ~30 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **LandingAppMobile:** Sección entre Planes y Social Proof con QR (react-qr-code), botón descarga, guía colapsable 5 pasos (lenguaje no técnico)
+- [x] **LandingFAQ:** Acordeón con 5 preguntas (incluye "¿Cómo instalo la app en mi celular?")
+- [x] **LandingSocialProof:** Grid sectores (Restaurantes, Salud, Retail) + placeholder testimonios
+- [x] **NEXT_PUBLIC_APP_APK_URL:** Si no está definida, se muestra "Próximamente" y placeholder en QR
+- [x] i18n: claves `landing.app_mobile`, `landing.faq`, `landing.social_proof` en es/en
+- [x] Build frontend OK
+
+### 📋 Próximos pasos (Fase 4)
+- [x] Reabrir guía, páginas /privacy, /terms, botón Invitaciones — ✅ 2026-03-12 (L)
+- [ ] Gráficos (diagrama por rol, opcional)
+- [ ] Hospedar APK en CDN/Storage; configurar `NEXT_PUBLIC_APP_APK_URL`
+
+---
+
+## 2026-03-12 (I) - Fase 1 Landing: Header, Hero, Features, Planes, Footer
+
+**Duración:** ~45 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **Componentes landing:** `LandingHeader`, `LandingHero`, `LandingFeatures`, `LandingPlans`, `LandingFooter`, `LandingAuthForm`
+- [x] **page.tsx refactorizado:** Landing completa con redirect a `/dashboard` si usuario autenticado
+- [x] **i18n:** Claves `landing.*` en `es.json` y `en.json` (nav, hero, features, plans, footer)
+- [x] **Branding respetado:** `globals.css`, `ds-*`, Space Grotesk, Fraunces, `logo-fondo.png`, dark mode
+- [x] **Clase `.font-display`** añadida en globals.css para elementos no-heading
+- [x] Build frontend OK
+
+### 🔗 Referencias
+- docs/LANDING_PLANS_ONBOARDING_SPEC.md — Especificación completa
+- frontend/src/components/landing/ — Componentes creados
+
+---
+
+## 2026-03-12 (H) - Especificación Landing, Onboarding y App Móvil
+
+**Duración:** ~30 min  
+**Estado:** ✅ Completada
+
+### ✅ Avances
+- [x] **docs/LANDING_PLANS_ONBOARDING_SPEC.md** — Especificación ampliada:
+  - **Onboarding amigable (no técnicos):** Reglas de diseño (lenguaje simple, un paso a la vez, mensajes positivos, poder saltar, progreso visible). Flujos detallados por rol (Admin 6 pasos, User/Doctor, Client)
+  - **Sección App Móvil en landing:** QR para descargar APK, botón descarga, guía paso a paso para instalar APK (5 pasos en lenguaje no técnico). Variable `NEXT_PUBLIC_APP_APK_URL` sugerida
+  - **Estructura landing:** Añadida sección "App Móvil" entre Planes y Social Proof. FAQ con "¿Cómo instalo la app en mi celular?"
+  - **Componente:** `LandingAppMobile.tsx` en la lista de componentes a crear
+
+### 📋 Próximos pasos (implementación)
+- [x] **Fase 1:** Landing básica (Header, Hero, Features, Planes, Footer) — ✅ 2026-03-12 (I)
+- [x] **Fase 2:** Sección App Móvil con QR, guía APK colapsable, FAQ — ✅ 2026-03-12 (J)
+- [x] **Fase 3:** Onboarding wizard amigable por rol — ✅ 2026-03-12 (K)
+- [ ] Hospedar APK en CDN/Storage (EAS artifacts expiran); configurar `NEXT_PUBLIC_APP_APK_URL`
+
+### 🔗 Referencias
+- docs/LANDING_PLANS_ONBOARDING_SPEC.md — Especificación completa
+
+---
+
 ## 2026-03-12 (D) - Commit batch: AgendaSection tipado, builds, CI
 
 **Duración:** ~45 min  

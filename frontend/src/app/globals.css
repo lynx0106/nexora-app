@@ -99,6 +99,10 @@ body {
   }
 }
 
+.font-display {
+  font-family: var(--font-display);
+}
+
 h1,
 h2,
 h3,

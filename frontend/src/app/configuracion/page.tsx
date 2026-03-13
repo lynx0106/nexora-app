@@ -144,7 +144,12 @@ export default function ConfiguracionPage() {
           </section>
         </main>
 
-        <footer className="mt-auto pt-12 text-center">
+        <footer className="mt-auto pt-12 text-center space-y-2">
+          <div className="text-[11px] text-slate-500">
+            <Link href="/privacy" className="hover:text-teal-400 transition-colors">{t("landing.footer.privacy")}</Link>
+            {" · "}
+            <Link href="/terms" className="hover:text-teal-400 transition-colors">{t("landing.footer.terms")}</Link>
+          </div>
           <p className="text-xs text-slate-500">
             &copy; {new Date().getFullYear()} {t('config.footer')}
           </p>

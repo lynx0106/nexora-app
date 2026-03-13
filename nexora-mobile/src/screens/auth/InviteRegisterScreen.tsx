@@ -9,9 +9,14 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
+  Alert,
+  Linking,
 } from 'react-native';
 import { showToast } from '../../lib/toast';
+import { isPlanLimitError } from '../../api/client';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+const UPGRADE_URL = 'https://nexora-app.online';
 import { useAuth } from '../../context/AuthContext';
 import invitationsApi, { InvitationValidationResponse } from '../../api/invitations.api';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
@@ -159,8 +164,20 @@ export default function InviteRegisterScreen({ navigation, route }: Props) {
         invitationId: invitationId || invitationData?.invitationId,
       });
       showToast('Cuenta creada. Ya puedes iniciar sesión', 'success');
-    } catch (error: any) {
-      showToast(error.response?.data?.message || 'Error al registrarse', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al registrarse';
+      if (isPlanLimitError(error)) {
+        Alert.alert(
+          'Límite de plan alcanzado',
+          `${message}\n\nPara ampliar tu plan, actualiza en la web.`,
+          [
+            { text: 'Entendido', style: 'cancel' },
+            { text: 'Abrir Nexora', onPress: () => Linking.openURL(UPGRADE_URL) },
+          ],
+        );
+      } else {
+        showToast(message, 'error');
+      }
     } finally {
       setIsLoading(false);
     }

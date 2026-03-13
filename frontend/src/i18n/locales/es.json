@@ -379,6 +379,8 @@
     "update_profile": "Actualizar Perfil",
     "success_profile": "Perfil actualizado correctamente",
     "error_profile": "Error al actualizar perfil",
+    "plan_users_usage": "{{current}}/{{max}} usuarios",
+    "plan_limit_reached": "Límite alcanzado",
     "tenant_title": "Identidad de tu negocio",
     "tenant_subtitle": "Configura cómo ven tus clientes tu empresa en la plataforma.",
     "loading_tenant": "Cargando datos del negocio...",
@@ -571,6 +573,7 @@
     "register_link": "Regístrate",
     "login_link": "Inicia Sesión",
     "tenant_name": "Nombre de la Empresa",
+    "plan_label": "Plan",
     "sector_label": "Sector",
     "country_label": "País",
     "role_descs": {
@@ -613,6 +616,246 @@
     "reset_token_invalid": "El enlace ha expirado o no es válido. Solicita uno nuevo.",
     "reset_token_missing": "Enlace inválido. Solicita un nuevo enlace de recuperación.",
     "reset_password_mismatch": "Las contraseñas no coinciden."
+  },
+  "landing": {
+    "nav": {
+      "features": "Funcionalidades",
+      "plans": "Planes",
+      "faq": "FAQ",
+      "login": "Iniciar sesión",
+      "cta": "Empezar gratis"
+    },
+    "hero": {
+      "headline": "El núcleo inteligente de tu negocio",
+      "subtitle": "Productos, pedidos, agenda, chat e IA en una sola plataforma. Gestiona tu negocio con facilidad.",
+      "cta_primary": "Empezar gratis",
+      "cta_secondary": "Iniciar sesión",
+      "badge": "Productos · Pedidos · Agenda · Chat · IA"
+    },
+    "features": {
+      "title": "Todo lo que tu negocio necesita",
+      "subtitle": "Módulos integrados para gestionar ventas, citas, clientes y más.",
+      "products": {
+        "title": "Productos y Catálogo",
+        "desc": "Gestiona tu inventario, precios e imágenes de productos o servicios."
+      },
+      "orders": {
+        "title": "Pedidos",
+        "desc": "Recibe y procesa pedidos con estados y seguimiento en tiempo real."
+      },
+      "agenda": {
+        "title": "Agenda y Citas",
+        "desc": "Reservas, citas y calendario sincronizado para tu equipo."
+      },
+      "chat": {
+        "title": "Chat en tiempo real",
+        "desc": "Comunicación directa con clientes y equipo interno."
+      },
+      "ai": {
+        "title": "IA conversacional",
+        "desc": "Asistente inteligente que responde y vende por ti."
+      },
+      "payments": {
+        "title": "MercadoPago",
+        "desc": "Cobros en línea seguros con link de pago y checkout."
+      },
+      "automations": {
+        "title": "Automatizaciones",
+        "desc": "Reglas y flujos automáticos para ahorrar tiempo."
+      },
+      "audit": {
+        "title": "Auditoría",
+        "desc": "Registro completo de acciones para trazabilidad."
+      }
+    },
+    "plans": {
+      "title": "Planes para cada etapa",
+      "subtitle": "Elige el plan que mejor se adapte a tu negocio. Sin compromisos.",
+      "popular": "Popular",
+      "tenants": "Empresas",
+      "users": "Usuarios",
+      "cta": "Empezar ahora",
+      "contact": "Contactar",
+      "starter": { "name": "Starter" },
+      "pro": { "name": "Pro" },
+      "enterprise": { "name": "Enterprise" },
+      "features": {
+        "products": "Productos y catálogo",
+        "orders": "Pedidos",
+        "agenda": "Agenda/Citas",
+        "chat": "Chat en tiempo real",
+        "ai": "IA conversacional",
+        "payments": "MercadoPago",
+        "automations": "Automatizaciones",
+        "audit": "Auditoría avanzada",
+        "api": "API e integraciones"
+      }
+    },
+    "comparison": {
+      "title": "Comparativa por plan",
+      "subtitle": "Detalle de funcionalidades incluidas en cada plan.",
+      "feature": "Funcionalidad",
+      "rows": {
+        "tenants": "Empresas (tenants)",
+        "users": "Usuarios",
+        "products": "Productos y catálogo",
+        "orders": "Pedidos",
+        "agenda": "Agenda/Citas",
+        "chat": "Chat en tiempo real",
+        "ai": "IA conversacional",
+        "payments": "MercadoPago",
+        "automations": "Automatizaciones",
+        "audit": "Auditoría avanzada",
+        "api": "API e integraciones",
+        "support": "Soporte dedicado"
+      }
+    },
+    "footer": {
+      "tagline": "El núcleo inteligente de tu negocio. Plataforma SaaS multi-tenant.",
+      "links": "Enlaces",
+      "legal": "Legal",
+      "demo": "Ver demo",
+      "privacy": "Privacidad",
+      "terms": "Términos",
+      "copyright": "© {{year}} NEXORA. Todos los derechos reservados."
+    },
+    "app_mobile": {
+      "title": "Gestiona tu negocio desde cualquier lugar",
+      "subtitle": "Descarga la app Nexora en tu celular Android y accede a pedidos, agenda y chat al instante.",
+      "download_btn": "Descargar app para Android",
+      "coming_soon": "La app estará disponible próximamente.",
+      "qr_placeholder": "Configura NEXT_PUBLIC_APP_APK_URL",
+      "how_install": "¿Cómo instalo la app?",
+      "steps": {
+        "1": {
+          "title": "Abre el enlace",
+          "text": "Toca el botón 'Descargar app' o escanea el código QR con la cámara de tu celular."
+        },
+        "2": {
+          "title": "Permite la descarga",
+          "text": "Tu celular descargará un archivo. Si te pregunta si deseas descargar, toca 'Aceptar' o 'Descargar'."
+        },
+        "3": {
+          "title": "Activa la instalación",
+          "text": "Android puede mostrar un mensaje como 'Apps de fuentes desconocidas'. Toca 'Configuración' y activa 'Permitir desde este navegador' (o Chrome). Así Android sabe que confías en esta descarga."
+        },
+        "4": {
+          "title": "Instala la app",
+          "text": "Cuando termine la descarga, toca 'Abrir' o busca el archivo en tu carpeta 'Descargas'. Toca el archivo y luego 'Instalar'."
+        },
+        "5": {
+          "title": "¡Listo!",
+          "text": "Cuando termine, verás el ícono de Nexora en tu celular. Abre la app e inicia sesión con tu cuenta."
+        }
+      },
+      "safety_notice": "La app Nexora es segura. Solo descárgala desde este sitio oficial."
+    },
+    "diagram": {
+      "title": "Tu camino según tu rol",
+      "subtitle": "Cada usuario tiene un flujo adaptado. Te guiamos paso a paso.",
+      "register": "Registro",
+      "choose_role": "¿Cuál es tu rol?",
+      "admin": "Dueño / Admin",
+      "admin_1": "Configura tu negocio",
+      "admin_2": "Sube logo e invita equipo",
+      "admin_3": "¡Listo para vender!",
+      "employee": "Empleado",
+      "employee_1": "Pedidos, agenda y chat",
+      "employee_2": "Ir al panel",
+      "client": "Cliente",
+      "client_1": "Ver pedidos y reservas"
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "subtitle": "Respuestas a las dudas más comunes sobre NEXORA.",
+      "q1": {
+        "question": "¿Cómo instalo la app en mi celular?",
+        "answer": "En la sección 'Nexora en tu celular' más arriba encontrarás un botón 'Descargar app' y un código QR. Escanea el QR con la cámara de tu celular o toca el botón para descargar. Sigue la guía paso a paso que aparece al hacer clic en '¿Cómo instalo la app?'"
+      },
+      "q2": {
+        "question": "¿Puedo probar NEXORA antes de pagar?",
+        "answer": "Sí. El plan Starter incluye un período de prueba. Regístrate con 'Empezar gratis' y podrás explorar la plataforma con todas las funciones básicas."
+      },
+      "q3": {
+        "question": "¿Qué medios de pago aceptan?",
+        "answer": "NEXORA se integra con MercadoPago, permitiendo a tus clientes pagar con tarjeta, transferencia, PSE y otras opciones según tu país."
+      },
+      "q4": {
+        "question": "¿Puedo gestionar más de un negocio?",
+        "answer": "Sí. Los planes Pro y Enterprise permiten gestionar varios negocios (tenants) desde una misma cuenta. El plan Starter incluye un negocio."
+      },
+      "q5": {
+        "question": "¿La IA responde a los clientes automáticamente?",
+        "answer": "Sí. En los planes Pro y Enterprise, el asistente de IA puede responder preguntas sobre productos, horarios y reservas. Siempre puedes pausar la IA y atender manualmente cuando lo prefieras."
+      }
+    },
+    "social_proof": {
+      "title": "Para todo tipo de negocio",
+      "subtitle": "Restaurantes, consultorios, tiendas y más confían en NEXORA para gestionar su día a día.",
+      "restaurant": {
+        "title": "Restaurantes",
+        "desc": "Menú, reservas, pedidos y cobros en un solo lugar."
+      },
+      "health": {
+        "title": "Salud",
+        "desc": "Agenda de citas, historial de pacientes y facturación."
+      },
+      "retail": {
+        "title": "Retail y Tiendas",
+        "desc": "Catálogo, pedidos, inventario y ventas."
+      },
+      "testimonials_placeholder": "Próximamente: testimonios de nuestros clientes."
+    }
+  },
+  "onboarding": {
+    "view_guide": "Ver guía",
+    "skip": "Omitir por ahora",
+    "skip_confirm": "¿Necesitas ayuda más tarde? Busca 'Ver guía' en el menú.",
+    "progress": "Paso {{current}} de {{total}}",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "finish": "Ver mi panel",
+    "admin": {
+      "1_title": "¡Bienvenido!",
+      "1_text": "Vamos a configurar tu negocio en pocos minutos. Es muy fácil.",
+      "2_title": "¿Cómo se llama tu negocio?",
+      "2_text": "Así tus clientes verán tu negocio cuando reserven o compren.",
+      "2_placeholder": "Ej. Mi Restaurante",
+      "3_title": "¿A qué te dedicas?",
+      "3_text": "Selecciona el tipo de negocio que mejor te describa.",
+      "3_options": { "restaurant": "Restaurante", "store": "Tienda", "clinic": "Consultorio", "spa": "Spa", "other": "Otro" },
+      "4_title": "Tu logo (opcional)",
+      "4_text": "¿Tienes un logo? Puedes subirlo aquí. Si no, lo haremos después.",
+      "4_upload": "Subir logo",
+      "4_change": "Cambiar",
+      "4_remove": "Quitar logo",
+      "4_preview": "Vista previa del logo",
+      "5_title": "Invita a tu equipo",
+      "5_text": "¿Quieres que alguien más gestione el negocio? Envíale un enlace de invitación por correo.",
+      "5_later": "Hacerlo después",
+      "5_invite_now": "Ir a Invitaciones",
+      "6_title": "¡Todo listo!",
+      "6_text": "Ya puedes ver tu panel. Aquí gestionarás pedidos, citas y más. ¡Empecemos!"
+    },
+    "employee": {
+      "1_title": "¡Tu cuenta está lista!",
+      "1_text": "Tu jefe te ha dado acceso. Aquí verás los pedidos, la agenda y el chat.",
+      "2_title": "Un recorrido rápido",
+      "2_text": "Aquí están los pedidos, aquí la agenda del día y aquí el chat con clientes.",
+      "2_orders": "Pedidos",
+      "2_agenda": "Agenda",
+      "2_chat": "Chat",
+      "3_title": "Ir al panel",
+      "3_text": "Entra y empieza a trabajar.",
+      "3_cta": "Entrar al panel"
+    },
+    "client": {
+      "1_title": "¡Hola!",
+      "1_text": "Aquí puedes ver tus pedidos y reservas.",
+      "2_title": "Tu negocio",
+      "2_text": "También puedes reservar o comprar desde la página del negocio.",
+      "3_cta": "Ver mis pedidos"
+    }
   },
   "config": {
     "title": "Configuración",

@@ -134,7 +134,7 @@ export class PublicService {
         email: data.client.email,
         phone: data.client.phone,
         password: tempPassword,
-        role: 'user',
+        role: 'client',
       });
     }
 
@@ -162,7 +162,7 @@ export class PublicService {
         email: data.client.email,
         phone: data.client.phone,
         password: tempPassword,
-        role: 'user',
+        role: 'client',
         address: data.client.address,
       });
     }
