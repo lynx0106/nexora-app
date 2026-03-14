@@ -5,7 +5,8 @@ import { useTranslation } from "react-i18next";
 import { Smartphone, ChevronDown, ChevronUp, Link2, Download, CheckCircle } from "lucide-react";
 import QRCode from "react-qr-code";
 
-const APK_URL = process.env.NEXT_PUBLIC_APP_APK_URL ?? "";
+/** URL del APK: env, o /nexora-mobile.apk si está en frontend/public/ */
+const APK_URL = process.env.NEXT_PUBLIC_APP_APK_URL ?? "/nexora-mobile.apk";
 
 export default function LandingAppMobile() {
   const { t } = useTranslation();

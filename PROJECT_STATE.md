@@ -17,7 +17,7 @@
 ## Despliegues
 - **Frontend:** Vercel — nexora-app.online ✅
 - **Backend:** Railway — nexora-app-production-3104.up.railway.app ✅ (tras fix employeeType)
-- **APK:** frontend/public/nexora-mobile.apk (build anterior). Build nuevo pendiente.
+- **APK:** landing usa /nexora-mobile.apk. Build preview `cb00afa2` (commit 7eb2213). Ejecutar `.\scripts\actualizar-apk-landing.ps1` cuando termine.
 - **Variable:** NEXT_PUBLIC_APP_APK_URL en Vercel ✅
 
 ## Próximo objetivo
