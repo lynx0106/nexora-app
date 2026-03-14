@@ -638,9 +638,7 @@ export default function DashboardPage() {
             )}
             </div>
           </main>
-          <footer className="flex-shrink-0 mt-auto border-t border-slate-800 px-4 py-3 text-center text-[11px] text-slate-500 sm:px-6 lg:px-8">
-            <LegalFooter /> · Powered by Lynx IA
-          </footer>
+          <LegalFooter variant="platform" showPoweredBy className="flex-shrink-0" />
         </div>
       </div>
       {/* Chat Widget */}

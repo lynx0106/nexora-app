@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff } from "lucide-react";
+import LegalFooter from "@/components/LegalFooter";
 import { API_URL } from "@/lib/api";
 import { validatePassword } from "@/lib/validation";
 import { showToast } from "@/lib/toast";
@@ -189,11 +190,7 @@ function ResetPasswordContent() {
           </div>
         </div>
       </div>
-      <footer className="mt-auto pt-8 pb-4 text-center text-[11px] text-slate-500">
-        <Link href="/privacy" className="hover:text-teal-400 transition-colors">{t("landing.footer.privacy")}</Link>
-        {" · "}
-        <Link href="/terms" className="hover:text-teal-400 transition-colors">{t("landing.footer.terms")}</Link>
-      </footer>
+      <LegalFooter variant="platform" />
     </div>
   );
 }

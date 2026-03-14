@@ -5,6 +5,31 @@ Mantiene contexto, avances y tareas pendientes entre conversaciones.
 
 ---
 
+## 2026-03-13 - Blindaje seguridad, deploy, APK y fix Railway
+
+**Duración:** ~2 h  
+**Estado:** ✅ Completada (build APK en espera)
+
+### ✅ Avances
+- [x] **SetupGuard:** Protege /db-init y /users/public/* en producción (requiere SETUP_SECRET)
+- [x] **Contraseñas env:** SUPERADMIN_PASSWORD obligatorio en prod, sin hardcode
+- [x] **Content-Security-Policy** en frontend next.config.ts
+- [x] **Superadmin:** superadmin@nexora.app creado, credenciales en .env
+- [x] **Commit + push:** c281c93, 1529173, 96ed2e4, 23954c0
+- [x] **APK:** Descargado (build a7272505), añadido a frontend/public/, pusheado
+- [x] **Fix crash Railway:** User.employeeType `type: 'varchar'` explícito — DataTypeNotSupportedError resuelto
+
+### 📋 Pendiente
+- [ ] **Build EAS** `cf96d827-980e-4fde-a572-f2b9c8d0233d` en cola. Revisar más tarde: https://expo.dev/accounts/lynx0106/projects/nexora-mobile/builds/cf96d827-980e-4fde-a572-f2b9c8d0233d
+- [ ] Cuando status=finished: `.\scripts\download-apk.ps1 -ArtifactUrl <URL>` → commit APK → push
+
+### 🔗 Recursos
+- docs/SECURITY_SETUP.md
+- docs/RAILWAY_MCP_SETUP.md
+- Superadmin: superadmin@nexora.app (password en backend/.env)
+
+---
+
 ## 2026-03-12 (N) - App móvil: manejo error límite de plan
 
 **Duración:** ~15 min  

@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, Linking } from 'react-native';
 import { showToast } from '../../lib/toast';
 import { useAuth } from '../../context/AuthContext';
 import { colors, spacing, typography, borderRadius, shadows } from '../../theme';
+import { WEB_URL } from '../../config/api.config';
 
 export default function ProfileScreen() {
   const { user, logout } = useAuth();
@@ -19,10 +20,15 @@ export default function ProfileScreen() {
   };
 
   const handleMenuItemPress = (title: string) => {
-    Alert.alert(
-      title,
-      `Esta función estará disponible pronto: ${title}`
-    );
+    if (title === 'Términos y Condiciones') {
+      Linking.openURL(`${WEB_URL}/terms`);
+      return;
+    }
+    if (title === 'Política de Privacidad') {
+      Linking.openURL(`${WEB_URL}/privacy`);
+      return;
+    }
+    Alert.alert(title, `Esta función estará disponible pronto: ${title}`);
   };
 
   const getRoleLabel = () => {

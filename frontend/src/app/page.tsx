@@ -90,7 +90,7 @@ function HomeContent() {
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen flex-nowrap">
       <LandingSidebar
         activeView={activeView}
         onSelectView={setActiveView}
@@ -114,9 +114,9 @@ function HomeContent() {
 
         {/* Main content */}
         {activeView === "inicio" ? (
-          <main className="flex-1">
-            <LandingHero />
-            <LegalFooter />
+          <main className="flex flex-1 flex-col">
+            <LandingHero onGoToAuth={() => setActiveView("auth")} />
+            <LegalFooter variant="landing" />
           </main>
         ) : (
           <main className="flex-1">
@@ -127,7 +127,7 @@ function HomeContent() {
             >
               {renderView()}
             </LandingViewWrapper>
-            <LegalFooter />
+            <LegalFooter variant="landing" />
           </main>
         )}
       </div>

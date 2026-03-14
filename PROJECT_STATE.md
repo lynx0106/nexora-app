@@ -3,22 +3,22 @@
 Última actualización: 2026-03-13
 
 ## Rama actual
-- **main** — commit `995264a` (chore: add APK nexora-mobile 1.0.0)
+- **main** — commit `23954c0` (fix: employeeType type varchar explícito para PostgreSQL)
 
 ## Bugs resueltos esta sesión
-- ESLint: set-state-in-effect, exhaustive-deps (page, AgendaSection, ChatSection, TeamSection, OnboardingWizard)
-- App móvil: manejo error límite de plan (InviteRegisterScreen Alert + Linking)
+- Crash Railway: `DataTypeNotSupportedError` en `User.employeeType` — corregido con `type: 'varchar'` explícito
+- Blindaje seguridad: SetupGuard, contraseñas desde env, CSP, endpoints /db-init y /users/public/* protegidos
 
 ## Tareas pendientes
+- [ ] **Build APK en espera:** EAS build `cf96d827-980e-4fde-a572-f2b9c8d0233d` en cola. Cuando termine: descargar, `.\scripts\download-apk.ps1`, commit en frontend/public/, push
 - [ ] npm audit backend: 8 moderadas (ajv, file-type) — evaluar antes de --force
 - [ ] Gráficos en dashboard (opcional)
-- [ ] logo-fondo.png en frontend/public (si falta)
 
 ## Despliegues
 - **Frontend:** Vercel — nexora-app.online ✅
-- **Backend:** Railway — nexora-app-production-3104.up.railway.app ✅
-- **APK:** frontend/public/nexora-mobile.apk, URL https://nexora-app.online/nexora-mobile.apk ✅
-- **Variable:** NEXT_PUBLIC_APP_APK_URL configurada en Vercel ✅
+- **Backend:** Railway — nexora-app-production-3104.up.railway.app ✅ (tras fix employeeType)
+- **APK:** frontend/public/nexora-mobile.apk (build anterior). Build nuevo pendiente.
+- **Variable:** NEXT_PUBLIC_APP_APK_URL en Vercel ✅
 
 ## Próximo objetivo
-Continuar con mejoras o features según prioridad. Para cambios en app móvil: `npx eas build` → reemplazar APK en public → push.
+Verificar build EAS `cf96d827` cuando salga de cola. Si status=finished, descargar APK, actualizar frontend/public/, commit y push para renovar APK en landing.

@@ -2,14 +2,18 @@
 
 import Image from "next/image";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { LogIn, Sparkles } from "lucide-react";
 
-export default function LandingHero() {
+interface LandingHeroProps {
+  onGoToAuth?: () => void;
+}
+
+export default function LandingHero({ onGoToAuth }: LandingHeroProps) {
   const { t } = useTranslation();
 
-  const scrollToAuth = (e: React.MouseEvent) => {
+  const handleAuth = (e: React.MouseEvent) => {
     e.preventDefault();
-    document.querySelector("#auth")?.scrollIntoView({ behavior: "smooth" });
+    onGoToAuth?.();
   };
 
   return (
@@ -31,22 +35,15 @@ export default function LandingHero() {
         <p className="mx-auto mt-6 max-w-2xl text-lg ds-soft sm:text-xl">
           {t("landing.hero.subtitle")}
         </p>
-        <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a
-            href="#auth"
-            onClick={scrollToAuth}
+        <div className="mt-10 flex justify-center">
+          <button
+            type="button"
+            onClick={handleAuth}
             className="ds-button ds-button-primary inline-flex items-center gap-2 px-8 py-3 text-base"
           >
-            {t("landing.hero.cta_primary")}
-            <ArrowRight className="h-4 w-4" />
-          </a>
-          <a
-            href="#auth"
-            onClick={scrollToAuth}
-            className="ds-button ds-button-ghost inline-flex items-center gap-2 px-8 py-3 text-base"
-          >
+            <LogIn className="h-5 w-5" />
             {t("landing.hero.cta_secondary")}
-          </a>
+          </button>
         </div>
         <div className="mt-12 flex items-center justify-center gap-2 text-sm ds-muted">
           <Sparkles className="h-4 w-4 text-[var(--color-accent)]" />

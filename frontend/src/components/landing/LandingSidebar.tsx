@@ -70,13 +70,13 @@ export default function LandingSidebar({
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar: siempre altura completa, sin cortes */}
       <aside
-        className={`fixed left-0 top-0 z-50 h-full w-72 shrink-0 border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-transform duration-300 lg:static lg:z-30 lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-72 shrink-0 flex-col border-r border-[var(--color-border)] bg-[var(--color-surface)] transition-transform duration-300 lg:sticky lg:top-0 lg:z-30 lg:h-screen lg:translate-x-0 ${
           isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
         }`}
       >
-        <div className="flex h-full flex-col">
+        <div className="flex min-h-screen flex-1 flex-col lg:min-h-0">
           {/* Logo + título */}
           <div className="flex items-center gap-3 border-b border-[var(--color-border)] px-4 py-5">
             <Image
@@ -96,7 +96,7 @@ export default function LandingSidebar({
             {t("landing.sidebar.menu_title")}
           </p>
 
-          <nav className="flex-1 overflow-y-auto px-2 py-3">
+          <nav className="flex-1 overflow-y-auto px-2 py-3 scrollbar-thin">
             {menuItems.map(({ id, icon: Icon, i18nKey }) => (
               <button
                 key={id}

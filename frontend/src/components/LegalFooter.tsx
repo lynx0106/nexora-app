@@ -5,11 +5,37 @@ import { useTranslation } from "react-i18next";
 
 interface LegalFooterProps {
   className?: string;
-  variant?: "compact" | "full";
+  variant?: "compact" | "full" | "landing" | "platform";
+  /** Solo para variant platform: muestra "Powered by Lynx IA" */
+  showPoweredBy?: boolean;
 }
 
-export default function LegalFooter({ className = "", variant = "compact" }: LegalFooterProps) {
+export default function LegalFooter({ className = "", variant = "compact", showPoweredBy = false }: LegalFooterProps) {
   const { t } = useTranslation();
+
+  const footerLanding = (
+    <footer
+      className={`mt-auto border-t border-[var(--color-border)] bg-[var(--color-surface)] px-6 py-8 text-center ${className}`}
+    >
+      <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm ds-soft">
+        <Link href="/privacy" className="hover:text-[var(--color-accent)] transition-colors">
+          {t("landing.footer.privacy")}
+        </Link>
+        <span className="text-[var(--color-border)]">·</span>
+        <Link href="/terms" className="hover:text-[var(--color-accent)] transition-colors">
+          {t("landing.footer.terms")}
+        </Link>
+      </div>
+      <p className="mt-3 text-sm ds-muted">
+        {t("landing.footer.copyright", { year: new Date().getFullYear() })}
+        {showPoweredBy && " · Powered by Lynx IA"}
+      </p>
+    </footer>
+  );
+
+  if (variant === "landing" || variant === "platform") {
+    return footerLanding;
+  }
 
   if (variant === "full") {
     return (

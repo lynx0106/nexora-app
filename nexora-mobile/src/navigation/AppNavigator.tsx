@@ -1,5 +1,5 @@
 import React, { useMemo, forwardRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Alert, ActivityIndicator, Linking } from 'react-native';
 import { NavigationContainer, DrawerActions, NavigationContainerRef } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { getBusinessFeatures, toBusinessType, hasOrders, hasAppointments, BusinessType } from '../config/menuConfig';
 import { colors } from '../theme';
+import { WEB_URL } from '../config/api.config';
 
 // Importar pantallas
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -124,12 +125,21 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
         <DrawerItemList {...props} />
       </View>
       
-      {/* Footer con Cerrar Sesión */}
+      {/* Footer con Cerrar Sesión y enlaces legales */}
       <View style={styles.drawerFooter}>
         <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
           <Ionicons name="log-out-outline" size={22} color={colors.error} />
           <Text style={styles.signOutText}>Cerrar Sesión</Text>
         </TouchableOpacity>
+        <View style={styles.legalLinks}>
+          <TouchableOpacity onPress={() => Linking.openURL(`${WEB_URL}/privacy`)}>
+            <Text style={styles.legalLinkText}>Privacidad</Text>
+          </TouchableOpacity>
+          <Text style={styles.legalSeparator}>·</Text>
+          <TouchableOpacity onPress={() => Linking.openURL(`${WEB_URL}/terms`)}>
+            <Text style={styles.legalLinkText}>Términos</Text>
+          </TouchableOpacity>
+        </View>
         <Text style={styles.versionText}>Nexora v1.0.0</Text>
       </View>
     </DrawerContentScrollView>
@@ -384,6 +394,21 @@ const styles = StyleSheet.create({
     color: colors.error,
     marginLeft: 12,
     fontWeight: '600',
+  },
+  legalLinks: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  legalLinkText: {
+    fontSize: 13,
+    color: colors.primary,
+  },
+  legalSeparator: {
+    fontSize: 12,
+    color: colors.textSecondary,
   },
   versionText: {
     fontSize: 12,
